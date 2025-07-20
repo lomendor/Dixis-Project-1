@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Premium Design System Foundation */
+@layer base {
+  /* Global font setup with Inter */
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv08', 'cv11';
+    background-color: theme('colors.secondary.50');
+  }
+  
+  body {
+    color: theme('colors.neutral.800');
+    font-feature-settings: 'cv08', 'cv11';
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Typography hierarchy with perfect spacing */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: theme('colors.neutral.900');
+  }
+
+  /* Price styling with tabular numerals */
+  .price-text {
+    font-feature-settings: 'tnum';
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Focus states for accessibility */
+  :focus-visible {
+    outline: 2px solid theme('colors.accent.400');
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+  }
+}
+
+@layer components {
+  /* Premium button components με όμορφα χρώματα */
+  .btn-primary {
+    @apply bg-primary-700 text-white px-6 py-3 rounded-button font-medium;
+    @apply hover:bg-primary-800 transition-colors duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center whitespace-nowrap;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-primary-700 px-6 py-3 rounded-button font-medium;
+    @apply border border-primary-200 hover:bg-primary-50 hover:border-primary-300;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center whitespace-nowrap;
+  }
+
+  .btn-accent {
+    @apply bg-accent-400 text-white px-6 py-3 rounded-button font-medium;
+    @apply hover:bg-accent-500 transition-colors duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-300 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center whitespace-nowrap;
+  }
+
+  /* Premium card components */
+  .card-base {
+    @apply bg-white rounded-card border border-secondary-200;
+    @apply shadow-card hover:shadow-card-hover transition-shadow duration-200;
+  }
+  
+  .card-elevated {
+    @apply bg-white rounded-card border-0;
+    @apply shadow-elevated hover:shadow-premium transition-shadow duration-300;
+  }
+
+  /* Premium input components */
+  .input-base {
+    @apply w-full px-4 py-3 rounded-input border border-secondary-300;
+    @apply bg-white text-neutral-900 placeholder-neutral-500;
+    @apply focus:border-primary-500 focus:ring-1 focus:ring-primary-500;
+    @apply transition-colors duration-200;
+  }
+
+  /* Container with proper max-width and spacing */
+  .container-premium {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Navigation link styles */
+  .nav-link {
+    @apply px-4 py-2 text-sm font-medium text-neutral-700 rounded-lg;
+    @apply hover:text-primary-700 hover:bg-primary-50 transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-200;
+  }
+
+  /* Spacing utilities με περισσότερο λευκό χώρο */
+  .section-spacing {
+    @apply py-20 lg:py-32;
+  }
+  
+  .content-spacing {
+    @apply space-y-12 lg:space-y-16;
+  }
+}
+
+@layer utilities {
+  /* Text balance for headlines */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradient overlays for sophisticated effects */
+  .gradient-overlay {
+    background: linear-gradient(
+      135deg,
+      rgba(27, 67, 50, 0.8) 0%,
+      rgba(212, 165, 116, 0.6) 100%
+    );
+  }
+
+  /* Performance optimizations */
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  /* Critical performance CSS for hero load */
+  .hero-optimized {
+    contain: layout style;
+    transform: translateZ(0);
+  }
+
+  /* Preload critical fonts */
+  .font-preload {
+    font-display: swap;
+  }
+
+  /* Image aspect ratios */
+  .aspect-product {
+    aspect-ratio: 4 / 3;
+  }
+  
+  .aspect-hero {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Smooth scrolling */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbars for carousels */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Touch interactions for mobile */
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Better tap targets for mobile */
+  @media (max-width: 768px) {
+    .mobile-tap-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+}

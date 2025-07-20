@@ -1,0 +1,152 @@
+{
+  "name": "Dixis Fresh - B2B Marketplace",
+  "short_name": "Dixis Fresh",
+  "description": "Ελληνική πλατφόρμα για φρέσκα προϊόντα από τοπικούς παραγωγούς. B2B και λιανικές πωλήσεις.",
+  "version": "1.0.0",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "el",
+  "dir": "ltr",
+  "categories": [
+    "business",
+    "food",
+    "shopping",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/images/dixis-logo-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/dixis-logo-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/dixis-logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/dixis-logo-with-text.png",
+      "sizes": "256x128",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "B2B Dashboard",
+      "short_name": "Dashboard",
+      "description": "Πρόσβαση στο B2B dashboard",
+      "url": "/b2b/dashboard",
+      "icons": [
+        {
+          "src": "/images/dixis-logo-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Προϊόντα",
+      "short_name": "Products",
+      "description": "Περιήγηση στα προϊόντα",
+      "url": "/products",
+      "icons": [
+        {
+          "src": "/images/dixis-logo-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Παραγωγοί",
+      "short_name": "Producers",
+      "description": "Εύρεση παραγωγών",
+      "url": "/producers",
+      "icons": [
+        {
+          "src": "/images/dixis-logo-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Καλάθι",
+      "short_name": "Cart",
+      "description": "Το καλάθι μου",
+      "url": "/cart",
+      "icons": [
+        {
+          "src": "/images/dixis-logo-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Αναζήτηση",
+      "short_name": "Search",
+      "description": "Αναζητήστε προϊόντα",
+      "url": "/search",
+      "icons": [
+        {
+          "src": "/images/dixis-logo-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dixis Fresh B2B Dashboard"
+    },
+    {
+      "src": "/screenshot-narrow.png",
+      "sizes": "640x1136",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dixis Fresh Mobile App"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "/import",
+      "accept": {
+        "text/csv": [".csv"],
+        "application/vnd.ms-excel": [".xls"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"]
+      }
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=gr.dixis.fresh",
+      "id": "gr.dixis.fresh"
+    }
+  ],
+  "prefer_related_applications": false
+}

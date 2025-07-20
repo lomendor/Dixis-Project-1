@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Ελαιόλαδο",
+    "slug": "elaiolado",
+    "parent_id": null,
+    "description": "Εξαιρετικό παρθένο ελαιόλαδο από διάφορες περιοχές της Ελλάδας.",
+    "image": "/images/category-placeholder.jpg",
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  },
+  {
+    "id": 2,
+    "name": "Μέλι",
+    "slug": "meli",
+    "parent_id": null,
+    "description": "Αγνό μέλι από διάφορες περιοχές της Ελλάδας.",
+    "image": "/images/category-placeholder.jpg",
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  },
+  {
+    "id": 3,
+    "name": "Τυροκομικά",
+    "slug": "tyrokomika",
+    "parent_id": null,
+    "description": "Παραδοσιακά τυροκομικά προϊόντα από διάφορες περιοχές της Ελλάδας.",
+    "image": "/images/category-placeholder.jpg",
+    "created_at": "2023-01-01T00:00:00.000000Z",
+    "updated_at": "2023-01-01T00:00:00.000000Z"
+  }
+]

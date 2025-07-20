@@ -1,0 +1,163 @@
+name: 🏢 Enterprise Integration
+description: Enterprise feature integration from existing branches
+title: "[ENTERPRISE] "
+labels: ["enterprise", "integration", "high-priority"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is for integrating enterprise features from existing development branches into the main codebase.
+
+  - type: dropdown
+    id: source_branch
+    attributes:
+      label: 🌟 Source Branch
+      description: Which branch contains the enterprise feature to integrate?
+      options:
+        - b2b-marketplace-implementation-20250125
+        - enterprise-integrations-system-20250125
+        - mobile-optimization-pwa-system
+        - feature/admin-authentication-security-system
+        - e2e-testing-implementation
+        - enterprise-production-deployment-system
+        - comprehensive-b2b-multi-tenant-implementation
+        - order-completion-email-system-20250125
+        - performance-ux-optimization-complete
+        - Other (specify in description)
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: 🎯 Enterprise Feature Description
+      description: Describe the enterprise feature being integrated
+      placeholder: What specific enterprise capability does this feature provide?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: integration_complexity
+    attributes:
+      label: 🔧 Integration Complexity
+      description: How complex is this integration?
+      options:
+        - Low (direct merge, no conflicts)
+        - Medium (some conflicts, minor adjustments needed)
+        - High (significant conflicts, major refactoring needed)
+        - Critical (complete system integration required)
+    validations:
+      required: true
+
+  - type: textarea
+    id: business_value
+    attributes:
+      label: 💰 Business Value
+      description: What business value does this enterprise feature provide?
+      placeholder: Revenue impact, cost savings, operational efficiency, competitive advantage...
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected_systems
+    attributes:
+      label: 🏗️ Affected Systems
+      description: Which parts of the platform will be affected by this integration?
+      placeholder: |
+        - Frontend components
+        - Backend APIs
+        - Database schema
+        - External integrations
+        - User workflows
+    validations:
+      required: true
+
+  - type: textarea
+    id: integration_plan
+    attributes:
+      label: 📋 Integration Plan
+      description: Step-by-step plan for integrating this feature
+      placeholder: |
+        1. Archive current branch as tag
+        2. Create integration branch
+        3. Merge feature components
+        4. Resolve conflicts
+        5. Test integration
+        6. Deploy to staging
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing_strategy
+    attributes:
+      label: 🧪 Testing Strategy
+      description: How will this integration be tested?
+      placeholder: |
+        - Unit tests for new components
+        - Integration tests for workflows
+        - Manual testing scenarios
+        - Performance testing
+        - Security testing
+
+  - type: textarea
+    id: rollback_plan
+    attributes:
+      label: ↩️ Rollback Plan
+      description: What's the plan if the integration fails?
+      placeholder: Steps to safely rollback the integration if issues arise
+
+  - type: dropdown
+    id: dependencies
+    attributes:
+      label: 🔗 Dependencies
+      description: Does this integration depend on other enterprise features?
+      options:
+        - No dependencies (can be integrated independently)
+        - Depends on B2B marketplace features
+        - Depends on payment system integration
+        - Depends on admin/security features
+        - Depends on mobile/PWA features
+        - Multiple dependencies (specify in notes)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: timeline
+    attributes:
+      label: ⏰ Integration Timeline
+      description: When should this integration be completed?
+      options:
+        - Immediate (critical for current sprint)
+        - Next sprint (1-2 weeks)
+        - Current quarter (2-3 months)
+        - Future planning (3+ months)
+    validations:
+      required: true
+
+  - type: textarea
+    id: success_criteria
+    attributes:
+      label: ✅ Success Criteria
+      description: How will we know the integration is successful?
+      placeholder: |
+        - [ ] All existing functionality preserved
+        - [ ] New enterprise features working correctly
+        - [ ] Performance maintained or improved
+        - [ ] All tests passing
+        - [ ] Documentation updated
+    validations:
+      required: true
+
+  - type: textarea
+    id: estimated_value
+    attributes:
+      label: 💎 Estimated Development Value
+      description: What's the estimated value of the work being integrated?
+      placeholder: Development hours, monetary value, strategic importance...
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 📝 Additional Notes
+      description: Any other relevant information about this integration
+      placeholder: Technical notes, risks, considerations...

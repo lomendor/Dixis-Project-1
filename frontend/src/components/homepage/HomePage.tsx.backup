@@ -1,0 +1,302 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import FeaturedProducts from '@/components/FeaturedProducts';
+import FeaturedProducers from '@/components/FeaturedProducers';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/enhanced-card';
+import {
+  Star,
+  Truck,
+  Shield,
+  Award,
+  Heart,
+  ArrowRight,
+  CheckCircle,
+  ShoppingBag,
+  Users,
+  Quote,
+  MapPin
+} from 'lucide-react';
+
+const benefits = [
+  {
+    icon: Truck,
+    title: 'Δωρεάν Αποστολή',
+    description: 'Για παραγγελίες άνω των 50€ σε όλη την Ελλάδα'
+  },
+  {
+    icon: Shield,
+    title: 'Ασφαλείς Πληρωμές',
+    description: '100% ασφαλείς συναλλαγές με κρυπτογράφηση'
+  },
+  {
+    icon: Award,
+    title: 'Εγγύηση Ποιότητας',
+    description: 'Αυθεντικά προϊόντα με πιστοποίηση'
+  },
+  {
+    icon: Heart,
+    title: '30 Ημέρες Επιστροφή',
+    description: 'Εγγύηση επιστροφής χρημάτων'
+  }
+];
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-lime-50 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0">
+          <motion.div
+            animate={{
+              x: [0, 30, 0],
+              y: [0, -30, 0],
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-emerald-400/20 to-green-400/20 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              x: [0, -20, 0],
+              y: [0, 20, 0],
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-br from-lime-400/20 to-emerald-400/20 rounded-full blur-3xl"
+          />
+        </div>
+
+        <div className="relative z-10 container mx-auto px-4 h-screen flex items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+            {/* Left Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
+            >
+              <div className="space-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <Badge className="bg-emerald-100 text-emerald-800 px-4 py-2 text-sm font-semibold">
+                    🌿 Αυθεντικά Ελληνικά Προϊόντα
+                  </Badge>
+                </motion.div>
+
+                <motion.h1
+                  className="text-5xl lg:text-7xl font-black leading-tight"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <span className="text-gray-900 block">Γεύσου την</span>
+                  <span className="bg-gradient-to-r from-emerald-600 via-green-500 to-lime-500 bg-clip-text text-transparent block">
+                    Αυθεντική Ελλάδα
+                  </span>
+                </motion.h1>
+
+                <motion.p
+                  className="text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-2xl"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  Ανακαλύψτε εξαιρετικά προϊόντα από τοπικούς παραγωγούς.
+                  Από το χωράφι στο τραπέζι σας, με αγάπη και παράδοση.
+                </motion.p>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="flex flex-col sm:flex-row gap-4"
+              >
+                <Button
+                  asChild
+                  size="lg"
+                  className="group bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-8 py-6 text-lg font-bold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
+                >
+                  <Link href="/products">
+                    <ShoppingBag className="mr-3 h-6 w-6" />
+                    Εξερεύνησε Προϊόντα
+                    <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white px-8 py-6 text-lg font-semibold transition-all duration-300"
+                >
+                  <Link href="/producers">
+                    <Users className="mr-3 h-6 w-6" />
+                    Γνώρισε Παραγωγούς
+                  </Link>
+                </Button>
+              </motion.div>
+
+              {/* Stats */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+                className="grid grid-cols-3 gap-6 pt-8"
+              >
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary-600">500+</div>
+                  <div className="text-sm text-secondary-600">Προϊόντα</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary-600">100+</div>
+                  <div className="text-sm text-secondary-600">Παραγωγοί</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary-600">50+</div>
+                  <div className="text-sm text-secondary-600">Περιοχές</div>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Right Content - Hero Image */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="relative">
+                <motion.div
+                  animate={{ rotate: [0, 5, 0] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  className="bg-white rounded-3xl shadow-2xl p-8 transform rotate-3"
+                >
+                  <div className="aspect-square bg-gradient-to-br from-emerald-100 to-green-100 rounded-2xl flex items-center justify-center">
+                    <div className="text-8xl">🫒</div>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  animate={{ rotate: [0, -3, 0] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-xl p-6 transform -rotate-12"
+                >
+                  <div className="text-4xl">🍯</div>
+                </motion.div>
+
+                <motion.div
+                  animate={{ rotate: [0, 8, 0] }}
+                  transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl p-6 transform rotate-12"
+                >
+                  <div className="text-4xl">🧀</div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <FeaturedProducts />
+
+      {/* Featured Producers */}
+      <FeaturedProducers />
+
+      {/* Benefits Section */}
+      <section className="py-16 bg-gradient-to-br from-emerald-50 via-white to-green-50">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Γιατί να Επιλέξετε το Dixis
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Η εμπιστοσύνη σας είναι η προτεραιότητά μας
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {benefits.map((benefit, index) => {
+              const Icon = benefit.icon;
+              return (
+                <motion.div
+                  key={benefit.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="text-center group"
+                >
+                  <div className="w-16 h-16 bg-gradient-to-r from-emerald-600 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {benefit.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Ξεκινήστε την Γευστική σας Εξερεύνηση
+            </h2>
+            <p className="text-xl text-emerald-100 mb-8">
+              Ανακαλύψτε την αυθεντική γεύση της Ελλάδας με προϊόντα κορυφαίας ποιότητας
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                size="lg"
+                className="bg-white text-emerald-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-xl"
+                asChild
+              >
+                <Link href="/products">
+                  Περιηγηθείτε στα Προϊόντα
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-2 border-white text-white hover:bg-white hover:text-emerald-600 px-8 py-4 text-lg font-semibold"
+                asChild
+              >
+                <Link href="/producers">
+                  <Users className="w-5 h-5 mr-2" />
+                  Γνωρίστε τους Παραγωγούς
+                </Link>
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </div>
+  );
+}

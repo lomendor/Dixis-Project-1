@@ -1,0 +1,218 @@
+import { ID } from '../../client/apiTypes';
+import { Product, SimpleProduct } from '../product/types';
+
+/**
+ * Cart item interface representing an item in the shopping cart
+ */
+export interface CartItem {
+  id: ID;
+  cartId: ID;
+  productId: ID;
+  product?: Product | SimpleProduct;
+  quantity: number;
+  price: number; // Price at the time of adding to cart
+  originalPrice?: number; // Original price if there's a discount
+  attributes?: CartItemAttributes;
+  addedAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Cart item attributes for product variations
+ */
+export interface CartItemAttributes {
+  size?: string;
+  color?: string;
+  weight?: string;
+  packaging?: string;
+  notes?: string;
+  [key: string]: any;
+}
+
+/**
+ * Cart interface representing the shopping cart
+ */
+export interface Cart {
+  id: ID;
+  userId?: ID;
+  sessionId?: string;
+  items: CartItem[];
+  itemCount: number;
+  subtotal: number;
+  total: number;
+  discount?: number;
+  discountAmount?: number;
+  shippingCost?: number;
+  taxAmount?: number;
+  currency: string;
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Cart state for the context
+ */
+export interface CartState {
+  cart: Cart | null;
+  isLoading: boolean;
+  isError: boolean;
+  error: string | null;
+  isOpen: boolean; // For cart drawer
+  lastAddedItem: CartItem | null;
+}
+
+/**
+ * Cart actions interface
+ */
+export interface CartActions {
+  // Cart operations
+  addToCart: (productId: ID, quantity?: number, attributes?: CartItemAttributes) => Promise<void>;
+  removeFromCart: (itemId: ID) => Promise<void>;
+  updateQuantity: (itemId: ID, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  
+  // UI operations
+  openCart: () => void;
+  closeCart: () => void;
+  toggleCart: () => void;
+  
+  // Utility operations
+  getItemQuantity: (productId: ID) => number;
+  isInCart: (productId: ID) => boolean;
+  refreshCart: () => Promise<void>;
+}
+
+/**
+ * Add to cart request payload
+ */
+export interface AddToCartRequest {
+  productId: ID;
+  quantity: number;
+  attributes?: CartItemAttributes;
+}
+
+/**
+ * Update cart item request payload
+ */
+export interface UpdateCartItemRequest {
+  quantity: number;
+  attributes?: CartItemAttributes;
+}
+
+/**
+ * Cart summary for quick display
+ */
+export interface CartSummary {
+  itemCount: number;
+  subtotal: number;
+  total: number;
+  currency: string;
+}
+
+/**
+ * Cart validation result
+ */
+export interface CartValidation {
+  isValid: boolean;
+  errors: CartValidationError[];
+  warnings: CartValidationWarning[];
+}
+
+/**
+ * Cart validation error
+ */
+export interface CartValidationError {
+  itemId: ID;
+  productId: ID;
+  type: 'out_of_stock' | 'insufficient_stock' | 'product_unavailable' | 'price_changed';
+  message: string;
+  currentStock?: number;
+  requestedQuantity?: number;
+  newPrice?: number;
+}
+
+/**
+ * Cart validation warning
+ */
+export interface CartValidationWarning {
+  itemId: ID;
+  productId: ID;
+  type: 'low_stock' | 'price_increase' | 'price_decrease';
+  message: string;
+  details?: any;
+}
+
+/**
+ * Cart persistence options
+ */
+export interface CartPersistenceOptions {
+  enableLocalStorage: boolean;
+  enableSessionStorage: boolean;
+  autoSync: boolean;
+  syncInterval: number; // in milliseconds
+}
+
+/**
+ * Cart configuration
+ */
+export interface CartConfig {
+  maxItems: number;
+  maxQuantityPerItem: number;
+  enableGuestCart: boolean;
+  guestCartExpiration: number; // in days
+  persistence: CartPersistenceOptions;
+  validation: {
+    enableStockValidation: boolean;
+    enablePriceValidation: boolean;
+    validateOnAdd: boolean;
+    validateOnUpdate: boolean;
+  };
+}
+
+/**
+ * Default cart configuration
+ */
+export const DEFAULT_CART_CONFIG: CartConfig = {
+  maxItems: 50,
+  maxQuantityPerItem: 99,
+  enableGuestCart: true,
+  guestCartExpiration: 30,
+  persistence: {
+    enableLocalStorage: true,
+    enableSessionStorage: false,
+    autoSync: true,
+    syncInterval: 30000, // 30 seconds
+  },
+  validation: {
+    enableStockValidation: true,
+    enablePriceValidation: true,
+    validateOnAdd: true,
+    validateOnUpdate: true,
+  },
+};
+
+/**
+ * Cart event types for analytics
+ */
+export enum CartEventType {
+  ITEM_ADDED = 'cart_item_added',
+  ITEM_REMOVED = 'cart_item_removed',
+  ITEM_UPDATED = 'cart_item_updated',
+  CART_CLEARED = 'cart_cleared',
+  CART_OPENED = 'cart_opened',
+  CART_CLOSED = 'cart_closed',
+  CHECKOUT_STARTED = 'checkout_started',
+}
+
+/**
+ * Cart event data for analytics
+ */
+export interface CartEvent {
+  type: CartEventType;
+  productId?: ID;
+  quantity?: number;
+  value?: number;
+  timestamp: string;
+  metadata?: Record<string, any>;
+}

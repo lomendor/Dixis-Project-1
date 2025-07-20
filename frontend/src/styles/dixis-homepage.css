@@ -1,0 +1,86 @@
+/* Dixis Homepage Authentic Styles - Restored from Original Design */
+
+.dixis-title {
+  font-size: 4rem;
+  color: #059669;
+  margin-bottom: 1.25rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.dixis-subtitle {
+  font-size: 1.5rem;
+  color: #6b7280;
+  margin-bottom: 2.5rem;
+  font-weight: normal;
+}
+
+.dixis-btn-primary {
+  background: #059669 !important;
+  color: white !important;
+  padding: 15px 30px !important;
+  border-radius: 12px !important;
+  font-weight: bold !important;
+  font-size: 1.1rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3) !important;
+  border: none !important;
+}
+
+.dixis-btn-primary:hover {
+  background: #047857 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4) !important;
+}
+
+.dixis-btn-secondary {
+  background: white !important;
+  color: #059669 !important;
+  border: 2px solid #059669 !important;
+  padding: 15px 30px !important;
+  border-radius: 12px !important;
+  font-weight: bold !important;
+  font-size: 1.1rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dixis-btn-secondary:hover {
+  background: #f0fdf4 !important;
+  transform: translateY(-2px) !important;
+  color: #059669 !important;
+}
+
+.dixis-feature-card {
+  background: white;
+  padding: 2.5rem 1.875rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.dixis-feature-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .dixis-title { 
+    font-size: 2.5rem; 
+  }
+  
+  .dixis-subtitle { 
+    font-size: 1.2rem; 
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .dixis-feature-card {
+    padding: 2rem 1.5rem;
+  }
+}

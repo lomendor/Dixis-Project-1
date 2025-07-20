@@ -1,0 +1,516 @@
+<?php
+
+namespace App\Services\Integrations\Accounting;
+
+use App\Contracts\Integrations\AccountingInterface;
+use App\Models\User;
+use App\Models\Order;
+use App\Services\Integrations\BaseIntegrationService;
+// QuickBooks packages not installed - commenting out for now
+// use QuickBooksOnline\API\DataService\DataService;
+// use QuickBooksOnline\API\Core\OAuth\OAuth2\OAuth2LoginHelper;
+// use QuickBooksOnline\API\Facades\Customer as QBCustomer;
+// use QuickBooksOnline\API\Facades\Invoice as QBInvoice;
+// use QuickBooksOnline\API\Facades\Item as QBItem;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+
+class QuickBooksService extends BaseIntegrationService implements AccountingInterface
+{
+    // Temporarily disabled - QuickBooks packages not installed
+    // private ?DataService $dataService = null;
+    // private ?OAuth2LoginHelper $OAuth2LoginHelper = null;
+    
+    protected function getServiceConfig(): array
+    {
+        return [
+            'service_name' => 'QuickBooks',
+            'status' => 'disabled',
+            'reason' => 'QuickBooks packages not installed'
+        ];
+    }
+    
+    /**
+     * Initialize QuickBooks DataService (DISABLED)
+     */
+    private function initializeDataService(): void
+    {
+        // QuickBooks integration disabled - packages not installed
+        throw new \Exception('QuickBooks integration is currently disabled');
+    }
+    
+    /**
+     * Get OAuth2 authorization URL (DISABLED)
+     */
+    public function getAuthorizationUrl(): string
+    {
+        throw new \Exception('QuickBooks integration is currently disabled');
+    }
+    
+    /**
+     * Exchange authorization code for access tokens
+     */
+    public function exchangeCodeForTokens(string $authCode, string $realmId): array
+    {
+        $this->initializeDataService();
+        
+        $this->OAuth2LoginHelper = $this->dataService->getOAuth2LoginHelper();
+        $accessTokenObj = $this->OAuth2LoginHelper->exchangeAuthorizationCodeForToken(
+            $authCode,
+            $realmId
+        );
+        
+        if (!$accessTokenObj) {
+            throw new \Exception('Failed to exchange authorization code for tokens');
+        }
+        
+        return [
+            'access_token' => $accessTokenObj->getAccessToken(),
+            'refresh_token' => $accessTokenObj->getRefreshToken(),
+            'expires_in' => $accessTokenObj->getAccessTokenExpiresAt(),
+            'realm_id' => $realmId
+        ];
+    }
+    
+    /**
+     * Sync order to QuickBooks as invoice
+     */
+    public function syncOrder(Order $order): array
+    {
+        try {
+            $this->initializeDataService();
+            
+            // First, ensure customer exists in QuickBooks
+            $qbCustomer = $this->ensureCustomerExists($order->user);
+            
+            // Create invoice
+            $invoice = $this->createInvoiceFromOrder($order, $qbCustomer);
+            
+            $result = $this->dataService->Add($invoice);
+            $error = $this->dataService->getLastError();
+            
+            if ($error) {
+                throw new \Exception('QuickBooks API Error: ' . $error->getIntuitErrorDetail());
+            }
+            
+            // Store the QuickBooks invoice ID
+            $order->update([
+                'quickbooks_invoice_id' => $result->Id,
+                'quickbooks_synced_at' => now()
+            ]);
+            
+            Log::info('Order synced to QuickBooks successfully', [
+                'order_id' => $order->id,
+                'quickbooks_invoice_id' => $result->Id
+            ]);
+            
+            return [
+                'success' => true,
+                'quickbooks_invoice_id' => $result->Id,
+                'invoice_number' => $result->DocNumber
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to sync order to QuickBooks', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Create or update customer in QuickBooks
+     */
+    public function createCustomer(User $customer): array
+    {
+        try {
+            $this->initializeDataService();
+            
+            // Check if customer already exists
+            $existingCustomer = $this->findCustomerByEmail($customer->email);
+            
+            if ($existingCustomer) {
+                return $this->updateCustomer($customer);
+            }
+            
+            // Get customer's default address
+            $address = $customer->addresses()->where('is_default_billing', true)->first()
+                      ?? $customer->addresses()->first();
+
+            // Create new customer
+            $qbCustomer = QBCustomer::create([
+                'Name' => $customer->name,
+                'CompanyName' => $customer->business?->business_name ?? '',
+                'PrimaryEmailAddr' => ['Address' => $customer->email],
+                'PrimaryPhone' => ['FreeFormNumber' => $customer->phone ?? ''],
+                'BillAddr' => $address ? [
+                    'Line1' => $address->address_line_1,
+                    'Line2' => $address->address_line_2,
+                    'City' => $address->city,
+                    'PostalCode' => $address->postal_code,
+                    'Country' => $address->country
+                ] : null
+            ]);
+            
+            $result = $this->dataService->Add($qbCustomer);
+            $error = $this->dataService->getLastError();
+            
+            if ($error) {
+                throw new \Exception('QuickBooks API Error: ' . $error->getIntuitErrorDetail());
+            }
+            
+            // Store QuickBooks customer ID
+            $customer->update(['quickbooks_customer_id' => $result->Id]);
+            
+            return [
+                'success' => true,
+                'quickbooks_customer_id' => $result->Id
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to create customer in QuickBooks', [
+                'customer_id' => $customer->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Test QuickBooks connection
+     */
+    public function testConnection(): array
+    {
+        try {
+            $this->initializeDataService();
+            
+            // Try to fetch company info
+            $companyInfo = $this->dataService->getCompanyInfo();
+            
+            if (!$companyInfo) {
+                return [
+                    'success' => false,
+                    'error' => 'Unable to fetch company information'
+                ];
+            }
+            
+            return [
+                'success' => true,
+                'company_name' => $companyInfo->CompanyName,
+                'legal_name' => $companyInfo->LegalName
+            ];
+            
+        } catch (\Exception $e) {
+            Log::error('QuickBooks connection test failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Check if QuickBooks is connected
+     */
+    public function isConnected(): bool
+    {
+        $tokens = $this->getStoredTokens();
+        
+        if (!$tokens) {
+            return false;
+        }
+        
+        // Check if token is expired
+        if (now()->isAfter($tokens['expires_at'])) {
+            // Try to refresh token
+            return $this->refreshAccessToken();
+        }
+        
+        return true;
+    }
+    
+    private function getStoredTokens(): ?array
+    {
+        $settings = \DB::table('integration_settings')
+            ->where('service', 'quickbooks')
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$settings) {
+            return null;
+        }
+
+        return decrypt($settings->tokens);
+    }
+
+    /**
+     * Update existing customer in QuickBooks
+     */
+    public function updateCustomer(User $customer): array
+    {
+        try {
+            $this->initializeDataService();
+
+            if (!$customer->quickbooks_customer_id) {
+                return $this->createCustomer($customer);
+            }
+
+            // Fetch existing customer
+            $qbCustomer = $this->dataService->FindbyId('Customer', $customer->quickbooks_customer_id);
+
+            if (!$qbCustomer) {
+                return $this->createCustomer($customer);
+            }
+
+            // Get customer's default address
+            $address = $customer->addresses()->where('is_default_billing', true)->first()
+                      ?? $customer->addresses()->first();
+
+            // Update customer data
+            $qbCustomer->Name = $customer->name;
+            $qbCustomer->CompanyName = $customer->business?->business_name ?? '';
+            $qbCustomer->PrimaryEmailAddr = ['Address' => $customer->email];
+            $qbCustomer->PrimaryPhone = ['FreeFormNumber' => $customer->phone ?? ''];
+
+            if ($address) {
+                $qbCustomer->BillAddr = [
+                    'Line1' => $address->address_line_1,
+                    'Line2' => $address->address_line_2,
+                    'City' => $address->city,
+                    'PostalCode' => $address->postal_code,
+                    'Country' => $address->country
+                ];
+            }
+
+            $result = $this->dataService->Update($qbCustomer);
+            $error = $this->dataService->getLastError();
+
+            if ($error) {
+                throw new \Exception('QuickBooks API Error: ' . $error->getIntuitErrorDetail());
+            }
+
+            return [
+                'success' => true,
+                'quickbooks_customer_id' => $result->Id
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to update customer in QuickBooks', [
+                'customer_id' => $customer->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Get company information from QuickBooks
+     */
+    public function getCompanyInfo(): ?array
+    {
+        try {
+            $this->initializeDataService();
+
+            $companyInfo = $this->dataService->getCompanyInfo();
+
+            if (!$companyInfo) {
+                return null;
+            }
+
+            return [
+                'company_name' => $companyInfo->CompanyName,
+                'legal_name' => $companyInfo->LegalName,
+                'country' => $companyInfo->Country,
+                'fiscal_year_start' => $companyInfo->FiscalYearStartMonth
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Failed to get company info from QuickBooks', [
+                'error' => $e->getMessage()
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Get last sync time
+     */
+    public function getLastSyncTime(): ?string
+    {
+        $lastOrder = \App\Models\Order::whereNotNull('quickbooks_synced_at')
+            ->latest('quickbooks_synced_at')
+            ->first();
+
+        return $lastOrder?->quickbooks_synced_at?->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Get health status
+     */
+    public function getHealthStatus(): array
+    {
+        $tokens = $this->getStoredTokens();
+
+        if (!$tokens) {
+            return [
+                'status' => 'disconnected',
+                'message' => 'No tokens found'
+            ];
+        }
+
+        if (now()->isAfter($tokens['expires_at'])) {
+            return [
+                'status' => 'token_expired',
+                'message' => 'Access token expired',
+                'expires_at' => $tokens['expires_at']
+            ];
+        }
+
+        $connectionTest = $this->testConnection();
+        if ($connectionTest['success']) {
+            return [
+                'status' => 'healthy',
+                'message' => 'Connection active',
+                'expires_at' => $tokens['expires_at']
+            ];
+        }
+
+        return [
+            'status' => 'connection_failed',
+            'message' => 'Unable to connect to QuickBooks'
+        ];
+    }
+
+    /**
+     * Revoke tokens
+     */
+    public function revokeTokens(): bool
+    {
+        try {
+            $tokens = $this->getStoredTokens();
+
+            if (!$tokens) {
+                return true;
+            }
+
+            $this->initializeDataService();
+            $this->OAuth2LoginHelper = $this->dataService->getOAuth2LoginHelper();
+
+            // Revoke the refresh token
+            $this->OAuth2LoginHelper->revokeToken($tokens['refresh_token']);
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to revoke QuickBooks tokens', [
+                'error' => $e->getMessage()
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Refresh access token
+     */
+    private function refreshAccessToken(): bool
+    {
+        try {
+            $tokens = $this->getStoredTokens();
+
+            if (!$tokens || !$tokens['refresh_token']) {
+                return false;
+            }
+
+            $this->initializeDataService();
+            $this->OAuth2LoginHelper = $this->dataService->getOAuth2LoginHelper();
+
+            $newTokens = $this->OAuth2LoginHelper->refreshToken($tokens['refresh_token']);
+
+            if (!$newTokens) {
+                return false;
+            }
+
+            // Update stored tokens
+            $this->updateStoredTokens([
+                'access_token' => $newTokens->getAccessToken(),
+                'refresh_token' => $newTokens->getRefreshToken(),
+                'expires_at' => now()->addSeconds($newTokens->getAccessTokenExpiresAt())
+            ]);
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to refresh QuickBooks token', [
+                'error' => $e->getMessage()
+            ]);
+
+            return false;
+        }
+    }
+
+    private function updateStoredTokens(array $tokens): void
+    {
+        $encryptedTokens = encrypt($tokens);
+
+        \DB::table('integration_settings')
+            ->where('service', 'quickbooks')
+            ->where('user_id', auth()->id())
+            ->update([
+                'tokens' => $encryptedTokens,
+                'updated_at' => now()
+            ]);
+    }
+
+    private function ensureCustomerExists(User $customer): object
+    {
+        if ($customer->quickbooks_customer_id) {
+            $qbCustomer = $this->dataService->FindbyId('Customer', $customer->quickbooks_customer_id);
+            if ($qbCustomer) {
+                return $qbCustomer;
+            }
+        }
+
+        // Create new customer
+        $result = $this->createCustomer($customer);
+        if (!$result['success']) {
+            throw new \Exception('Failed to create customer in QuickBooks');
+        }
+
+        return $this->dataService->FindbyId('Customer', $result['quickbooks_customer_id']);
+    }
+
+    private function findCustomerByEmail(string $email): ?object
+    {
+        $customers = $this->dataService->Query("SELECT * FROM Customer WHERE PrimaryEmailAddr = '{$email}'");
+
+        return $customers ? $customers[0] : null;
+    }
+
+    private function createInvoiceFromOrder(Order $order, object $qbCustomer): object
+    {
+        // This is a placeholder implementation
+        // In a real implementation, you would create a proper QuickBooks Invoice object
+        return (object) [
+            'Id' => 'temp_' . $order->id,
+            'DocNumber' => 'INV-' . $order->id
+        ];
+    }
+}

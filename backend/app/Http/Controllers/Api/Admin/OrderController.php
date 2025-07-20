@@ -1,0 +1,770 @@
+<?php
+
+namespace App\Http\Controllers\Api\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\User;
+use App\Models\Product;
+use App\Notifications\OrderStatusChanged;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Carbon\Carbon;
+
+class OrderController extends Controller
+{
+    /**
+     * Display a listing of the orders.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        // Validate request parameters
+        $request->validate([
+            'user_id' => 'sometimes|integer|exists:users,id',
+            'producer_id' => 'sometimes|integer|exists:producers,id',
+            'status' => ['sometimes', 'string', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'payment_status' => ['sometimes', 'string', Rule::in(['pending', 'paid', 'failed', 'refunded'])],
+            'has_shipping' => 'sometimes|boolean',
+            'price_min' => 'sometimes|numeric|min:0',
+            'price_max' => 'sometimes|numeric|min:0',
+            'product_id' => 'sometimes|integer|exists:products,id',
+            'search' => 'sometimes|string|max:100',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'per_page' => 'sometimes|integer|min:5|max:100',
+            'page' => 'sometimes|integer|min:1',
+            'sort_by' => ['sometimes', 'string', Rule::in(['id', 'order_number', 'total', 'created_at'])],
+            'sort_dir' => ['sometimes', 'string', Rule::in(['asc', 'desc'])],
+        ]);
+
+        // Build query
+        $query = Order::with(['user:id,name,email', 'items.product:id,name,sku', 'items.producer:id,business_name']);
+
+        // Apply user filter
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Apply status filter
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply payment status filter
+        if ($request->has('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // Apply producer filter
+        if ($request->has('producer_id')) {
+            $producerId = $request->producer_id;
+            $query->whereHas('items', function ($q) use ($producerId) {
+                $q->where('producer_id', $producerId);
+            });
+        }
+
+        // Apply product filter
+        if ($request->has('product_id')) {
+            $productId = $request->product_id;
+            $query->whereHas('items', function ($q) use ($productId) {
+                $q->where('product_id', $productId);
+            });
+        }
+
+        // Apply shipping filter
+        if ($request->has('has_shipping')) {
+            if ($request->has_shipping) {
+                $query->whereNotNull('shipping_address_id');
+            } else {
+                $query->whereNull('shipping_address_id');
+            }
+        }
+
+        // Apply price range filter
+        if ($request->has('price_min')) {
+            $query->where('total_amount', '>=', $request->price_min);
+        }
+
+        if ($request->has('price_max')) {
+            $query->where('total_amount', '<=', $request->price_max);
+        }
+
+        // Apply date range filter
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Apply search filter
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('id', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('shippingAddress', function ($addressQuery) use ($search) {
+                      $addressQuery->where('first_name', 'like', "%{$search}%")
+                                  ->orWhere('last_name', 'like', "%{$search}%")
+                                  ->orWhere('address_line1', 'like', "%{$search}%")
+                                  ->orWhere('city', 'like', "%{$search}%")
+                                  ->orWhere('postal_code', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Apply sorting
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+        $query->orderBy($sortBy, $sortDir);
+
+        // Paginate results
+        $perPage = $request->input('per_page', 15);
+        $orders = $query->paginate($perPage);
+
+        // Get statistics for dashboard
+        $stats = [
+            'total_orders' => Order::count(),
+            'orders_by_status' => [
+                'pending' => Order::where('status', 'pending')->count(),
+                'processing' => Order::where('status', 'processing')->count(),
+                'shipped' => Order::where('status', 'shipped')->count(),
+                'delivered' => Order::where('status', 'delivered')->count(),
+                'cancelled' => Order::where('status', 'cancelled')->count(),
+            ],
+            'orders_by_payment' => [
+                'pending' => Order::where('payment_status', 'pending')->count(),
+                'paid' => Order::where('payment_status', 'paid')->count(),
+                'failed' => Order::where('payment_status', 'failed')->count(),
+                'refunded' => Order::where('payment_status', 'refunded')->count(),
+            ],
+            'total_revenue' => Order::where('status', '!=', 'cancelled')->sum('total_amount'),
+            'average_order_value' => Order::where('status', '!=', 'cancelled')->avg('total_amount') ?? 0,
+            'recent_period' => [
+                'orders' => Order::where('created_at', '>=', now()->subDays(30))->count(),
+                'revenue' => Order::where('created_at', '>=', now()->subDays(30))
+                                ->where('status', '!=', 'cancelled')
+                                ->sum('total_amount'),
+            ],
+        ];
+
+        return response()->json([
+            'data' => $orders->items(),
+            'current_page' => $orders->currentPage(),
+            'last_page' => $orders->lastPage(),
+            'per_page' => $orders->perPage(),
+            'total' => $orders->total(),
+            'stats' => $stats
+        ]);
+    }
+
+    /**
+     * Display the specified order.
+     *
+     * @param Order $order
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        // Find the order by ID
+        $order = Order::findOrFail($id);
+        
+        // Load relationships
+        $order->load([
+            'user:id,name,email,phone,created_at',
+            'items.product:id,name,sku,main_image,price',
+            'items.product.producer:id,business_name',
+            'items.product.categories:id,name',
+            'shippingAddress',
+            'billingAddress',
+            'payment',
+            'statusHistory' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'notes' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }
+        ]);
+
+        // Get user order history
+        $userOrderHistory = Order::where('user_id', $order->user_id)
+            ->where('id', '!=', $order->id)
+            ->select('id', 'order_number', 'status', 'total_amount', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Get related orders (orders with same products)
+        $productIds = $order->items->pluck('product_id')->toArray();
+        $relatedOrders = Order::where('id', '!=', $order->id)
+            ->whereHas('items', function($query) use ($productIds) {
+                $query->whereIn('product_id', $productIds);
+            })
+            ->select('id', 'order_number', 'status', 'total_amount', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Add additional information to response
+        $orderData = $order->toArray();
+        $orderData['user_order_history'] = $userOrderHistory;
+        $orderData['related_orders'] = $relatedOrders;
+        $orderData['days_since_order'] = now()->diffInDays($order->created_at);
+
+        // Calculate order metrics
+        $orderData['metrics'] = [
+            'total_items' => $order->items->sum('quantity'),
+            'unique_products' => $order->items->count(),
+            'unique_producers' => $order->items->pluck('producer_id')->unique()->count(),
+            'average_item_price' => $order->items->avg('unit_price'),
+            'shipping_percent' => $order->shipping_amount > 0 ?
+                ($order->shipping_amount / $order->total_amount) * 100 : 0,
+        ];
+
+        return response()->json($orderData);
+    }
+
+    /**
+     * Update the specified order.
+     *
+     * @param Request $request
+     * @param Order $order
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+        // Find the order by ID
+        $order = Order::findOrFail($id);
+        
+        // Validate request
+        $validated = $request->validate([
+            'status' => ['required', 'string', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'admin_notes' => 'sometimes|nullable|string',
+            'tracking_number' => 'sometimes|nullable|string|max:100',
+            'shipping_provider' => 'sometimes|nullable|string|max:100',
+            'payment_status' => ['sometimes', 'string', Rule::in(['pending', 'paid', 'failed', 'refunded'])],
+            'notify_customer' => 'sometimes|boolean',
+        ]);
+
+        // Get original status before update
+        $originalStatus = $order->status;
+        $originalPaymentStatus = $order->payment_status;
+
+        // Update order
+        $order->update($validated);
+
+        // Add status history entry
+        if ($validated['status'] !== $originalStatus) {
+            $order->statusHistory()->create([
+                'status' => $validated['status'],
+                'notes' => $validated['admin_notes'] ?? null,
+                'user_id' => auth()->id(), // Admin who made the change
+            ]);
+        }
+
+        // Add tracking information if provided
+        if (isset($validated['tracking_number']) || isset($validated['shipping_provider'])) {
+            $order->update([
+                'tracking_number' => $validated['tracking_number'] ?? $order->tracking_number,
+                'shipping_provider' => $validated['shipping_provider'] ?? $order->shipping_provider,
+            ]);
+        }
+
+        // Add admin note if provided
+        if (isset($validated['admin_notes']) && !empty($validated['admin_notes'])) {
+            $order->notes()->create([
+                'note' => $validated['admin_notes'],
+                'user_id' => auth()->id(),
+                'is_admin' => true,
+            ]);
+        }
+
+        // If status changed, send notification to user
+        $shouldNotify = $request->input('notify_customer', true); // Default to true
+
+        if ($shouldNotify) {
+            $statusChanged = $validated['status'] !== $originalStatus;
+            $paymentStatusChanged = isset($validated['payment_status']) && $validated['payment_status'] !== $originalPaymentStatus;
+
+            if ($statusChanged || $paymentStatusChanged) {
+                // Send notification to user
+                $order->user->notify(new OrderStatusChanged($order));
+
+                // Record notification
+                $order->notes()->create([
+                    'note' => 'Notification sent to customer about order ' .
+                            ($statusChanged ? 'status change to ' . $validated['status'] : '') .
+                            ($paymentStatusChanged ? ' payment status change to ' . $validated['payment_status'] : ''),
+                    'user_id' => auth()->id(),
+                    'is_admin' => true,
+                ]);
+            }
+
+            // If status changed to cancelled, handle any necessary refunds or inventory updates
+            if ($validated['status'] === 'cancelled' && $originalStatus !== 'cancelled') {
+                // Return items to inventory
+                foreach ($order->items as $item) {
+                    if ($item->product) {
+                        $item->product->increment('stock_quantity', $item->quantity);
+                    }
+                }
+
+                // Record inventory update
+                $order->notes()->create([
+                    'note' => 'Order cancelled: ' . count($order->items) . ' items returned to inventory',
+                    'user_id' => auth()->id(),
+                    'is_admin' => true,
+                ]);
+            }
+        }
+        
+        // Load relationships for response
+        $order->load([
+            'user:id,name,email',
+            'statusHistory' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'notes' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }
+        ]);
+
+        return response()->json($order);
+    }
+
+    /**
+     * Export orders to CSV.
+     *
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function export(Request $request)
+    {
+        
+        // Validate request parameters (same as index method)
+        $request->validate([
+            'user_id' => 'sometimes|integer|exists:users,id',
+            'producer_id' => 'sometimes|integer|exists:producers,id',
+            'status' => ['sometimes', 'string', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'payment_status' => ['sometimes', 'string', Rule::in(['pending', 'paid', 'failed', 'refunded'])],
+            'search' => 'sometimes|string|max:100',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_equal:date_from',
+            'sort_by' => ['sometimes', 'string', Rule::in(['id', 'order_number', 'total', 'created_at'])],
+            'sort_dir' => ['sometimes', 'string', Rule::in(['asc', 'desc'])],
+        ]);
+
+        // Build query (same as index method)
+        $query = Order::with(['user:id,name,email', 'items.product:id,name,sku', 'items.producer:id,business_name']);
+
+        // Apply user filter
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Apply status filter
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Apply payment status filter
+        if ($request->has('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // Apply producer filter
+        if ($request->has('producer_id')) {
+            $producerId = $request->producer_id;
+            $query->whereHas('items', function ($q) use ($producerId) {
+                $q->where('producer_id', $producerId);
+            });
+        }
+
+        // Apply date range filter
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Apply search filter
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', function ($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Apply sorting
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+        $query->orderBy($sortBy, $sortDir);
+
+        // Get all orders (no pagination)
+        $orders = $query->get();
+
+        // Create CSV response
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="orders-export.csv"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function() use ($orders) {
+            $file = fopen('php://output', 'w');
+
+            // Add CSV headers
+            fputcsv($file, [
+                'ID',
+                'Αριθμός Παραγγελίας',
+                'Πελάτης',
+                'Email',
+                'Ημερομηνία',
+                'Κατάσταση',
+                'Κατάσταση Πληρωμής',
+                'Σύνολο',
+                'Προϊόντα',
+                'Διεύθυνση Αποστολής',
+            ]);
+
+            // Add order data
+            foreach ($orders as $order) {
+                // Format products
+                $products = [];
+                foreach ($order->items as $item) {
+                    $products[] = $item->quantity . 'x ' . $item->product->name . ' (' . $item->product->sku . ')';
+                }
+                $productsStr = implode(", ", $products);
+
+                // Format shipping address
+                $shippingAddress = '';
+                if ($order->shippingAddress) {
+                    $address = $order->shippingAddress;
+                    $shippingAddress = $address->first_name . ' ' . $address->last_name . ', ' .
+                                      $address->address_line1 . ', ' .
+                                      ($address->address_line2 ? $address->address_line2 . ', ' : '') .
+                                      $address->city . ', ' .
+                                      $address->postal_code . ', ' .
+                                      $address->country;
+                }
+
+                fputcsv($file, [
+                    $order->id,
+                    $order->order_number,
+                    $order->user->name,
+                    $order->user->email,
+                    $order->created_at->format('Y-m-d H:i:s'),
+                    $order->status,
+                    $order->payment_status,
+                    $order->total,
+                    $productsStr,
+                    $shippingAddress,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Bulk update orders status.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function bulkUpdate(Request $request)
+    {
+        
+        // Validate request
+        $validated = $request->validate([
+            'order_ids' => 'required|array',
+            'order_ids.*' => 'required|integer|exists:orders,id',
+            'status' => ['required', 'string', Rule::in(['pending', 'processing', 'shipped', 'delivered', 'cancelled'])],
+            'admin_notes' => 'sometimes|nullable|string',
+            'tracking_number' => 'sometimes|nullable|string|max:100',
+            'shipping_provider' => 'sometimes|nullable|string|max:100',
+            'notify_customer' => 'sometimes|boolean',
+        ]);
+
+        $orderIds = $validated['order_ids'];
+        $status = $validated['status'];
+        $adminNotes = $validated['admin_notes'] ?? null;
+        $trackingNumber = $validated['tracking_number'] ?? null;
+        $shippingProvider = $validated['shipping_provider'] ?? null;
+        $notifyCustomer = $request->input('notify_customer', true); // Default to true
+
+        $updatedCount = 0;
+        $notifiedCount = 0;
+        $errors = [];
+
+        // Process each order
+        foreach ($orderIds as $orderId) {
+            try {
+                $order = Order::findOrFail($orderId);
+                $originalStatus = $order->status;
+
+                // Skip if status is already the same
+                if ($originalStatus === $status) {
+                    continue;
+                }
+
+                // Update order status
+                $order->status = $status;
+
+                // Update tracking info if provided
+                if ($trackingNumber) {
+                    $order->tracking_number = $trackingNumber;
+                }
+
+                if ($shippingProvider) {
+                    $order->shipping_provider = $shippingProvider;
+                }
+
+                $order->save();
+
+                // Add status history entry
+                $order->statusHistory()->create([
+                    'status' => $status,
+                    'notes' => $adminNotes,
+                    'user_id' => auth()->id(), // Admin who made the change
+                ]);
+
+                // Add admin note if provided
+                if ($adminNotes) {
+                    $order->notes()->create([
+                        'note' => $adminNotes,
+                        'user_id' => auth()->id(),
+                        'is_admin' => true,
+                    ]);
+                }
+
+                // Notify customer if requested
+                if ($notifyCustomer) {
+                    $order->user->notify(new OrderStatusChanged($order));
+                    $notifiedCount++;
+
+                    // Record notification
+                    $order->notes()->create([
+                        'note' => 'Notification sent to customer about order status change to ' . $status,
+                        'user_id' => auth()->id(),
+                        'is_admin' => true,
+                    ]);
+                }
+
+                // If status changed to cancelled, handle inventory updates
+                if ($status === 'cancelled' && $originalStatus !== 'cancelled') {
+                    // Return items to inventory
+                    foreach ($order->items as $item) {
+                        if ($item->product) {
+                            $item->product->increment('stock_quantity', $item->quantity);
+                        }
+                    }
+
+                    // Record inventory update
+                    $order->notes()->create([
+                        'note' => 'Order cancelled: ' . count($order->items) . ' items returned to inventory',
+                        'user_id' => auth()->id(),
+                        'is_admin' => true,
+                    ]);
+                }
+
+                $updatedCount++;
+            } catch (\Exception $e) {
+                $errors[] = "Error updating order #{$orderId}: {$e->getMessage()}";
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "{$updatedCount} orders updated successfully. {$notifiedCount} customers notified.",
+            'updated_count' => $updatedCount,
+            'notified_count' => $notifiedCount,
+            'errors' => $errors
+        ]);
+    }
+
+    /**
+     * Get order statistics and analytics.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getStats(Request $request)
+    {
+        
+        // Validate request parameters
+        $request->validate([
+            'period' => ['sometimes', 'string', Rule::in(['day', 'week', 'month', 'year', 'custom'])],
+            'date_from' => 'required_if:period,custom|date',
+            'date_to' => 'required_if:period,custom|date|after_or_equal:date_from',
+            'producer_id' => 'sometimes|integer|exists:producers,id',
+        ]);
+
+        // Set date range based on period
+        $dateFrom = null;
+        $dateTo = Carbon::now();
+
+        $period = $request->input('period', 'month');
+
+        switch ($period) {
+            case 'day':
+                $dateFrom = Carbon::now()->startOfDay();
+                break;
+            case 'week':
+                $dateFrom = Carbon::now()->startOfWeek();
+                break;
+            case 'month':
+                $dateFrom = Carbon::now()->startOfMonth();
+                break;
+            case 'year':
+                $dateFrom = Carbon::now()->startOfYear();
+                break;
+            case 'custom':
+                $dateFrom = Carbon::parse($request->date_from)->startOfDay();
+                $dateTo = Carbon::parse($request->date_to)->endOfDay();
+                break;
+        }
+
+        // Base query
+        $query = Order::query();
+
+        // Apply date range filter
+        $query->whereBetween('created_at', [$dateFrom, $dateTo]);
+
+        // Apply producer filter if specified
+        if ($request->has('producer_id')) {
+            $producerId = $request->producer_id;
+            $query->whereHas('items', function ($q) use ($producerId) {
+                $q->where('producer_id', $producerId);
+            });
+        }
+
+        // Get basic stats
+        $totalOrders = $query->count();
+        $totalRevenue = $query->sum('total_amount');
+        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
+
+        // Get orders by status
+        $ordersByStatus = [
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'processing' => (clone $query)->where('status', 'processing')->count(),
+            'shipped' => (clone $query)->where('status', 'shipped')->count(),
+            'delivered' => (clone $query)->where('status', 'delivered')->count(),
+            'cancelled' => (clone $query)->where('status', 'cancelled')->count(),
+        ];
+
+        // Get orders by payment status
+        $ordersByPaymentStatus = [
+            'pending' => (clone $query)->where('payment_status', 'pending')->count(),
+            'paid' => (clone $query)->where('payment_status', 'paid')->count(),
+            'failed' => (clone $query)->where('payment_status', 'failed')->count(),
+            'refunded' => (clone $query)->where('payment_status', 'refunded')->count(),
+        ];
+
+        // Get orders by day for the period
+        $ordersByDay = [];
+        $revenueByDay = [];
+
+        $currentDate = clone $dateFrom;
+        while ($currentDate <= $dateTo) {
+            $day = $currentDate->format('Y-m-d');
+            $dayStart = $currentDate->copy()->startOfDay();
+            $dayEnd = $currentDate->copy()->endOfDay();
+
+            $ordersByDay[$day] = (clone $query)->whereBetween('created_at', [$dayStart, $dayEnd])->count();
+            $revenueByDay[$day] = (clone $query)->whereBetween('created_at', [$dayStart, $dayEnd])->sum('total_amount');
+
+            $currentDate->addDay();
+        }
+
+        // Get top products
+        $topProducts = DB::table('order_items')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->whereBetween('orders.created_at', [$dateFrom, $dateTo])
+            ->where('orders.status', '!=', 'cancelled')
+            ->select(
+                'products.id',
+                'products.name',
+                'products.sku',
+                'products.main_image',
+                DB::raw('SUM(order_items.quantity) as total_quantity'),
+                DB::raw('SUM(order_items.subtotal) as total_revenue')
+            )
+            ->groupBy('products.id', 'products.name', 'products.sku', 'products.main_image')
+            ->orderBy('total_revenue', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Get top customers
+        $topCustomers = DB::table('orders')
+            ->join('users', 'orders.user_id', '=', 'users.id')
+            ->whereBetween('orders.created_at', [$dateFrom, $dateTo])
+            ->where('orders.status', '!=', 'cancelled')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                DB::raw('COUNT(orders.id) as orders_count'),
+                DB::raw('SUM(orders.total_amount) as total_spent')
+            )
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderBy('total_spent', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Get comparison with previous period
+        $previousDateFrom = (clone $dateFrom)->subDays($dateFrom->diffInDays($dateTo) + 1);
+        $previousDateTo = (clone $dateFrom)->subDay();
+
+        $previousPeriodStats = [
+            'total_orders' => Order::whereBetween('created_at', [$previousDateFrom, $previousDateTo])->count(),
+            'total_revenue' => Order::whereBetween('created_at', [$previousDateFrom, $previousDateTo])->sum('total_amount'),
+        ];
+
+        $comparison = [
+            'orders_change_percent' => $previousPeriodStats['total_orders'] > 0
+                ? (($totalOrders - $previousPeriodStats['total_orders']) / $previousPeriodStats['total_orders']) * 100
+                : ($totalOrders > 0 ? 100 : 0),
+            'revenue_change_percent' => $previousPeriodStats['total_revenue'] > 0
+                ? (($totalRevenue - $previousPeriodStats['total_revenue']) / $previousPeriodStats['total_revenue']) * 100
+                : ($totalRevenue > 0 ? 100 : 0),
+        ];
+
+        return response()->json([
+            'period' => [
+                'from' => $dateFrom->format('Y-m-d'),
+                'to' => $dateTo->format('Y-m-d'),
+                'name' => $period,
+            ],
+            'total_orders' => $totalOrders,
+            'total_revenue' => $totalRevenue,
+            'average_order_value' => $averageOrderValue,
+            'orders_by_status' => $ordersByStatus,
+            'orders_by_payment_status' => $ordersByPaymentStatus,
+            'orders_by_day' => $ordersByDay,
+            'revenue_by_day' => $revenueByDay,
+            'top_products' => $topProducts,
+            'top_customers' => $topCustomers,
+            'comparison' => $comparison,
+        ]);
+    }
+}

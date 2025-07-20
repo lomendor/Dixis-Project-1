@@ -1,0 +1,125 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please fill out the form below to help us understand your request.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🎯 Problem Statement
+      description: What problem does this feature solve? What need does it address?
+      placeholder: "As a [user type], I need [functionality] so that [benefit]"
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe the solution you'd like to see implemented
+      placeholder: A clear and concise description of what you want to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternative Solutions
+      description: Describe any alternative solutions or features you've considered
+      placeholder: What other approaches have you thought about?
+
+  - type: dropdown
+    id: user_type
+    attributes:
+      label: 👤 User Type
+      description: Which type of user would benefit from this feature?
+      options:
+        - Consumer (end customer)
+        - Producer (farmer/supplier)
+        - Business (B2B customer)
+        - Admin (platform administrator)
+        - All users
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: 🏗️ Module
+      description: Which part of the system does this feature relate to?
+      options:
+        - Frontend (User Interface)
+        - Backend (API/Database)
+        - Admin Panel
+        - Mobile/PWA
+        - Analytics
+        - Payments
+        - Integrations
+        - Infrastructure
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: ⚡ Priority
+      description: How important is this feature?
+      options:
+        - Critical (required for launch)
+        - High (important for user experience)
+        - Medium (nice to have)
+        - Low (future consideration)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: 📏 Estimated Size
+      description: How complex do you think this feature is?
+      options:
+        - XS (1-2 hours)
+        - S (1-2 days)
+        - M (3-5 days)
+        - L (1-2 weeks)
+        - XL (2+ weeks)
+        - Unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: Define what "done" looks like for this feature
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+        
+  - type: textarea
+    id: mockups
+    attributes:
+      label: 🎨 Mockups/Examples
+      description: Include any mockups, examples, or references
+      placeholder: Drag and drop images or provide links to examples
+
+  - type: textarea
+    id: business_value
+    attributes:
+      label: 💰 Business Value
+      description: What business value would this feature provide?
+      placeholder: How would this feature help the business/users?
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: 🔧 Technical Notes
+      description: Any technical considerations or implementation notes
+      placeholder: Technical requirements, dependencies, or constraints

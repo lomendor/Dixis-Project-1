@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/lomendor/Dixis4/wiki
+    about: Check the project documentation and guides
+  - name: 💬 Discussion Forum
+    url: https://github.com/lomendor/Dixis4/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🔒 Security Issue
+    url: https://github.com/lomendor/Dixis4/security/advisories/new
+    about: Report a security vulnerability privately

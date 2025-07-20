@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+  # Laravel Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      args:
+        - APP_ENV=production
+    image: dixis-fresh:production
+    container_name: dixis-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./storage:/var/www/storage
+      - ./bootstrap/cache:/var/www/bootstrap/cache
+    networks:
+      - dixis-network
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - APP_ENV=production
+      - CONTAINER_ROLE=app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dixis.rule=Host(`dixis.gr`)"
+      - "traefik.http.routers.dixis.tls=true"
+      - "traefik.http.routers.dixis.tls.certresolver=letsencrypt"
+
+  # Queue Worker
+  queue:
+    image: dixis-fresh:production
+    container_name: dixis-queue
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./storage:/var/www/storage
+    networks:
+      - dixis-network
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - APP_ENV=production
+      - CONTAINER_ROLE=queue
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+
+  # Scheduler
+  scheduler:
+    image: dixis-fresh:production
+    container_name: dixis-scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./storage:/var/www/storage
+    networks:
+      - dixis-network
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - APP_ENV=production
+      - CONTAINER_ROLE=scheduler
+    command: php artisan schedule:work
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: dixis-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: dixis_production
+      MYSQL_USER: dixis_user
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - "3306:3306"
+    networks:
+      - dixis-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: dixis-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    networks:
+      - dixis-network
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: dixis-nginx
+    restart: unless-stopped
+    volumes:
+      - ./public:/var/www/public
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - dixis-network
+    depends_on:
+      - app
+    labels:
+      - "traefik.enable=true"
+
+  # Meilisearch (Search Engine)
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: dixis-search
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY}
+    volumes:
+      - meilisearch_data:/meili_data
+    ports:
+      - "7700:7700"
+    networks:
+      - dixis-network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  meilisearch_data:
+    driver: local
+
+networks:
+  dixis-network:
+    driver: bridge

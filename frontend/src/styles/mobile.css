@@ -1,0 +1,331 @@
+/* Enhanced Mobile-first Design System */
+
+/* Base mobile styles - mobile-first approach */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-size: 16px; /* Prevent zoom on iOS */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+/* Touch-friendly interactions with haptic feedback simulation */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .hover-only:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Enhanced touch targets - WCAG 2.1 AA compliance */
+  button, 
+  a, 
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  .touchable {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Enhanced touch feedback with spring animation */
+  .touch-feedback {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+  }
+  
+  .touch-feedback:active {
+    transform: scale(0.95);
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Ripple effect for touch interactions */
+  .touch-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .touch-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+    pointer-events: none;
+  }
+  
+  .touch-ripple:active::after {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+/* Mobile-optimized spacing */
+@media (max-width: 768px) {
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .mobile-spacing > * + * {
+    margin-top: 1rem;
+  }
+  
+  .mobile-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Mobile typography */
+  .mobile-text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  .mobile-text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  .mobile-text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+/* Mobile-specific animations */
+@media (max-width: 768px) {
+  .mobile-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .mobile-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Mobile navigation enhancements */
+@media (max-width: 768px) {
+  .mobile-nav-item {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+  }
+  
+  .mobile-nav-item:active {
+    background-color: rgba(34, 197, 94, 0.1);
+  }
+  
+  .mobile-search {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+}
+
+/* Mobile card optimizations */
+@media (max-width: 768px) {
+  .mobile-card {
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .mobile-card-image {
+    border-radius: 0.75rem;
+    aspect-ratio: 1;
+  }
+  
+  .mobile-card-content {
+    padding-top: 0.75rem;
+  }
+  
+  .mobile-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-card-description {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+  }
+  
+  .mobile-card-price {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #059669;
+  }
+}
+
+/* Mobile button optimizations */
+@media (max-width: 768px) {
+  .mobile-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    min-height: 48px;
+    transition: all 0.2s ease;
+  }
+  
+  .mobile-btn-primary {
+    background-color: #059669;
+    color: white;
+  }
+  
+  .mobile-btn-primary:active {
+    background-color: #047857;
+    transform: scale(0.98);
+  }
+  
+  .mobile-btn-secondary {
+    background-color: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+  
+  .mobile-btn-secondary:active {
+    background-color: #f9fafb;
+    transform: scale(0.98);
+  }
+  
+  .mobile-btn-icon {
+    padding: 0.75rem;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 0.75rem;
+  }
+}
+
+/* Mobile form optimizations */
+@media (max-width: 768px) {
+  .mobile-input {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #d1d5db;
+    min-height: 48px;
+  }
+  
+  .mobile-input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  }
+  
+  .mobile-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+}
+
+/* Mobile modal/drawer optimizations */
+@media (max-width: 768px) {
+  .mobile-modal {
+    border-radius: 1rem 1rem 0 0;
+    max-height: 90vh;
+  }
+  
+  .mobile-drawer {
+    width: 100vw;
+    max-width: none;
+  }
+  
+  .mobile-drawer-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+  }
+  
+  .mobile-drawer-content {
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile-specific utilities */
+@media (max-width: 768px) {
+  .mobile-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .mobile-scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .mobile-no-scroll {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+  
+  .mobile-backdrop-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+/* Dark mode mobile optimizations */
+@media (max-width: 768px) and (prefers-color-scheme: dark) {
+  .mobile-card {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .mobile-btn-secondary {
+    background-color: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+  }
+  
+  .mobile-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+}

@@ -1,0 +1,526 @@
+<?php
+
+namespace App\Http\Controllers\Api\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
+
+class UserController extends Controller
+{
+    /**
+     * Display a listing of the users.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+        
+        // Validate request parameters
+        $request->validate([
+            'role' => ['sometimes', 'string', Rule::in(['admin', 'producer', 'consumer', 'business_user'])],
+            'search' => 'sometimes|string|max:100',
+            'status' => ['sometimes', 'string', Rule::in(['active', 'inactive', 'unverified', 'all'])],
+            'has_orders' => 'sometimes|boolean',
+            'has_products' => 'sometimes|boolean',
+            'verified_producer' => 'sometimes|boolean',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date',
+            'per_page' => 'sometimes|integer|min:5|max:100',
+            'page' => 'sometimes|integer|min:1',
+            'sort_by' => ['sometimes', 'string', Rule::in(['id', 'name', 'email', 'created_at', 'role', 'orders_count', 'products_count'])],
+            'sort_dir' => ['sometimes', 'string', Rule::in(['asc', 'desc'])],
+        ]);
+
+        // Build query
+        $query = User::query();
+
+        // Apply role filter
+        if ($request->has('role')) {
+            $query->role($request->role);
+        }
+
+        // Apply search filter
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply status filter
+        if ($request->has('status') && $request->status !== 'all') {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            } elseif ($request->status === 'unverified') {
+                $query->whereNull('email_verified_at');
+            }
+        }
+
+        // Filter users with orders
+        if ($request->has('has_orders')) {
+            if ($request->has_orders) {
+                $query->whereHas('orders');
+            } else {
+                $query->whereDoesntHave('orders');
+            }
+        }
+
+        // Filter producers with products
+        if ($request->has('has_products')) {
+            if ($request->has_products) {
+                $query->whereHas('producer.products');
+            } else {
+                $query->whereHas('producer', function($q) {
+                    $q->whereDoesntHave('products');
+                });
+            }
+        }
+
+        // Filter verified producers
+        if ($request->has('verified_producer')) {
+            if ($request->verified_producer) {
+                $query->whereHas('producer', function($q) {
+                    $q->where('verified', true);
+                });
+            } else {
+                $query->whereHas('producer', function($q) {
+                    $q->where('verified', false);
+                });
+            }
+        }
+
+        // Apply date range filter
+        if ($request->has('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Apply sorting
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = $request->input('sort_dir', 'desc');
+
+        // Special handling for role sorting
+        if ($sortBy === 'role') {
+            // We need to join with the model_has_roles table to sort by role
+            $query->join('model_has_roles', function ($join) {
+                $join->on('users.id', '=', 'model_has_roles.model_id')
+                     ->where('model_has_roles.model_type', '=', User::class);
+            })
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->orderBy('roles.name', $sortDir)
+            ->select('users.*'); // Make sure we only select from the users table
+        }
+        // Special handling for orders count sorting
+        else if ($sortBy === 'orders_count') {
+            $query->withCount('orders')
+                  ->orderBy('orders_count', $sortDir);
+        }
+        // Special handling for products count sorting (for producers)
+        else if ($sortBy === 'products_count') {
+            $query->whereHas('producer')
+                  ->withCount(['producer.products as products_count'])
+                  ->orderBy('products_count', $sortDir);
+        }
+        else {
+            $query->orderBy($sortBy, $sortDir);
+        }
+
+        // Paginate results
+        $perPage = $request->input('per_page', 15);
+        $users = $query->paginate($perPage);
+
+        // Add role and additional info to each user
+        $users->getCollection()->transform(function ($user) {
+            $user->role = $user->getRoleNames()->first();
+
+            // Add orders count
+            if (!isset($user->orders_count)) {
+                $user->orders_count = $user->orders()->count();
+            }
+
+            // Add products count for producers
+            if ($user->role === 'producer' && !isset($user->products_count)) {
+                $producer = $user->producer;
+                $user->products_count = $producer ? $producer->products()->count() : 0;
+                $user->verified = $producer ? $producer->verified : false;
+            }
+
+            return $user;
+        });
+
+        // Get statistics for dashboard
+        $stats = [
+            'total_users' => User::count(),
+            'users_by_role' => [
+                'admin' => User::role('admin')->count(),
+                'producer' => User::role('producer')->count(),
+                'consumer' => User::role('consumer')->count(),
+                'business_user' => User::role('business_user')->count(),
+            ],
+            'users_by_status' => [
+                'active' => User::where('is_active', true)->count(),
+                'inactive' => User::where('is_active', false)->count(),
+                'unverified' => User::whereNull('email_verified_at')->count(),
+            ],
+            'recent_users' => User::where('created_at', '>=', now()->subDays(30))->count(),
+        ];
+
+        return response()->json([
+            'data' => $users->items(),
+            'current_page' => $users->currentPage(),
+            'last_page' => $users->lastPage(),
+            'per_page' => $users->perPage(),
+            'total' => $users->total(),
+            'stats' => $stats
+        ]);
+    }
+
+    /**
+     * Store a newly created user.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+        
+        // Validate request
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8',
+            'role' => ['required', 'string', Rule::in(['admin', 'producer', 'consumer', 'business_user'])],
+            'phone' => 'nullable|string|max:20',
+            'is_active' => 'boolean',
+        ]);
+
+        // Create user
+        $user = new User([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'] ?? null,
+            'role' => $validated['role'],
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
+
+        $user->save();
+
+        // Assign role
+        $user->assignRole($validated['role']);
+
+        return response()->json($user, 201);
+    }
+
+    /**
+     * Display the specified user.
+     *
+     * @param User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            // Log the user ID for debugging
+            \Illuminate\Support\Facades\Log::info('Showing user with ID: ' . $user->id);
+
+            // Load relationships based on user role
+            if ($user->hasRole('producer')) {
+            $user->load([
+                'producer',
+                'producer.products' => function ($query) {
+                    $query->orderBy('created_at', 'desc')->limit(10);
+                },
+                'producer.documents',
+                'producer.shippingMethods'
+            ]);
+        } elseif ($user->hasRole('consumer')) {
+            $user->load([
+                'addresses',
+                'reviews',
+                'wishlist'
+            ]);
+        } elseif ($user->hasRole('business_user')) {
+            $user->load([
+                'business',
+                'business.addresses'
+            ]);
+        }
+
+        // Load orders with items and shipping details
+        $user->load([
+            'orders' => function ($query) {
+                $query->orderBy('created_at', 'desc')->limit(10);
+            },
+            'orders.items',
+            'orders.items.product:id,name,sku,main_image',
+            'orders.shippingAddress',
+            'orders.billingAddress',
+            'orders.payments' // Σωστή αναφορά στη σχέση payments (πληθυντικός)
+        ]);
+
+        // Add role to user
+        $user->role = $user->getRoleNames()->first();
+
+        // Get total orders count and stats
+        $user->orders_count = $user->orders()->count();
+        $user->orders_stats = [
+            'pending' => $user->orders()->where('status', 'pending')->count(),
+            'processing' => $user->orders()->where('status', 'processing')->count(),
+            'shipped' => $user->orders()->where('status', 'shipped')->count(),
+            'delivered' => $user->orders()->where('status', 'delivered')->count(),
+            'cancelled' => $user->orders()->where('status', 'cancelled')->count(),
+        ];
+
+        // Get total spent (for consumers)
+        if ($user->hasRole('consumer')) {
+            $user->total_spent = $user->orders()->where('status', '!=', 'cancelled')->sum('total_amount');
+            $user->average_order_value = $user->orders()->where('status', '!=', 'cancelled')->avg('total_amount') ?? 0;
+            $user->first_order_date = $user->orders()->min('created_at');
+            $user->last_order_date = $user->orders()->max('created_at');
+
+            // Get favorite products/categories
+            $favoriteProducts = DB::table('order_items')
+                ->join('products', 'order_items.product_id', '=', 'products.id')
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->where('orders.user_id', $user->id)
+                ->where('orders.status', '!=', 'cancelled')
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.main_image',
+                    DB::raw('SUM(order_items.quantity) as total_quantity')
+                )
+                ->groupBy('products.id', 'products.name', 'products.main_image')
+                ->orderBy('total_quantity', 'desc')
+                ->limit(5)
+                ->get();
+
+            $user->favorite_products = $favoriteProducts;
+        }
+
+        // Get total sales (for producers)
+        if ($user->hasRole('producer')) {
+            try {
+            $user = User::findOrFail($id);
+                // Get total sales
+                $user->total_sales = $user->producer->products()
+                    ->join('order_items', 'products.id', '=', 'order_items.product_id')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('orders.status', '!=', 'cancelled')
+                    ->sum('order_items.subtotal');
+
+                // Get total products
+                $user->active_products_count = $user->producer->products()->where('is_active', true)->count();
+                $user->inactive_products_count = $user->producer->products()->where('is_active', false)->count();
+
+                // Get top selling products
+                $topProducts = DB::table('order_items')
+                    ->join('products', 'order_items.product_id', '=', 'products.id')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('products.producer_id', $user->producer->id)
+                    ->where('orders.status', '!=', 'cancelled')
+                    ->select(
+                        'products.id',
+                        'products.name',
+                        'products.main_image',
+                        'products.price',
+                        DB::raw('SUM(order_items.quantity) as total_quantity'),
+                        DB::raw('SUM(order_items.subtotal) as total_revenue')
+                    )
+                    ->groupBy('products.id', 'products.name', 'products.main_image', 'products.price')
+                    ->orderBy('total_revenue', 'desc')
+                    ->limit(5)
+                    ->get();
+
+                $user->top_products = $topProducts;
+
+                // Get sales by month for the last 6 months
+                $salesByMonth = [];
+                for ($i = 5; $i >= 0; $i--) {
+                    $month = now()->subMonths($i);
+                    $startDate = $month->startOfMonth()->format('Y-m-d');
+                    $endDate = $month->endOfMonth()->format('Y-m-d');
+
+                    $monthlySales = DB::table('order_items')
+                        ->join('products', 'order_items.product_id', '=', 'products.id')
+                        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                        ->where('products.producer_id', $user->producer->id)
+                        ->where('orders.status', '!=', 'cancelled')
+                        ->whereBetween('orders.created_at', [$startDate, $endDate])
+                        ->sum('order_items.subtotal');
+
+                    $salesByMonth[$month->format('M Y')] = $monthlySales;
+                }
+
+                $user->sales_by_month = $salesByMonth;
+            } catch (\Exception $e) {
+                \Log::error('Error calculating producer stats: ' . $e->getMessage());
+            }
+        }
+
+        return response()->json($user);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error showing user: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while retrieving user data'], 500);
+        }
+    }
+
+    /**
+     * Update the specified user.
+     *
+     * @param Request $request
+     * @param User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+        
+        // Validate request
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'password' => 'sometimes|string|min:8',
+            'role' => ['sometimes', 'string', Rule::in(['admin', 'producer', 'consumer', 'business_user'])],
+            'is_active' => 'sometimes|boolean',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        // Update basic user data
+        if (isset($validated['name'])) {
+            $user->name = $validated['name'];
+        }
+
+        if (isset($validated['email'])) {
+            $user->email = $validated['email'];
+        }
+
+        if (isset($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        if (isset($validated['phone'])) {
+            $user->phone = $validated['phone'];
+        }
+
+        // Ενημέρωση του is_active αν παρέχεται
+        if (isset($validated['is_active'])) {
+            $user->is_active = $validated['is_active'];
+        }
+
+        // Update role if provided
+        if (isset($validated['role']) && $validated['role'] !== $user->role) {
+            // Remove old role
+            $user->removeRole($user->role);
+
+            // Assign new role
+            $user->assignRole($validated['role']);
+            $user->role = $validated['role'];
+        }
+
+        $user->save();
+
+        return response()->json($user);
+    }
+
+    /**
+     * Remove the specified user.
+     *
+     * @param User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+        
+        // Prevent deleting the last admin
+        if ($user->hasRole('admin') && User::role('admin')->count() <= 1) {
+            return response()->json(['message' => 'Cannot delete the last admin user.'], 422);
+        }
+
+        // Delete the user
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully.']);
+    }
+
+    /**
+     * Send password reset link to the specified user.
+     *
+     * @param Request $request
+     * @param User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendPasswordResetLink(Request $request, $id)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+        
+        // Generate password reset token
+        $token = Password::createToken($user);
+
+        // Send password reset email
+        $user->sendPasswordResetNotification($token);
+
+        return response()->json(['message' => 'Password reset link sent successfully.']);
+    }
+
+    /**
+     * Change the role of a user.
+     *
+     * @param Request $request
+     * @param User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function changeRole(Request $request, $id)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id);
+        
+        // Validate request
+        $validated = $request->validate([
+            'role' => ['required', 'string', Rule::in(['admin', 'producer', 'consumer', 'business_user'])],
+        ]);
+
+        // Check if this is the last admin
+        if ($user->hasRole('admin') && $validated['role'] !== 'admin' && User::role('admin')->count() <= 1) {
+            return response()->json(['message' => 'Cannot change role of the last admin user.'], 422);
+        }
+
+        // Remove old role
+        $oldRole = $user->getRoleNames()->first();
+        $user->removeRole($oldRole);
+
+        // Assign new role
+        $user->assignRole($validated['role']);
+        $user->role = $validated['role'];
+        $user->save();
+
+        return response()->json([
+            'message' => 'User role changed successfully.',
+            'user' => $user
+        ]);
+    }
+}

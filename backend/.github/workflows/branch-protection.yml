@@ -1,0 +1,133 @@
+name: Branch Protection Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-branch-naming:
+    name: Check Branch Naming
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check Branch Name
+        run: |
+          branch_name="${{ github.head_ref }}"
+          
+          # Define valid branch patterns
+          valid_patterns=(
+            "^feature/.+"
+            "^fix/.+"
+            "^hotfix/.+"
+            "^release/.+"
+            "^docs/.+"
+            "^chore/.+"
+            "^test/.+"
+          )
+          
+          # Check if branch name matches any valid pattern
+          is_valid=false
+          for pattern in "${valid_patterns[@]}"; do
+            if [[ $branch_name =~ $pattern ]]; then
+              is_valid=true
+              break
+            fi
+          done
+          
+          if [ "$is_valid" = false ]; then
+            echo "❌ Invalid branch name: $branch_name"
+            echo "Branch names should follow the pattern: type/description"
+            echo "Valid types: feature, fix, hotfix, release, docs, chore, test"
+            exit 1
+          fi
+          
+          echo "✅ Valid branch name: $branch_name"
+
+  check-pr-title:
+    name: Check PR Title
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check PR Title Format
+        run: |
+          pr_title="${{ github.event.pull_request.title }}"
+          
+          # Check if PR title follows conventional commits
+          if ! [[ $pr_title =~ ^(feat|fix|docs|style|refactor|test|chore|build|ci|perf)(\(.+\))?:\ .+ ]]; then
+            echo "❌ Invalid PR title: $pr_title"
+            echo "PR titles should follow conventional commits format:"
+            echo "Examples:"
+            echo "  feat: add shopping cart functionality"
+            echo "  fix: resolve payment calculation error"
+            echo "  docs: update API documentation"
+            exit 1
+          fi
+          
+          echo "✅ Valid PR title: $pr_title"
+
+  check-files-changed:
+    name: Check Files Changed
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for large files
+        run: |
+          # Find files larger than 5MB
+          large_files=$(find . -type f -size +5M -not -path "./.git/*" | head -10)
+          
+          if [ -n "$large_files" ]; then
+            echo "❌ Large files detected (>5MB):"
+            echo "$large_files"
+            echo ""
+            echo "Please use Git LFS for large files or exclude them from the repository"
+            exit 1
+          fi
+          
+          echo "✅ No large files detected"
+
+      - name: Check for sensitive files
+        run: |
+          # Check for potential sensitive files
+          sensitive_patterns=(
+            "*.env"
+            "*.pem"
+            "*.key"
+            "*_rsa"
+            "*_dsa"
+            "*.p12"
+            "*.pfx"
+            "credentials.json"
+            "secret*"
+          )
+          
+          found_sensitive=false
+          for pattern in "${sensitive_patterns[@]}"; do
+            if find . -name "$pattern" -not -path "./.git/*" -not -path "./vendor/*" -not -path "./node_modules/*" | grep -q .; then
+              found_sensitive=true
+              echo "❌ Potential sensitive file found matching pattern: $pattern"
+            fi
+          done
+          
+          if [ "$found_sensitive" = true ]; then
+            echo ""
+            echo "Please ensure no sensitive files are committed"
+            exit 1
+          fi
+          
+          echo "✅ No sensitive files detected"
+
+  auto-assign:
+    name: Auto Assign Reviewers
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Auto assign reviewers
+        uses: kentaro-m/auto-assign-action@v1.2.5
+        with:
+          configuration-path: .github/auto-assign.yml

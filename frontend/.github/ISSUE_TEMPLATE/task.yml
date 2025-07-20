@@ -1,0 +1,130 @@
+name: 📋 Development Task
+description: Create a development task
+title: "[TASK] "
+labels: ["task", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Create a development task for the team. This could be refactoring, optimization, documentation, or other development work.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📋 Task Description
+      description: Describe what needs to be done
+      placeholder: Clear description of the task...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: 🔧 Task Type
+      description: What type of task is this?
+      options:
+        - Development (new code)
+        - Refactoring (improve existing code)
+        - Bug Fix (fix existing issue)
+        - Documentation (write/update docs)
+        - Testing (add/improve tests)
+        - Performance (optimize performance)
+        - Security (security improvements)
+        - Infrastructure (DevOps/deployment)
+        - Research (investigation/analysis)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: 🏗️ Module
+      description: Which part of the system does this task affect?
+      options:
+        - Frontend (React/Next.js)
+        - Backend (Laravel/PHP)
+        - Database (MySQL/Schema)
+        - Admin Panel
+        - Mobile/PWA
+        - Analytics
+        - Payments
+        - Integrations
+        - Infrastructure
+        - Documentation
+        - Testing
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: ⚡ Priority
+      description: How urgent is this task?
+      options:
+        - Critical (blocking other work)
+        - High (should be done soon)
+        - Medium (normal priority)
+        - Low (when time permits)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: 📏 Estimated Size
+      description: How long do you estimate this task will take?
+      options:
+        - XS (1-2 hours)
+        - S (1-2 days)
+        - M (3-5 days)
+        - L (1-2 weeks)
+        - XL (2+ weeks)
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: Define what "done" looks like
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical_requirements
+    attributes:
+      label: 🔧 Technical Requirements
+      description: Technical specifications or requirements
+      placeholder: Technical details, constraints, dependencies...
+
+  - type: textarea
+    id: files_affected
+    attributes:
+      label: 📁 Files/Components Affected
+      description: Which files or components will be modified?
+      placeholder: List of files or components that will be changed
+
+  - type: textarea
+    id: testing_requirements
+    attributes:
+      label: 🧪 Testing Requirements
+      description: What testing is needed for this task?
+      placeholder: Unit tests, integration tests, manual testing...
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 🔗 Dependencies
+      description: Does this task depend on other tasks or external factors?
+      placeholder: List any dependencies or blockers
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 📝 Additional Notes
+      description: Any other relevant information
+      placeholder: Additional context, links, references...

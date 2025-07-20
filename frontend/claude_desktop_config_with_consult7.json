@@ -1,0 +1,85 @@
+{
+  "mcpServers": {
+    "server-brave-search": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "BSA-5IbdMrmhPsN7VvTlSWKrSHXKMT4"
+      }
+    },
+    "consult7": {
+      "command": "uvx",
+      "args": ["consult7", "openrouter", "YOUR_OPENROUTER_API_KEY_HERE"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "server-filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/panagiotiskourkoutis/Documents"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "@anthropic-ai/mcp-github"
+      ]
+    },
+    "browse": {
+      "command": "npx",
+      "args": [
+        "@anthropic-ai/mcp-browser-browse"
+      ]
+    },
+    "terminal": {
+      "command": "npx",
+      "args": [
+        "@anthropic-ai/mcp-terminal"
+      ]
+    },
+    "desktop-commander": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@wonderwhy-er/desktop-commander",
+        "--key",
+        "96022122-2cba-414b-a7db-7536cb1c9b5e"
+      ]
+    },
+    "toolbox": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery/toolbox",
+        "--key",
+        "96022122-2cba-414b-a7db-7536cb1c9b5e",
+        "--profile",
+        "delightful-jackal-Pn1qQa"
+      ]
+    },
+    "server-sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery-ai/server-sequential-thinking",
+        "--key",
+        "96022122-2cba-414b-a7db-7536cb1c9b5e"
+      ]
+    }
+  }
+}

@@ -1,0 +1,130 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+/.nyc_output
+/test-results
+/tests/e2e/screenshots
+/tests/e2e/videos
+*.test.js
+*.spec.js
+*.test.tsx
+*.spec.tsx
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+debug-*.js
+test-*.js
+
+# env files
+.env*
+!.env.example
+!.env.template
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Production specific
+.env.production
+/backups
+*.sqlite
+*.sqlite-journal
+*.sql.gz
+migration.log
+production-setup.log
+deploy.log
+
+# Monitoring & logs
+error.log
+access.log
+/monitoring-data
+/performance-logs
+/lighthouse-reports
+
+# Claude development
+.claude/
+CLAUDE.md
+
+# Archives
+/archive
+/old
+/deprecated
+
+# Bundle analysis
+/analyze
+.next/analyze
+
+# PWA
+/public/sw.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+
+# Sentry
+.sentryclirc
+
+# Docker volumes
+/docker/volumes
+/mysql_data
+/redis_data
+
+# Uploaded files
+/public/uploads
+/storage/app/public/*
+!/storage/app/public/.gitkeep
+
+# OS files
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+.directory
+
+# Production secrets
+/secrets
+*.key
+*.crt
+*.cer
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Storybook
+/storybook-static

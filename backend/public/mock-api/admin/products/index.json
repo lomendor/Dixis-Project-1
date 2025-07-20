@@ -1,0 +1,84 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "producer_id": 1,
+      "name": "Εξαιρετικό Παρθένο Ελαιόλαδο",
+      "slug": "exairetiko-partheno-elaiolado",
+      "description": "Εξαιρετικό παρθένο ελαιόλαδο από τους ελαιώνες της Μεσσηνίας. Παράγεται με παραδοσιακές μεθόδους και έχει χαμηλή οξύτητα.",
+      "short_description": "Εξαιρετικό παρθένο ελαιόλαδο από τους ελαιώνες της Μεσσηνίας.",
+      "price": 12.50,
+      "discount_price": null,
+      "stock": 100,
+      "sku": "EL-001",
+      "weight_grams": 1000,
+      "main_image": "/images/product-placeholder.jpg",
+      "is_active": true,
+      "is_featured": true,
+      "created_at": "2023-01-01T00:00:00.000000Z",
+      "updated_at": "2023-01-01T00:00:00.000000Z",
+      "producer": {
+        "id": 1,
+        "business_name": "Ελαιώνες Καλαμάτας",
+        "user": {
+          "id": 2,
+          "name": "Γιώργος Παπαδόπουλος"
+        }
+      },
+      "categories": [
+        {
+          "id": 1,
+          "name": "Ελαιόλαδο"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "producer_id": 2,
+      "name": "Μέλι Ελάτης",
+      "slug": "meli-elatis",
+      "description": "Αγνό μέλι από τις πλαγιές του Ολύμπου, συλλεγμένο με παραδοσιακές μεθόδους.",
+      "short_description": "Αγνό μέλι από τις πλαγιές του Ολύμπου.",
+      "price": 9.80,
+      "discount_price": 8.50,
+      "stock": 50,
+      "sku": "ME-001",
+      "weight_grams": 500,
+      "main_image": "/images/product-placeholder.jpg",
+      "is_active": true,
+      "is_featured": false,
+      "created_at": "2023-01-02T00:00:00.000000Z",
+      "updated_at": "2023-01-02T00:00:00.000000Z",
+      "producer": {
+        "id": 2,
+        "business_name": "Μέλι Ολύμπου",
+        "user": {
+          "id": 3,
+          "name": "Μαρία Αντωνίου"
+        }
+      },
+      "categories": [
+        {
+          "id": 2,
+          "name": "Μέλι"
+        }
+      ]
+    }
+  ],
+  "current_page": 1,
+  "last_page": 1,
+  "per_page": 15,
+  "total": 2,
+  "stats": {
+    "total_products": 2,
+    "active_products": 2,
+    "inactive_products": 0,
+    "featured_products": 1,
+    "out_of_stock_products": 0,
+    "price_range": {
+      "min": 9.80,
+      "max": 12.50,
+      "avg": 11.15
+    }
+  }
+}
