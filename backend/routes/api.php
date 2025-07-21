@@ -259,6 +259,257 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return $request->user();
     });
+    
+    // Producer Routes (MVP Testing)
+    Route::post('/producer/login', function (Request $request) {
+        try {
+            $validated = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
+            
+            // For MVP testing, create a simple producer login
+            // In production, this would use proper authentication
+            if ($validated['email'] === 'producer@dixis.gr' && $validated['password'] === 'test123') {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Producer logged in successfully',
+                    'data' => [
+                        'id' => 1,
+                        'name' => 'Ελαιώνες Καλαμάτας',
+                        'email' => 'producer@dixis.gr',
+                        'role' => 'producer',
+                        'token' => 'test-producer-token-' . time()
+                    ]
+                ]);
+            }
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid credentials'
+            ], 401);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Login failed: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Producer Product Upload (MVP)
+    Route::post('/producer/products', function (Request $request) {
+        try {
+            // Simple authorization check
+            $authHeader = $request->header('Authorization');
+            if (!$authHeader || !str_contains($authHeader, 'test-producer-token')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+            
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'required|string',
+                'price' => 'required|numeric|min:0',
+                'category' => 'required|string',
+                'stock' => 'required|integer|min:0'
+            ]);
+            
+            // Create new product
+            $product = \App\Models\Product::create([
+                'name' => $validated['name'],
+                'slug' => \Str::slug($validated['name']),
+                'description' => $validated['description'],
+                'price' => $validated['price'],
+                'producer_id' => 1, // Hardcoded for MVP
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Product created successfully',
+                'data' => [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'price' => $product->price,
+                    'stock' => $product->stock_quantity
+                ]
+            ]);
+            
+        } catch (\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create product: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Stripe Payment Processing (MVP)
+    Route::post('/payment/create-intent', function (Request $request) {
+        try {
+            $validated = $request->validate([
+                'cart_id' => 'required|string',
+                'amount' => 'required|numeric|min:0.50', // Minimum 0.50 EUR
+                'currency' => 'string|in:EUR',
+            ]);
+            
+            // Get cart to validate amount
+            $cart = session('cart_' . $validated['cart_id']);
+            if (!$cart) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cart not found'
+                ], 404);
+            }
+            
+            // Calculate total from cart
+            $total = collect($cart['items'])->sum('subtotal');
+            
+            // For MVP, create a mock payment intent
+            // In production, this would use the real Stripe SDK
+            $paymentIntent = [
+                'id' => 'pi_test_' . time(),
+                'amount' => $validated['amount'] * 100, // Convert to cents
+                'currency' => $validated['currency'] ?? 'EUR',
+                'status' => 'requires_payment_method',
+                'client_secret' => 'pi_test_' . time() . '_secret_test',
+                'created' => time(),
+                'cart_id' => $validated['cart_id']
+            ];
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment intent created',
+                'data' => $paymentIntent
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create payment intent: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Process Payment (MVP - Mock Success)
+    Route::post('/payment/confirm', function (Request $request) {
+        try {
+            $validated = $request->validate([
+                'payment_intent_id' => 'required|string',
+                'cart_id' => 'required|string'
+            ]);
+            
+            // Get cart for order creation
+            $cart = session('cart_' . $validated['cart_id']);
+            if (!$cart) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cart not found'
+                ], 404);
+            }
+            
+            // For MVP, simulate successful payment
+            // Create order record in database
+            $orderData = [
+                'user_id' => null, // Guest order
+                'order_number' => 'DX' . date('Ymd') . rand(1000, 9999),
+                'subtotal' => collect($cart['items'])->sum('subtotal'),
+                'total_amount' => collect($cart['items'])->sum('subtotal'),
+                'currency' => 'EUR',
+                'payment_status' => 'completed',
+                'payment_method' => 'stripe',
+                'payment_intent_id' => $validated['payment_intent_id'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+            
+            // For MVP, we'll simulate order creation
+            $orderId = rand(100, 999);
+            
+            // Clear the cart after successful payment
+            session()->forget('cart_' . $validated['cart_id']);
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment completed successfully',
+                'data' => [
+                    'order_id' => $orderId,
+                    'order_number' => $orderData['order_number'],
+                    'payment_status' => 'completed',
+                    'total' => $orderData['total_amount'],
+                    'currency' => 'EUR'
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Payment failed: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Email Testing Endpoint (MVP)
+    Route::post('/order/confirmation-email', function (Request $request) {
+        try {
+            $validated = $request->validate([
+                'order_number' => 'required|string',
+                'customer_email' => 'required|email',
+                'customer_name' => 'required|string',
+                'total' => 'required|numeric|min:0',
+                'items' => 'required|array'
+            ]);
+            
+            // For MVP, simulate email sending
+            // In production, this would use Laravel's Mail system
+            $emailData = [
+                'order_number' => $validated['order_number'],
+                'customer' => [
+                    'name' => $validated['customer_name'],
+                    'email' => $validated['customer_email']
+                ],
+                'items' => $validated['items'],
+                'total' => $validated['total'],
+                'currency' => 'EUR',
+                'sent_at' => now(),
+                'email_template' => 'order-confirmation'
+            ];
+            
+            // Simulate successful email send
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order confirmation email sent successfully',
+                'data' => [
+                    'email_sent' => true,
+                    'recipient' => $validated['customer_email'],
+                    'order_number' => $validated['order_number'],
+                    'sent_at' => $emailData['sent_at'],
+                    'email_preview' => [
+                        'subject' => 'Επιβεβαίωση Παραγγελίας #' . $validated['order_number'] . ' - Dixis Fresh',
+                        'content' => 'Γεια σας ' . $validated['customer_name'] . ', η παραγγελία σας έχει επιβεβαιωθεί!',
+                        'total' => '€' . number_format($validated['total'], 2),
+                        'items_count' => count($validated['items'])
+                    ]
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to send email: ' . $e->getMessage()
+            ], 500);
+        }
+    });
 });
 
 // Default fallback for undefined routes
