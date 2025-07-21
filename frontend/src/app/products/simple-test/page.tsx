@@ -7,7 +7,7 @@ export default async function SimpleProductsPage() {
   try {
     // Try to fetch directly from Laravel backend
     const response = await fetch(buildApiUrl('products?per_page=10'), {
-      cache: 'no-store'
+      next: { revalidate: 60 } // Revalidate every minute
     });
     
     if (response.ok) {

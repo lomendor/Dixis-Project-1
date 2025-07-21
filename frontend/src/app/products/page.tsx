@@ -30,7 +30,7 @@ export default async function ServerProductsPage() {
   try {
     // Fetch directly from Laravel backend with longer timeout
     const response = await fetch(buildApiUrl('api/v1/products?per_page=100'), {
-      cache: 'no-store',
+      next: { revalidate: 60 },
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

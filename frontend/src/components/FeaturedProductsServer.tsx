@@ -11,7 +11,7 @@ interface Product {
 
 async function getFeaturedProducts(): Promise<Product[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const response = await fetch(`${apiUrl}/api/v1/products?is_featured=1&per_page=3`, {
       next: { revalidate: 300 } // Revalidate every 5 minutes instead of no-store
     });

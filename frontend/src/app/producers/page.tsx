@@ -20,7 +20,7 @@ export default async function ServerProducersPage() {
   try {
     // Server-side fetch - no CORS issues, same pattern as products page
     const response = await fetch(buildApiUrl('api/v1/producers'), {
-      cache: 'no-store',
+      next: { revalidate: 60 },
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

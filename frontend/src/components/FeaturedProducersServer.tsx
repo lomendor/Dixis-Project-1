@@ -15,7 +15,7 @@ interface Producer {
 
 async function getFeaturedProducers(): Promise<Producer[]> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const response = await fetch(`${apiUrl}/api/v1/producers?per_page=6`, {
       next: { revalidate: 300 } // Revalidate every 5 minutes
     });
