@@ -22,19 +22,66 @@ Route::get('/health', [HealthCheckController::class, 'index']);
 // Public API endpoints (Version 1)
 Route::prefix('v1')->group(function () {
     
-    // Products (Direct database queries for MVP testing)
-    Route::get('/products', function () {
+    // Products with relationship filtering
+    Route::get('/products', function (Request $request) {
         try {
-            $products = \App\Models\Product::select('id', 'name', 'slug', 'price', 'description')
-                ->limit(10)
-                ->get();
+            $perPage = $request->get('per_page', 10);
+            $categoryId = $request->get('category_id');
+            $producerId = $request->get('producer_id');
+            $isFeatured = $request->get('is_featured');
+            
+            $query = \App\Models\Product::with(['category', 'producer'])
+                ->select('id', 'name', 'slug', 'price', 'discount_price', 'description', 'category_id', 'producer_id', 'is_featured')
+                ->where('is_active', true);
+                
+            // Apply filters
+            if ($categoryId) {
+                $query->where('category_id', $categoryId);
+            }
+            
+            if ($producerId) {
+                $query->where('producer_id', $producerId);
+            }
+            
+            if ($isFeatured) {
+                $query->where('is_featured', true);
+            }
+            
+            $products = $query->limit($perPage)->get();
+            
+            // Transform for frontend
+            $transformedProducts = $products->map(function($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'price' => (float) $product->price,
+                    'discount_price' => $product->discount_price ? (float) $product->discount_price : null,
+                    'description' => $product->description,
+                    'is_featured' => (bool) $product->is_featured,
+                    'category' => $product->category ? [
+                        'id' => $product->category->id,
+                        'name' => $product->category->name,
+                        'slug' => $product->category->slug
+                    ] : null,
+                    'producer' => $product->producer ? [
+                        'id' => $product->producer->id,
+                        'business_name' => $product->producer->business_name
+                    ] : null
+                ];
+            });
                 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Greek products from PostgreSQL',
-                'data' => $products,
-                'count' => $products->count(),
-                'total' => \App\Models\Product::count()
+                'message' => 'Products with relationships retrieved successfully',
+                'data' => $transformedProducts,
+                'count' => $transformedProducts->count(),
+                'total' => \App\Models\Product::where('is_active', true)->count(),
+                'filters' => [
+                    'category_id' => $categoryId,
+                    'producer_id' => $producerId,
+                    'is_featured' => $isFeatured
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -255,11 +302,82 @@ Route::prefix('v1')->group(function () {
         }
     });
     
+    // Categories API
+    Route::get('/categories', function (Request $request) {
+        try {
+            $categories = \App\Models\Category::select('id', 'name', 'slug', 'description')
+                ->withCount('products')
+                ->orderBy('name')
+                ->get();
+                
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Categories retrieved successfully',
+                'data' => $categories,
+                'count' => $categories->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve categories: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+
     // Basic user info
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return $request->user();
     });
     
+    // Producers API (GET endpoint for frontend)
+    Route::get('/producers', function (Request $request) {
+        try {
+            $perPage = $request->get('per_page', 10);
+            $isFeatured = $request->get('is_featured');
+            
+            $query = \App\Models\Producer::with('products')
+                ->select('id', 'business_name', 'description', 'bio', 'verified', 'rating', 'city', 'region')
+                ->where('verified', true); // Only show verified producers
+                
+            if ($isFeatured) {
+                // For featured, we can use rating or manually mark some as featured
+                $query->whereNotNull('rating')->orderBy('rating', 'desc');
+            }
+            
+            $producers = $query->limit($perPage)->get();
+            
+            // Transform for frontend compatibility
+            $transformedProducers = $producers->map(function($producer) {
+                return [
+                    'id' => $producer->id,
+                    'business_name' => $producer->business_name,
+                    'slug' => 'producer-' . $producer->id, // Generate slug
+                    'bio' => $producer->bio ?? $producer->description ?? 'Παραγωγός premium προϊόντων με παράδοση και ποιότητα.',
+                    'location' => $producer->city ?? $producer->region ?? 'Ελλάδα',
+                    'profile_image' => null, // Can be added later
+                    'verification_status' => $producer->verified ? 'verified' : 'pending',
+                    'rating' => $producer->rating ? (float) $producer->rating : 4.8,
+                    'total_products' => $producer->products->where('is_active', true)->count()
+                ];
+            });
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Producers retrieved successfully',
+                'data' => $transformedProducers,
+                'count' => $transformedProducers->count(),
+                'total' => \App\Models\Producer::where('verified', true)->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve producers: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+
     // Producer Routes (MVP Testing)
     Route::post('/producer/login', function (Request $request) {
         try {
