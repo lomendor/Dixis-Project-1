@@ -159,15 +159,15 @@ export default async function ServerProductsPage() {
                         {product.discount_price ? (
                           <div>
                             <span className="text-xl font-bold text-green-600">
-                              €{product.discount_price.toFixed(2)}
+                              €{Number(product.discount_price).toFixed(2)}
                             </span>
                             <span className="text-sm text-gray-500 line-through ml-2">
-                              €{product.price.toFixed(2)}
+                              €{Number(product.price).toFixed(2)}
                             </span>
                           </div>
                         ) : (
                           <span className="text-xl font-bold text-green-600">
-                            €{product.price.toFixed(2)}
+                            €{Number(product.price).toFixed(2)}
                           </span>
                         )}
                       </div>

@@ -66,6 +66,8 @@ class Product extends Model
         'is_limited_edition' => 'boolean',
         'allow_wishlist_notifications' => 'boolean',
         'attributes' => 'array', // Cast attributes JSON column to array
+        'price' => 'float',
+        'discount_price' => 'float',
     ];
 
     /**
