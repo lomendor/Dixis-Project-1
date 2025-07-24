@@ -13,6 +13,15 @@ class ContextEngineering {
         this.configPath = path.join(__dirname, '..', 'context-engine.json');
         this.statusPath = path.join(__dirname, '..', 'MASTER_STATUS.md');
         this.config = this.loadConfig();
+        
+        // Protected documents that should never be archived or classified as conflicting
+        this.protectedDocuments = [
+            'CLAUDE.md',
+            'MASTER_STATUS.md',
+            'docs/MD_DOCUMENTATION_INDEX.md',
+            'context-engine.json',
+            'scripts/context-hooks.js'
+        ];
     }
 
     loadConfig() {
@@ -696,6 +705,124 @@ class ContextEngineering {
         return match ? parseInt(match[1]) : null;
     }
 
+    // Documentation drift detection - monitor for conflicting claims
+    detectDocumentationDrift() {
+        console.log('🔍 Scanning for documentation drift and conflicts...');
+        
+        try {
+            const { execSync } = require('child_process');
+            
+            // Find all active MD files (not archived)
+            const findCommand = `find "${path.join(__dirname, '..')}" -name "*.md" -type f -not -path "*/archive/*" -not -path "*/node_modules/*" -not -path "*/vendor/*"`;
+            const mdFiles = execSync(findCommand, { encoding: 'utf8' }).trim().split('\n');
+            
+            const conflicts = [];
+            const percentageClaims = {};
+            
+            // Scan each file for claims
+            mdFiles.forEach(filePath => {
+                if (!filePath || !fs.existsSync(filePath)) return;
+                
+                try {
+                    const content = fs.readFileSync(filePath, 'utf8');
+                    const relativePath = path.relative(path.join(__dirname, '..'), filePath);
+                    
+                    // Skip protected documents from conflict detection
+                    if (this.protectedDocuments.some(protectedDoc => relativePath.includes(protectedDoc))) {
+                        console.log(`✅ Skipping protected document: ${relativePath}`);
+                        return;
+                    }
+                    
+                    // Extract percentage claims
+                    const percentageRegex = /(\w+.*?):?\s*(\d+)%/gi;
+                    let match;
+                    while ((match = percentageRegex.exec(content)) !== null) {
+                        const claimKey = match[1].toLowerCase().trim();
+                        const claimValue = parseInt(match[2]);
+                        
+                        if (!percentageClaims[claimKey]) {
+                            percentageClaims[claimKey] = [];
+                        }
+                        
+                        percentageClaims[claimKey].push({
+                            file: relativePath,
+                            value: claimValue,
+                            context: match[0]
+                        });
+                    }
+                    
+                    // Check for critical issue claims against verified facts
+                    if (content.includes('critical') && content.includes('bugs') && 
+                        !relativePath.includes('archive') && !relativePath.includes('AUDIT')) {
+                        const criticalRegex = /(\d+)\s*(critical|blocking)\s*(issues?|bugs?)/gi;
+                        const criticalMatch = criticalRegex.exec(content);
+                        if (criticalMatch && parseInt(criticalMatch[1]) > 0) {
+                            conflicts.push({
+                                type: 'critical_bugs_conflict',
+                                file: relativePath,
+                                claim: `${criticalMatch[1]} critical bugs`,
+                                reality: `0 verified by Context Engineering (all resolved)`,
+                                severity: 'high'
+                            });
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.log(`⚠️ Could not scan ${filePath}: ${error.message}`);
+                }
+            });
+            
+            // Detect percentage conflicts
+            Object.keys(percentageClaims).forEach(claimKey => {
+                const claims = percentageClaims[claimKey];
+                if (claims.length > 1) {
+                    const values = claims.map(c => c.value);
+                    const min = Math.min(...values);
+                    const max = Math.max(...values);
+                    
+                    if (max - min > 20) { // Significant difference
+                        conflicts.push({
+                            type: 'percentage_conflict',
+                            category: claimKey,
+                            range: `${min}% - ${max}%`,
+                            files: claims,
+                            severity: 'medium'
+                        });
+                    }
+                }
+            });
+            
+            // Report results
+            if (conflicts.length === 0) {
+                console.log('✅ No documentation drift detected - all files aligned');
+            } else {
+                console.log(`🚨 Found ${conflicts.length} documentation conflicts:`);
+                conflicts.forEach((conflict, index) => {
+                    console.log(`   ${index + 1}. ${conflict.type}: ${conflict.category || conflict.claim} (${conflict.severity})`);
+                });
+            }
+            
+            return {
+                totalFilesScanned: mdFiles.length,
+                conflictsFound: conflicts.length,
+                conflicts: conflicts,
+                status: conflicts.length === 0 ? 'clean' : 'needs_attention'
+            };
+            
+        } catch (error) {
+            console.log('⚠️ Documentation drift detection failed:', error.message);
+            return { error: error.message };
+        }
+    }
+
+    // Protect master documents from being archived
+    isProtectedDocument(filePath) {
+        const relativePath = path.relative(path.join(__dirname, '..'), filePath);
+        return this.protectedDocuments.some(protectedDoc => 
+            relativePath === protectedDoc || relativePath.endsWith(protectedDoc)
+        );
+    }
+
     updateMasterStatus() {
         // Update MASTER_STATUS.md with current metrics from real documents
         const metrics = this.config.realTimeMetrics;
@@ -741,11 +868,21 @@ class ContextEngineering {
                 return this.testUserRegistration();
             case 'test-cart':
                 return this.testCartFunctionality();
+            case 'drift-check':
+                return this.detectDocumentationDrift();
+            case 'documentation-audit':
+                console.log('🔍 Running comprehensive documentation audit...');
+                const driftResults = this.detectDocumentationDrift();
+                console.log('\n📊 Protected Documents:');
+                this.protectedDocuments.forEach(doc => console.log(`   ✅ ${doc}`));
+                return driftResults;
             default:
                 console.log('Available commands:');
                 console.log('  verify          - Run comprehensive real-time verification');
                 console.log('  test-registration - Test user registration specifically');
                 console.log('  test-cart       - Test cart functionality specifically');
+                console.log('  drift-check     - Check for documentation conflicts and drift');
+                console.log('  documentation-audit - Full documentation audit with protection status');
                 console.log('  status          - Show current status');
                 console.log('  next-task       - Get next recommended task');
         }

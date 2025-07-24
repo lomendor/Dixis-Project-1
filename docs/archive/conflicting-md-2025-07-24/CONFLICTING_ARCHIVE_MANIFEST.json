@@ -1,0 +1,63 @@
+{
+  "category": "conflicting",
+  "timestamp": "2025-07-24T21:13:27.727Z",
+  "purpose": "Archived conflicting MD files from Context Engineering audit",
+  "totalFiles": 9,
+  "files": [
+    {
+      "original": "frontend/CONSULT7_SETUP_GUIDE.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/frontend/CONSULT7_SETUP_GUIDE.md",
+      "reason": "Unverified enterprise completion claim: **Safely integrate €300K+ enterprise features**; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 10
+    },
+    {
+      "original": "frontend/GITHUB_STRATEGY_EXECUTIVE_SUMMARY.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/frontend/GITHUB_STRATEGY_EXECUTIVE_SUMMARY.md",
+      "reason": "Unverified enterprise completion claim: **Enterprise capabilities** unlocked and available; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 0
+    },
+    {
+      "original": "frontend/COMPREHENSIVE_PROJECT_ANALYSIS.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/frontend/COMPREHENSIVE_PROJECT_ANALYSIS.md",
+      "reason": "Unverified enterprise completion claim: Enterprise-grade deployment infrastructure; Unverified enterprise completion claim: Enterprise-grade security and admin systems; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€500K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 15
+    },
+    {
+      "original": "frontend/FEATURE_CONSOLIDATION_PLAN.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/frontend/FEATURE_CONSOLIDATION_PLAN.md",
+      "reason": "Unverified enterprise completion claim: Enterprise-grade admin system; High business value claim (€300K) needs verification; High business value claim (€500K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 10
+    },
+    {
+      "original": "frontend/GITHUB_ORGANIZATION_COMPLETE.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/frontend/GITHUB_ORGANIZATION_COMPLETE.md",
+      "reason": "Unverified enterprise completion claim: Enterprise integration roadmap created; Unverified enterprise completion claim: **Δημιουργεί roadmap** για unlocking €355K+ σε enterprise features; Claims 5 critical issues, but Context Engineering verified 0; High business value claim (€300K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 20
+    },
+    {
+      "original": "docs/COMPREHENSIVE_ANALYSIS_2025-07-23.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/docs/COMPREHENSIVE_ANALYSIS_2025-07-23.md",
+      "reason": "Claims 4 critical issues, but Context Engineering verified 0; Contains outdated references or old timestamps",
+      "truthScore": 45
+    },
+    {
+      "original": "docs/CRITICAL_ISSUES.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/docs/CRITICAL_ISSUES.md",
+      "reason": "Suspicious high percentage: 320% for Return**; Claims 4 critical issues, but Context Engineering verified 0; Contains outdated references or old timestamps",
+      "truthScore": 35
+    },
+    {
+      "original": "MD_AUDIT_REPORT.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/MD_AUDIT_REPORT.md",
+      "reason": "Suspicious high percentage: 100% for Issues**: Suspicious high percentage; Suspicious high percentage: 100% for Issues**: Suspicious high percentage; Suspicious high percentage: 100% for for Database Schema**, Suspicious high percentage; Suspicious high percentage: 100% for for Database Layer, Suspicious high percentage; Suspicious high percentage: 320% for Critical Issues**: Suspicious high percentage; Claims 3 critical issues, but Context Engineering verified 0; Claims 5 critical issues, but Context Engineering verified 0; Claims 5 critical issues, but Context Engineering verified 0; Claims 4 critical issues, but Context Engineering verified 0; Claims 4 critical issues, but Context Engineering verified 0; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€500K) needs verification; High business value claim (€300K) needs verification; High business value claim (€500K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification",
+      "truthScore": 0,
+      "method": "copy-delete"
+    },
+    {
+      "original": "CLAUDE.md",
+      "archived": "docs/archive/conflicting-md-2025-07-24/CLAUDE.md",
+      "reason": "High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 35
+    }
+  ]
+}

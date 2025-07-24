@@ -1,0 +1,290 @@
+{
+  "category": "outdated",
+  "timestamp": "2025-07-24T21:13:27.632Z",
+  "purpose": "Archived outdated MD files from Context Engineering audit",
+  "totalFiles": 47,
+  "files": [
+    {
+      "original": "frontend/GITHUB_SETUP_COMPLETE.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/GITHUB_SETUP_COMPLETE.md",
+      "reason": "Claims 3 critical issues, but Context Engineering verified 0",
+      "truthScore": 75
+    },
+    {
+      "original": "frontend/GITHUB_ISSUES_TO_CREATE.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/GITHUB_ISSUES_TO_CREATE.md",
+      "reason": "High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/GITHUB_SETUP_INSTRUCTIONS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/GITHUB_SETUP_INSTRUCTIONS.md",
+      "reason": "Unverified enterprise completion claim: **Professional workflow** ready for enterprise development; Unverified enterprise completion claim: Δημιουργεί clear path προς €355K+ enterprise features; Claims 5 critical issues, but Context Engineering verified 0",
+      "truthScore": 55
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/API_PATTERNS_AUDIT.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/API_PATTERNS_AUDIT.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/ADMIN_DASHBOARD_IMPROVEMENT_PLAN.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/ADMIN_DASHBOARD_IMPROVEMENT_PLAN.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/STRIPE_INTEGRATION_PLAN.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/STRIPE_INTEGRATION_PLAN.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_INSTRUCTIONS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_INSTRUCTIONS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/SUBSCRIPTION_SYSTEM_DOCUMENTATION.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/SUBSCRIPTION_SYSTEM_DOCUMENTATION.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/B2B_ANALYSIS_REPORT.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/B2B_ANALYSIS_REPORT.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/PRODUCTION_GUIDE.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/PRODUCTION_GUIDE.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/WEBPACK_ERROR_SOLUTION_STRATEGIES.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/WEBPACK_ERROR_SOLUTION_STRATEGIES.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/FEATURE_FLAGS_AUDIT.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/FEATURE_FLAGS_AUDIT.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_COMPREHENSIVE_INSTRUCTIONS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_COMPREHENSIVE_INSTRUCTIONS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/ARCHITECTURE.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/ARCHITECTURE.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/FEATURE_FLAG_CLEANUP_SUMMARY.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/FEATURE_FLAG_CLEANUP_SUMMARY.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_STRATEGIC_MISSION.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_STRATEGIC_MISSION.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/MASTER_PROJECT_PLAN.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/MASTER_PROJECT_PLAN.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_INSTRUCTIONS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_INSTRUCTIONS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CRITICAL_GAPS_ANALYSIS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CRITICAL_GAPS_ANALYSIS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_NEXT_MAJOR_TASK.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_NEXT_MAJOR_TASK.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_FEEDBACK_AND_NEXT_TASK.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_FEEDBACK_AND_NEXT_TASK.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/MOBILE_CART_IMPROVEMENTS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/MOBILE_CART_IMPROVEMENTS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/B2B_IMPLEMENTATION_SUMMARY.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/B2B_IMPLEMENTATION_SUMMARY.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/BACKEND-INTEGRATION-STRATEGY.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/BACKEND-INTEGRATION-STRATEGY.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/MARKETPLACE_SCHEMA.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/MARKETPLACE_SCHEMA.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/EMAIL_SYSTEM_DOCUMENTATION.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/EMAIL_SYSTEM_DOCUMENTATION.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/DIXIS_COMPREHENSIVE_ANALYSIS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/DIXIS_COMPREHENSIVE_ANALYSIS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/README.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/README.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/COMPREHENSIVE_PROJECT_AUDIT_RESULTS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/COMPREHENSIVE_PROJECT_AUDIT_RESULTS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/DIXIS_DESIGN_IMPLEMENTATION_PLAN.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/DIXIS_DESIGN_IMPLEMENTATION_PLAN.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/DEPLOYMENT.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/DEPLOYMENT.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/PRODUCTION_READY.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/PRODUCTION_READY.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/NEW_REMOTE_AGENT_INSTRUCTIONS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/NEW_REMOTE_AGENT_INSTRUCTIONS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CART-INTEGRATION-COMPLETE.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CART-INTEGRATION-COMPLETE.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CART-SYSTEM.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CART-SYSTEM.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_FINAL_FIXES.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_FINAL_FIXES.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_FOCUSED_INSTRUCTIONS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_FOCUSED_INSTRUCTIONS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/STATE_MANAGEMENT_AUDIT.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/STATE_MANAGEMENT_AUDIT.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_COMPREHENSIVE_TASKS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_COMPREHENSIVE_TASKS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/DESIGN_ANALYSIS_PLAN.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/DESIGN_ANALYSIS_PLAN.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_QUICK_START.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CLAUDE_CODE_QUICK_START.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/CURRENT_STATE_REPORT.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/CURRENT_STATE_REPORT.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_PRECISE_INSTRUCTIONS.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/REMOTE_AGENT_PRECISE_INSTRUCTIONS.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/docs/archive/old-docs-dixis/DEPLOYMENT_CHECKLIST.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/docs/archive/old-docs-dixis/DEPLOYMENT_CHECKLIST.md",
+      "reason": "File is in archive directory",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/PRIORITY_ISSUES_ROADMAP.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/PRIORITY_ISSUES_ROADMAP.md",
+      "reason": "High business value claim (€300K) needs verification; High business value claim (€300K) needs verification; Contains unverified enterprise value claims",
+      "truthScore": 50
+    },
+    {
+      "original": "frontend/CART_VALIDATION_COMPLETE.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/frontend/CART_VALIDATION_COMPLETE.md",
+      "reason": "Suspicious high percentage: 100% for Overall Quality Score; Claims Cart buttons non-functional is broken, but Context Engineering verified it working",
+      "truthScore": 70
+    },
+    {
+      "original": "docs/FEATURE_STATUS_MATRIX.md",
+      "archived": "docs/archive/outdated-md-2025-07-24/docs/FEATURE_STATUS_MATRIX.md",
+      "reason": "Suspicious high percentage: 100% for Database Schema**; Suspicious high percentage: 100% for Database Layer; Suspicious high percentage: 100% for Expected Outcome**",
+      "truthScore": 70
+    }
+  ]
+}

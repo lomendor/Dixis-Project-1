@@ -1,0 +1,481 @@
+{
+  "timestamp": "2025-07-24T21:13:27.165Z",
+  "purpose": "Pre-audit backup of all MD files",
+  "totalFiles": 79,
+  "files": [
+    {
+      "original": "frontend/CONSOLE_ERRORS_FIXED_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/CONSOLE_ERRORS_FIXED_REPORT.md",
+      "size": 4761,
+      "lastModified": "2025-07-21T10:29:00.044Z"
+    },
+    {
+      "original": "frontend/TEST_RESULTS_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/TEST_RESULTS_REPORT.md",
+      "size": 6055,
+      "lastModified": "2025-07-21T10:29:22.976Z"
+    },
+    {
+      "original": "frontend/GITHUB_SETUP_COMPLETE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/GITHUB_SETUP_COMPLETE.md",
+      "size": 4253,
+      "lastModified": "2025-07-21T10:29:00.059Z"
+    },
+    {
+      "original": "frontend/BUSINESS_ROADMAP_SUMMARY.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/BUSINESS_ROADMAP_SUMMARY.md",
+      "size": 8167,
+      "lastModified": "2025-07-21T10:29:00.042Z"
+    },
+    {
+      "original": "frontend/LOCAL_ENVIRONMENT_STATUS_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/LOCAL_ENVIRONMENT_STATUS_REPORT.md",
+      "size": 4551,
+      "lastModified": "2025-07-21T10:29:00.061Z"
+    },
+    {
+      "original": "frontend/CONSULT7_SETUP_GUIDE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/CONSULT7_SETUP_GUIDE.md",
+      "size": 5846,
+      "lastModified": "2025-07-21T10:29:00.044Z"
+    },
+    {
+      "original": "frontend/GITHUB_STRATEGY_EXECUTIVE_SUMMARY.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/GITHUB_STRATEGY_EXECUTIVE_SUMMARY.md",
+      "size": 7472,
+      "lastModified": "2025-07-21T10:29:00.060Z"
+    },
+    {
+      "original": "frontend/tests/e2e/README.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/tests/e2e/README.md",
+      "size": 8610,
+      "lastModified": "2025-07-21T10:29:22.979Z"
+    },
+    {
+      "original": "frontend/PRODUCTION_DEPLOYMENT_GUIDE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/PRODUCTION_DEPLOYMENT_GUIDE.md",
+      "size": 11595,
+      "lastModified": "2025-07-21T10:29:22.796Z"
+    },
+    {
+      "original": "frontend/GITHUB_ISSUES_TO_CREATE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/GITHUB_ISSUES_TO_CREATE.md",
+      "size": 15382,
+      "lastModified": "2025-07-21T10:29:00.059Z"
+    },
+    {
+      "original": "frontend/GITHUB_SETUP_INSTRUCTIONS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/GITHUB_SETUP_INSTRUCTIONS.md",
+      "size": 7104,
+      "lastModified": "2025-07-21T10:29:00.060Z"
+    },
+    {
+      "original": "frontend/docs/PRODUCTION_DATABASE_MIGRATION_PLAN.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/docs/PRODUCTION_DATABASE_MIGRATION_PLAN.md",
+      "size": 9873,
+      "lastModified": "2025-07-21T10:29:00.057Z"
+    },
+    {
+      "original": "frontend/README.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/README.md",
+      "size": 6666,
+      "lastModified": "2025-07-21T10:29:22.817Z"
+    },
+    {
+      "original": "frontend/B2B_INTEGRATION_PROGRESS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/B2B_INTEGRATION_PROGRESS.md",
+      "size": 6872,
+      "lastModified": "2025-07-21T10:29:00.041Z"
+    },
+    {
+      "original": "frontend/PRIORITY_ISSUES_ROADMAP.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/PRIORITY_ISSUES_ROADMAP.md",
+      "size": 7362,
+      "lastModified": "2025-07-21T10:29:22.795Z"
+    },
+    {
+      "original": "frontend/COMPREHENSIVE_PROJECT_ANALYSIS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/COMPREHENSIVE_PROJECT_ANALYSIS.md",
+      "size": 8984,
+      "lastModified": "2025-07-21T10:29:00.044Z"
+    },
+    {
+      "original": "frontend/FEATURE_CONSOLIDATION_PLAN.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/FEATURE_CONSOLIDATION_PLAN.md",
+      "size": 10669,
+      "lastModified": "2025-07-21T10:29:00.058Z"
+    },
+    {
+      "original": "frontend/.github/PROJECT_STRUCTURE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/.github/PROJECT_STRUCTURE.md",
+      "size": 4366,
+      "lastModified": "2025-07-21T09:07:31.370Z"
+    },
+    {
+      "original": "frontend/.github/pull_request_template.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/.github/pull_request_template.md",
+      "size": 2268,
+      "lastModified": "2025-07-21T09:07:31.370Z"
+    },
+    {
+      "original": "frontend/.github/ISSUE_TEMPLATE/feature_request.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/.github/ISSUE_TEMPLATE/feature_request.md",
+      "size": 1170,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "frontend/.github/ISSUE_TEMPLATE/bug_report.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/.github/ISSUE_TEMPLATE/bug_report.md",
+      "size": 1015,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "frontend/.github/ISSUE_TEMPLATE/task.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/.github/ISSUE_TEMPLATE/task.md",
+      "size": 1045,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "frontend/.github/ISSUES_TO_CREATE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/.github/ISSUES_TO_CREATE.md",
+      "size": 5620,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "frontend/GITHUB_ORGANIZATION_COMPLETE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/GITHUB_ORGANIZATION_COMPLETE.md",
+      "size": 7182,
+      "lastModified": "2025-07-21T10:29:00.059Z"
+    },
+    {
+      "original": "frontend/WEBPACK_MODULE_LOADING_ERROR_FIXED_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/WEBPACK_MODULE_LOADING_ERROR_FIXED_REPORT.md",
+      "size": 6860,
+      "lastModified": "2025-07-21T10:29:22.981Z"
+    },
+    {
+      "original": "frontend/PRODUCTION_DEPLOYMENT_READY_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/PRODUCTION_DEPLOYMENT_READY_REPORT.md",
+      "size": 6076,
+      "lastModified": "2025-07-21T10:29:22.798Z"
+    },
+    {
+      "original": "frontend/CLAUDE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/CLAUDE.md",
+      "size": 589,
+      "lastModified": "2025-07-22T17:05:40.982Z"
+    },
+    {
+      "original": "frontend/CART_VALIDATION_COMPLETE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/CART_VALIDATION_COMPLETE.md",
+      "size": 3187,
+      "lastModified": "2025-07-21T10:29:00.042Z"
+    },
+    {
+      "original": "frontend/GITHUB_CLEANUP_STRATEGY.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/GITHUB_CLEANUP_STRATEGY.md",
+      "size": 3252,
+      "lastModified": "2025-07-21T10:29:00.058Z"
+    },
+    {
+      "original": "frontend/src/lib/design-system/README.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/frontend/src/lib/design-system/README.md",
+      "size": 6680,
+      "lastModified": "2025-07-21T10:29:22.973Z"
+    },
+    {
+      "original": "CONFIGURATION_GUIDE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/CONFIGURATION_GUIDE.md",
+      "size": 4952,
+      "lastModified": "2025-07-23T21:39:36.903Z"
+    },
+    {
+      "original": "MASTER_STATUS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/MASTER_STATUS.md",
+      "size": 9196,
+      "lastModified": "2025-07-24T19:11:10.102Z"
+    },
+    {
+      "original": "GREEK_PAYMENT_RESEARCH.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/GREEK_PAYMENT_RESEARCH.md",
+      "size": 3231,
+      "lastModified": "2025-07-24T17:45:39.339Z"
+    },
+    {
+      "original": "backend/BACKEND_OPTIMIZATION_IMPLEMENTATION_LOG.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/BACKEND_OPTIMIZATION_IMPLEMENTATION_LOG.md",
+      "size": 9753,
+      "lastModified": "2025-07-21T10:28:51.425Z"
+    },
+    {
+      "original": "backend/PRODUCT_CRUD_TEST_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/PRODUCT_CRUD_TEST_REPORT.md",
+      "size": 8381,
+      "lastModified": "2025-07-21T10:28:51.490Z"
+    },
+    {
+      "original": "backend/MANUAL_ASSIGNMENT_GUIDE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/MANUAL_ASSIGNMENT_GUIDE.md",
+      "size": 2780,
+      "lastModified": "2025-07-21T10:28:51.488Z"
+    },
+    {
+      "original": "backend/tests/README.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/tests/README.md",
+      "size": 6238,
+      "lastModified": "2025-07-21T10:28:51.517Z"
+    },
+    {
+      "original": "backend/docs/API_DOCUMENTATION.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/docs/API_DOCUMENTATION.md",
+      "size": 9381,
+      "lastModified": "2025-07-21T10:28:51.485Z"
+    },
+    {
+      "original": "backend/docs/API_TESTING.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/docs/API_TESTING.md",
+      "size": 11599,
+      "lastModified": "2025-07-21T10:28:51.486Z"
+    },
+    {
+      "original": "backend/docs/DEPLOYMENT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/docs/DEPLOYMENT.md",
+      "size": 11764,
+      "lastModified": "2025-07-21T10:28:51.486Z"
+    },
+    {
+      "original": "backend/docs/GIT_WORKFLOW.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/docs/GIT_WORKFLOW.md",
+      "size": 5111,
+      "lastModified": "2025-07-21T10:28:51.487Z"
+    },
+    {
+      "original": "backend/README.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/README.md",
+      "size": 4109,
+      "lastModified": "2025-07-21T10:28:51.495Z"
+    },
+    {
+      "original": "backend/SETUP_NEW_FEATURES.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/backend/SETUP_NEW_FEATURES.md",
+      "size": 7689,
+      "lastModified": "2025-07-21T10:28:51.500Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/INVENTORY_MANAGEMENT_PART1.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/INVENTORY_MANAGEMENT_PART1.md",
+      "size": 20180,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/XERO_BRIDGE_PART1.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/XERO_BRIDGE_PART1.md",
+      "size": 17757,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/ENTERPRISE_INTEGRATION_PLAN.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/ENTERPRISE_INTEGRATION_PLAN.md",
+      "size": 15401,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/SHIPPING_PART1_CORE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/SHIPPING_PART1_CORE.md",
+      "size": 14596,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/INTEGRATION_FOUNDATION_SETUP.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/INTEGRATION_FOUNDATION_SETUP.md",
+      "size": 17576,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/MARKETING_AUTOMATION_PART1.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/MARKETING_AUTOMATION_PART1.md",
+      "size": 3201,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/CRM_INTEGRATION_PART1.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/CRM_INTEGRATION_PART1.md",
+      "size": 1987,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/INVENTORY_PART2_PROVIDERS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/INVENTORY_PART2_PROVIDERS.md",
+      "size": 20357,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/INVENTORY_PART3_DASHBOARD.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/INVENTORY_PART3_DASHBOARD.md",
+      "size": 13324,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/README.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/README.md",
+      "size": 3808,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/QUICKBOOKS_INTEGRATION_IMPLEMENTATION.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/QUICKBOOKS_INTEGRATION_IMPLEMENTATION.md",
+      "size": 30741,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/XERO_BRIDGE_PART3.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/XERO_BRIDGE_PART3.md",
+      "size": 25333,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/QUICKBOOKS_JOBS_AND_EVENTS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/QUICKBOOKS_JOBS_AND_EVENTS.md",
+      "size": 25138,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/XERO_BRIDGE_PART2.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/XERO_BRIDGE_PART2.md",
+      "size": 22380,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/SHIPPING_PART3_FINAL.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/SHIPPING_PART3_FINAL.md",
+      "size": 10717,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/enterprise-integrations/SHIPPING_PART2_CARRIERS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/enterprise-integrations/SHIPPING_PART2_CARRIERS.md",
+      "size": 16016,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/COMPREHENSIVE_ANALYSIS_2025-07-23.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/COMPREHENSIVE_ANALYSIS_2025-07-23.md",
+      "size": 22043,
+      "lastModified": "2025-07-23T18:06:42.013Z"
+    },
+    {
+      "original": "docs/CRITICAL_ISSUES.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/CRITICAL_ISSUES.md",
+      "size": 13283,
+      "lastModified": "2025-07-23T18:02:21.566Z"
+    },
+    {
+      "original": "docs/project-management/QUALITY_GATES_IMPLEMENTATION.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/project-management/QUALITY_GATES_IMPLEMENTATION.md",
+      "size": 7230,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "docs/project-management/PROJECT_BOARD_SETUP.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/project-management/PROJECT_BOARD_SETUP.md",
+      "size": 6733,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "docs/project-management/BRANCH_CLEANUP_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/project-management/BRANCH_CLEANUP_REPORT.md",
+      "size": 3130,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/project-management/INITIAL_GITHUB_ISSUES.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/project-management/INITIAL_GITHUB_ISSUES.md",
+      "size": 7071,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "docs/MIGRATION_COMPLETE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/MIGRATION_COMPLETE.md",
+      "size": 4671,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/FEATURE_STATUS_MATRIX.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/FEATURE_STATUS_MATRIX.md",
+      "size": 11351,
+      "lastModified": "2025-07-23T18:01:02.967Z"
+    },
+    {
+      "original": "docs/requirements/PRODUCT_REQUIREMENTS.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/requirements/PRODUCT_REQUIREMENTS.md",
+      "size": 96709,
+      "lastModified": "2025-07-21T09:07:31.369Z"
+    },
+    {
+      "original": "docs/hotjar-setup-guide.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/hotjar-setup-guide.md",
+      "size": 8132,
+      "lastModified": "2025-07-21T09:07:31.368Z"
+    },
+    {
+      "original": "docs/QUICKBOOKS_INTEGRATION_IMPLEMENTATION.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/QUICKBOOKS_INTEGRATION_IMPLEMENTATION.md",
+      "size": 9087,
+      "lastModified": "2025-07-21T09:07:31.367Z"
+    },
+    {
+      "original": "docs/SYSTEM_ARCHITECTURE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/docs/SYSTEM_ARCHITECTURE.md",
+      "size": 24169,
+      "lastModified": "2025-07-23T18:04:33.384Z"
+    },
+    {
+      "original": "CONTEXT_DASHBOARD.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/CONTEXT_DASHBOARD.md",
+      "size": 5021,
+      "lastModified": "2025-07-24T17:55:28.760Z"
+    },
+    {
+      "original": "README.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/README.md",
+      "size": 2683,
+      "lastModified": "2025-07-23T11:38:50.386Z"
+    },
+    {
+      "original": "GREEK_SHIPPING_RESEARCH.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/GREEK_SHIPPING_RESEARCH.md",
+      "size": 4673,
+      "lastModified": "2025-07-24T17:47:13.394Z"
+    },
+    {
+      "original": "DEPLOYMENT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/DEPLOYMENT.md",
+      "size": 13205,
+      "lastModified": "2025-07-24T10:09:19.011Z"
+    },
+    {
+      "original": "deployment/DEPLOYMENT-CHECKLIST.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/deployment/DEPLOYMENT-CHECKLIST.md",
+      "size": 4558,
+      "lastModified": "2025-07-21T19:44:59.154Z"
+    },
+    {
+      "original": "MD_AUDIT_REPORT.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/MD_AUDIT_REPORT.md",
+      "size": 29831,
+      "lastModified": "2025-07-24T21:13:26.886Z"
+    },
+    {
+      "original": "GITHUB_SECRETS_SETUP.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/GITHUB_SECRETS_SETUP.md",
+      "size": 2674,
+      "lastModified": "2025-07-23T12:21:53.666Z"
+    },
+    {
+      "original": "CLAUDE.md",
+      "backup": "docs/archive/pre-audit-backup-2025-07-24/CLAUDE.md",
+      "size": 11632,
+      "lastModified": "2025-07-24T18:15:12.083Z"
+    }
+  ]
+}
