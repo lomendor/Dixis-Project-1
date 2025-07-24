@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // Try to authenticate with Laravel backend
     try {
-      const backendResponse = await fetch('http://localhost:8000/api/auth/login', {
+      const backendResponse = await fetch('http://localhost:8000/api/v1/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

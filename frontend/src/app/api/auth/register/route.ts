@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Try to register with Laravel backend
     try {
-      const backendResponse = await fetch(buildApiUrl('api/auth/register'), {
+      const backendResponse = await fetch(buildApiUrl('api/v1/register'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
           email,
           password,
           password_confirmation,
-          user_type: userType
+          role: userType
         }),
       });
 
