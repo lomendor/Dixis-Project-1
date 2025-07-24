@@ -1,0 +1,108 @@
+{
+  "contextEngineering": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-07-24T17:45:00Z",
+    "status": "active",
+    "businessFocus": "Greek Traditional Products Marketplace Launch"
+  },
+  "currentSession": {
+    "startTime": "2025-07-24T17:00:00Z",
+    "focusArea": "Greek Market Integration",
+    "activeWorkstreams": [
+      "payment_integration",
+      "shipping_setup",
+      "producer_onboarding"
+    ],
+    "completedToday": [
+      "platform_functionality_verification",
+      "documentation_consolidation",
+      "greek_market_research"
+    ]
+  },
+  "intelligentTasks": {
+    "high_priority": [
+      {
+        "id": "viva_wallet_integration",
+        "title": "Implement Viva Wallet Payment Gateway",
+        "businessImpact": 85,
+        "timeEstimate": "4-6 hours",
+        "dependencies": [],
+        "blockers": [],
+        "greekMarketCritical": true,
+        "revenueImpact": "€1000+/month",
+        "status": "ready_to_start"
+      },
+      {
+        "id": "greek_shipping_setup",
+        "title": "Configure AfterSalesPro Greek Courier Integration",
+        "businessImpact": 80,
+        "timeEstimate": "3-4 hours",
+        "dependencies": [],
+        "blockers": [],
+        "greekMarketCritical": true,
+        "revenueImpact": "Required for any sales",
+        "status": "ready_to_start"
+      }
+    ],
+    "medium_priority": [
+      {
+        "id": "vat_configuration",
+        "title": "Implement Greek VAT System (24%/13%)",
+        "businessImpact": 70,
+        "timeEstimate": "2-3 hours",
+        "dependencies": [
+          "viva_wallet_integration"
+        ],
+        "blockers": [],
+        "greekMarketCritical": true,
+        "revenueImpact": "Legal compliance",
+        "status": "pending"
+      },
+      {
+        "id": "producer_dashboard_testing",
+        "title": "Test Producer Dashboard with Real Greek Producers",
+        "businessImpact": 65,
+        "timeEstimate": "2 hours",
+        "dependencies": [],
+        "blockers": [
+          "need_producer_contacts"
+        ],
+        "greekMarketCritical": false,
+        "revenueImpact": "Long-term growth",
+        "status": "blocked"
+      }
+    ]
+  },
+  "automationHooks": {
+    "onTaskComplete": {
+      "updateProgress": true,
+      "updateDocumentation": true,
+      "runTests": true,
+      "notifyNextTask": true
+    },
+    "onBusinessMetricChange": {
+      "recalculatePriorities": true,
+      "updateTimelines": true,
+      "alertCriticalChanges": true
+    },
+    "onGreekMarketProgress": {
+      "updateReadinessScore": true,
+      "validateCompliance": true,
+      "checkRevenuePotential": true
+    }
+  },
+  "realTimeMetrics": {
+    "platformFunctionality": 90,
+    "greekMarketReadiness": 60,
+    "revenueGenerationCapability": 25,
+    "producerEcosystemHealth": 60,
+    "technicalDebt": 15,
+    "lastCalculated": "2025-07-24T17:45:00Z"
+  },
+  "nextRecommendedAction": {
+    "task": "viva_wallet_integration",
+    "reasoning": "Highest business impact (100) + Greek market critical + €1000+/month",
+    "estimatedValue": "€1000+/month",
+    "urgency": "high"
+  }
+}
