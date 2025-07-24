@@ -23,6 +23,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\OptimizedProductController;
+use App\Http\Controllers\Api\ProducerAnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +103,10 @@ Route::prefix('v1')->group(function () {
     Route::put('/cart/{cartId}/items/{itemId}', [CartController::class, 'updateItem']); // Update cart item
     Route::delete('/cart/{cartId}/items/{itemId}', [CartController::class, 'removeItem']); // Remove item from cart
     Route::delete('/cart/{cartId}/clear', [CartController::class, 'clearCart']); // Clear cart
+
+    // Producer Analytics (Public for testing)
+    Route::get('/producer/analytics', [ProducerAnalyticsController::class, 'analytics']);
+    Route::get('/test/analytics', [ProducerAnalyticsController::class, 'analytics']);
 
     // Recommendations Routes
     Route::prefix('recommendations')->group(function () {
@@ -248,6 +253,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/profile', [ProducerRegistrationController::class, 'profile']);
             Route::put('/profile', [ProducerRegistrationController::class, 'updateProfile']);
             Route::get('/dashboard/stats', [ProducerRegistrationController::class, 'dashboardStats']);
+            Route::get('/analytics', [ProducerAnalyticsController::class, 'analytics']);
         });
         
         // Admin Analytics Routes

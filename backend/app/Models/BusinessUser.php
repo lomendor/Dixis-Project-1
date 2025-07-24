@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\BelongsToTenant;
+// use App\Traits\BelongsToTenant; // Disabled for MVP - multi-tenancy not needed yet
 
 class BusinessUser extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use HasFactory, SoftDeletes; // , BelongsToTenant disabled for MVP
 
     protected $fillable = [
         'tenant_id',

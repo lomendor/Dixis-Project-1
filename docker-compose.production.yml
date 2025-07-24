@@ -1,0 +1,319 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: dixis-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dixis_production
+      POSTGRES_USER: dixis_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dixis_secure_password_2024}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - dixis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dixis_user -d dixis_production"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Laravel Backend Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+      args:
+        - APP_ENV=production
+    container_name: dixis-backend
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend/storage:/var/www/storage
+      - ./backend/bootstrap/cache:/var/www/bootstrap/cache
+      - ./uploads:/var/www/public/uploads
+      - ./logs/backend:/var/www/storage/logs
+    networks:
+      - dixis-network
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://api.dixis.io
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=dixis_production
+      - DB_USERNAME=dixis_user
+      - DB_PASSWORD=${DB_PASSWORD:-dixis_secure_password_2024}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_secure_password}
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Queue Worker
+  queue:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+      args:
+        - APP_ENV=production
+    container_name: dixis-queue
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend/storage:/var/www/storage
+      - ./logs/queue:/var/www/storage/logs
+    networks:
+      - dixis-network
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=dixis_production
+      - DB_USERNAME=dixis_user
+      - DB_PASSWORD=${DB_PASSWORD:-dixis_secure_password_2024}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_secure_password}
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+
+  # Task Scheduler
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+      args:
+        - APP_ENV=production
+    container_name: dixis-scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend/storage:/var/www/storage
+      - ./logs/scheduler:/var/www/storage/logs
+    networks:
+      - dixis-network
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_DATABASE=dixis_production
+      - DB_USERNAME=dixis_user
+      - DB_PASSWORD=${DB_PASSWORD:-dixis_secure_password_2024}
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_secure_password}
+    command: php artisan schedule:work
+
+  # Next.js Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.production
+      target: runner
+    container_name: dixis-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_API_URL=https://api.dixis.io
+      - NEXTAUTH_URL=https://dixis.io
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-your-secret-key}
+    volumes:
+      - ./logs/frontend:/app/logs
+      - ./uploads:/app/uploads
+    networks:
+      - dixis-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis Cache & Session Store
+  redis:
+    image: redis:7-alpine
+    container_name: dixis-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - dixis-network
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD:-redis_secure_password}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: dixis-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+      - ./uploads:/var/www/uploads:ro
+    networks:
+      - dixis-network
+    depends_on:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dixis-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - dixis-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dixis-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - dixis-network
+    depends_on:
+      - prometheus
+
+  # Log Aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: dixis-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - dixis-network
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # Log Shipping
+  promtail:
+    image: grafana/promtail:latest
+    container_name: dixis-promtail
+    restart: unless-stopped
+    volumes:
+      - ./logs:/var/log/dixis:ro
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dixis-network
+    depends_on:
+      - loki
+    command: -config.file=/etc/promtail/config.yml
+
+  # Backup Service
+  backup:
+    image: postgres:15-alpine
+    container_name: dixis-backup
+    restart: "no"
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    networks:
+      - dixis-network
+    depends_on:
+      - postgres
+    environment:
+      - PGHOST=postgres
+      - PGDATABASE=dixis_production
+      - PGUSER=dixis_user
+      - PGPASSWORD=${DB_PASSWORD:-dixis_secure_password_2024}
+    command: ["sh", "/backup.sh"]
+    profiles:
+      - backup
+
+networks:
+  dixis-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+
+# Health check and monitoring
+# Use: docker-compose -f docker-compose.production.yml ps
+# Use: docker-compose -f docker-compose.production.yml logs -f [service]

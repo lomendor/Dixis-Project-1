@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\HealthCheckController;
+use App\Http\Controllers\Api\ProducerAnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -628,6 +629,9 @@ Route::prefix('v1')->group(function () {
             ], 500);
         }
     });
+    
+    // Producer Analytics API (MVP)
+    Route::get('/producer/analytics', [ProducerAnalyticsController::class, 'analytics']);
 });
 
 // Default fallback for undefined routes
