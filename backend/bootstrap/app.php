@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api-full.php', // Using full API with all features
+        api: __DIR__.'/../routes/api.php', // Using clean API with Greek market integration
         apiPrefix: 'api', // Standard API prefix
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
