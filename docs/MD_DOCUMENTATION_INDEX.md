@@ -11,10 +11,10 @@
 
 ### **Primary Master**
 - **[CLAUDE.md](../CLAUDE.md)** 🎯
-  - **Purpose**: Complete enterprise platform context and guidance
-  - **Status**: ✅ Verified master document (95% enterprise platform confirmed)
-  - **Scope**: Full project context, enterprise features, business strategy
-  - **Authority**: Primary source for all project decisions
+  - **Purpose**: Streamlined workflow hub and quick reference (69 lines)
+  - **Status**: ✅ Optimized for daily workflow efficiency
+  - **Scope**: Essential commands, navigation hub, core principles
+  - **Authority**: Primary entry point for all development work
 
 ### **Secondary Master**  
 - **[MASTER_STATUS.md](../MASTER_STATUS.md)** 📊
@@ -34,9 +34,10 @@
   - **Features**: Real-time metrics, task prioritization, Greek market focus
 
 - **[scripts/context-hooks.js](../scripts/context-hooks.js)** 🔧
-  - **Purpose**: Automation engine and workflow management
-  - **Status**: ✅ Advanced automation with real-time verification
-  - **Features**: Platform testing, truth verification, business metrics calculation
+  - **Purpose**: Intelligent automation engine and workflow management
+  - **Status**: ✅ Enhanced with 9+ smart workflow commands
+  - **Features**: Work session management, smart commits, Greek market intelligence
+  - **New Commands**: work-start, suggest-next, greek-readiness, smart-commit, health-monitor
 
 ### **Context Monitoring**
 - **[CONTEXT_DASHBOARD.md](../CONTEXT_DASHBOARD.md)** 📈
@@ -64,6 +65,35 @@
   - **Purpose**: Greek market setup and deployment configuration
   - **Status**: ✅ Ready for implementation
   - **Scope**: VAT rates, payment gateways, shipping zones
+
+---
+
+## 🏗️ **SPECIALIZED DOCUMENTATION MODULES**
+
+### **Enterprise Platform Documentation**
+- **[ENTERPRISE_FEATURES.md](ENTERPRISE_FEATURES.md)** 🏢
+  - **Purpose**: Complete enterprise feature specifications
+  - **Status**: ✅ Comprehensive B2B, QuickBooks, ML, PWA documentation
+  - **Scope**: €300K+ development value, enterprise capabilities
+  - **Authority**: Primary source for enterprise features
+
+- **[GREEK_MARKET_STRATEGY.md](GREEK_MARKET_STRATEGY.md)** 🇬🇷
+  - **Purpose**: Greek market integration and revenue strategy
+  - **Status**: ✅ Complete market analysis and implementation plan
+  - **Scope**: Payment, shipping, VAT, B2B penetration
+  - **Authority**: Greek market launch playbook
+
+- **[TECHNICAL_ARCHITECTURE.md](TECHNICAL_ARCHITECTURE.md)** 🏗️
+  - **Purpose**: System architecture and technical specifications
+  - **Status**: ✅ Complete technical documentation
+  - **Scope**: Stack, database, API, deployment, security
+  - **Authority**: Technical implementation reference
+
+- **[DEVELOPMENT_WORKFLOW.md](DEVELOPMENT_WORKFLOW.md)** 🔧
+  - **Purpose**: Development process and engineering guide
+  - **Status**: ✅ Complete workflow documentation
+  - **Scope**: Git workflow, testing, deployment, best practices
+  - **Authority**: Engineering process standard
 
 ---
 
