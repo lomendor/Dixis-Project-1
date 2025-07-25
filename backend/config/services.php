@@ -49,4 +49,21 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'viva_wallet' => [
+        'client_id' => env('VIVA_WALLET_CLIENT_ID'),
+        'client_secret' => env('VIVA_WALLET_CLIENT_SECRET'),
+        'merchant_id' => env('VIVA_WALLET_MERCHANT_ID'),
+        'api_key' => env('VIVA_WALLET_API_KEY'),
+        'source_code' => env('VIVA_WALLET_SOURCE_CODE'),
+        'webhook_secret' => env('VIVA_WALLET_WEBHOOK_SECRET'),
+        'sandbox' => env('VIVA_WALLET_SANDBOX', true),
+    ],
+
+    'aftersales_pro' => [
+        'api_key' => env('AFTERSALES_PRO_API_KEY'),
+        'api_secret' => env('AFTERSALES_PRO_API_SECRET'),
+        'webhook_secret' => env('AFTERSALES_PRO_WEBHOOK_SECRET'),
+        'sandbox' => env('AFTERSALES_PRO_SANDBOX', true),
+    ],
+
 ];

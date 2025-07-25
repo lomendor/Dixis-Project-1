@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\VivaWalletService;
 use Illuminate\Support\Facades\Log;
 use Stripe\Exception\ApiErrorException;
 use Stripe\PaymentIntent;
@@ -44,6 +45,8 @@ class PaymentService
         switch ($paymentMethod) {
             case 'stripe':
                 return $this->processStripePayment($payment, $paymentData);
+            case 'viva_wallet':
+                return $this->processVivaWalletPayment($payment, $paymentData);
             case 'paypal':
                 return $this->processPayPalPayment($payment, $paymentData);
             case 'bank_transfer':
@@ -123,6 +126,60 @@ class PaymentService
             $payment->status = 'failed';
             $payment->details = array_merge($payment->details ?? [], [
                 'error' => $e->getMessage(),
+            ]);
+            $payment->save();
+            
+            throw $e;
+        }
+    }
+    
+    /**
+     * Process a Viva Wallet payment (Greek payment gateway).
+     *
+     * @param Payment $payment
+     * @param array $paymentData
+     * @return Payment
+     */
+    protected function processVivaWalletPayment(Payment $payment, array $paymentData): Payment
+    {
+        try {
+            $vivaWalletService = app(VivaWalletService::class);
+            
+            // Create payment order with Viva Wallet
+            $result = $vivaWalletService->createPaymentOrder($payment->order, $paymentData);
+            
+            // Update payment with Viva Wallet order code and payment URL
+            $payment->transaction_id = $result['order_code'];
+            $payment->details = array_merge($payment->details ?? [], [
+                'order_code' => $result['order_code'],
+                'payment_url' => $result['payment_url'],
+                'max_installments' => $result['max_installments'],
+                'expires_at' => $result['expires_at'],
+                'viva_created_at' => now()->toISOString()
+            ]);
+            $payment->status = 'pending';
+            $payment->save();
+            
+            Log::info('Viva Wallet payment initiated', [
+                'payment_id' => $payment->id,
+                'order_id' => $payment->order_id,
+                'order_code' => $result['order_code']
+            ]);
+            
+            return $payment;
+            
+        } catch (\Exception $e) {
+            Log::error('Viva Wallet payment processing error: ' . $e->getMessage(), [
+                'payment_id' => $payment->id,
+                'order_id' => $payment->order_id,
+                'error' => $e->getMessage(),
+            ]);
+            
+            // Update payment status to failed
+            $payment->status = 'failed';
+            $payment->details = array_merge($payment->details ?? [], [
+                'error' => $e->getMessage(),
+                'failed_at' => now()->toISOString()
             ]);
             $payment->save();
             

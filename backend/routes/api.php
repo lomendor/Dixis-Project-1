@@ -632,6 +632,62 @@ Route::prefix('v1')->group(function () {
     
     // Producer Analytics API (MVP)
     Route::get('/producer/analytics', [ProducerAnalyticsController::class, 'analytics']);
+    
+    // Greek Market Payment Integration (Viva Wallet)
+    Route::prefix('payments/greek')->group(function () {
+        // Get available payment methods for Greek market
+        Route::get('/methods', [App\Http\Controllers\Api\PaymentController::class, 'getGreekPaymentMethods']);
+        
+        // Create Viva Wallet payment
+        Route::post('/viva-wallet/create', [App\Http\Controllers\Api\PaymentController::class, 'createVivaWalletPayment']);
+        
+        // Handle Viva Wallet payment completion callback
+        Route::get('/viva-wallet/callback', [App\Http\Controllers\Api\PaymentController::class, 'vivaWalletCallback']);
+        Route::post('/viva-wallet/callback', [App\Http\Controllers\Api\PaymentController::class, 'vivaWalletCallback']);
+    });
+    
+    // Greek Market Shipping Integration (AfterSalesPro)
+    Route::prefix('shipping/greek')->group(function () {
+        // Calculate shipping rates
+        Route::post('/rates', [App\Http\Controllers\Api\ShippingController::class, 'calculateRates']);
+        
+        // Get shipping zones and postcodes
+        Route::get('/zones', [App\Http\Controllers\Api\ShippingController::class, 'getShippingZones']);
+        
+        // Get available carriers
+        Route::get('/carriers', [App\Http\Controllers\Api\ShippingController::class, 'getCarriers']);
+        
+        // Track shipment
+        Route::get('/track', [App\Http\Controllers\Api\ShippingController::class, 'trackShipment']);
+    });
+    
+    // Greek Market VAT & Tax Integration
+    Route::prefix('vat/greek')->group(function () {
+        // Get VAT rates summary
+        Route::get('/rates', [App\Http\Controllers\Api\VATController::class, 'getVATRates']);
+        
+        // Calculate product VAT
+        Route::post('/product', [App\Http\Controllers\Api\VATController::class, 'calculateProductVAT']);
+        
+        // Calculate cart VAT
+        Route::post('/cart', [App\Http\Controllers\Api\VATController::class, 'calculateCartVAT']);
+        
+        // Get order VAT calculation
+        Route::get('/order', [App\Http\Controllers\Api\VATController::class, 'getOrderVAT']);
+        
+        // Generate VAT invoice data
+        Route::post('/invoice', [App\Http\Controllers\Api\VATController::class, 'generateInvoiceData']);
+        
+        // Check if postcode is Greek island (affects VAT rate)
+        Route::post('/postcode-check', [App\Http\Controllers\Api\VATController::class, 'checkIslandPostcode']);
+    });
+});
+
+// Webhook routes (outside authentication - Viva Wallet webhooks)
+Route::prefix('webhooks')->group(function () {
+    // Viva Wallet webhook endpoint
+    Route::post('/viva-wallet', [App\Http\Controllers\Api\PaymentController::class, 'vivaWalletWebhook'])
+        ->name('webhooks.viva-wallet');
 });
 
 // Default fallback for undefined routes

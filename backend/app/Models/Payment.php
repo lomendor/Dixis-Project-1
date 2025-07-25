@@ -17,13 +17,17 @@ class Payment extends Model
      */
     protected $fillable = [
         'order_id',
+        'user_id',
         'transaction_id',
         'stripe_payment_intent_id',
         'status',
         'payment_gateway',
+        'payment_method',
         'amount',
         'currency',
         'stripe_data',
+        'details',
+        'payment_date',
     ];
 
     /**
@@ -34,6 +38,8 @@ class Payment extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'stripe_data' => 'array',
+        'details' => 'array',
+        'payment_date' => 'datetime',
     ];
 
     /**
