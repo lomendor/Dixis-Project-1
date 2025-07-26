@@ -72,6 +72,12 @@ export default function ModernCartDrawer() {
 
   // Debug logging
   React.useEffect(() => {
+    console.log('🎭 ModernCartDrawer state changed:', {
+      isOpen,
+      itemCount,
+      cartItems: cart?.items?.length || 0,
+      isMobile
+    })
     logger.info('🎭 ModernCartDrawer render:', {
       cart,
       itemCount,

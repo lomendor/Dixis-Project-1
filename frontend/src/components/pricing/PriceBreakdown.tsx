@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { InformationCircleIcon, CurrencyEuroIcon } from '@heroicons/react/24/outline';
+import { calculatePrice, formatPrice } from '@/lib/utils/priceCalculator';
 
 interface PriceBreakdownProps {
   producerPrice: number;
@@ -20,14 +21,20 @@ export const PriceBreakdown: React.FC<PriceBreakdownProps> = ({
   className = '',
   size = 'md'
 }) => {
-  // Calculate all price components
-  const commission = producerPrice * (commissionRate / 100);
-  const priceBeforeVat = producerPrice + commission;
-  const vat = priceBeforeVat * (vatRate / 100);
-  const finalPrice = priceBeforeVat + vat;
-
-  // Producer earnings (what they actually receive)
-  const producerEarnings = producerPrice;
+  // Calculate all price components using centralized calculator
+  const priceBreakdown = calculatePrice({
+    producerPrice,
+    commissionRate,
+    vatRate
+  });
+  
+  const {
+    commission,
+    priceBeforeVat,
+    vat,
+    finalPrice,
+    producerPrice: producerEarnings
+  } = priceBreakdown;
 
   const sizeClasses = {
     sm: {
@@ -166,7 +173,7 @@ export const PriceBreakdown: React.FC<PriceBreakdownProps> = ({
               </p>
               {commissionRate === 12 && (
                 <p className="text-blue-700 text-xs mt-1">
-                  Οικονομία: έως €{((commission - (producerPrice * 0.07))).toFixed(2)} ανά προϊόν!
+                  Οικονομία: έως €{(commission - calculatePrice({ producerPrice, commissionRate: 7, vatRate }).commission).toFixed(2)} ανά προϊόν!
                 </p>
               )}
             </div>
@@ -183,10 +190,11 @@ export const CompactPriceBreakdown: React.FC<{
   commissionRate: number;
   vatRate?: number;
 }> = ({ producerPrice, commissionRate, vatRate = 24 }) => {
-  const commission = producerPrice * (commissionRate / 100);
-  const priceBeforeVat = producerPrice + commission;
-  const vat = priceBeforeVat * (vatRate / 100);
-  const finalPrice = priceBeforeVat + vat;
+  const { commission, priceBeforeVat, vat, finalPrice } = calculatePrice({
+    producerPrice,
+    commissionRate,
+    vatRate
+  });
 
   return (
     <div className="text-sm space-y-1">
@@ -226,10 +234,11 @@ export const PriceCalculator: React.FC<{
   const handlePriceChange = (value: number) => {
     setProducerPrice(value);
     
-    const commission = value * (commissionRate / 100);
-    const priceBeforeVat = value + commission;
-    const vat = priceBeforeVat * 0.24;
-    const finalPrice = priceBeforeVat + vat;
+    const { commission, priceBeforeVat, vat, finalPrice } = calculatePrice({
+      producerPrice: value,
+      commissionRate,
+      vatRate: 24
+    });
 
     onPriceChange?.({
       producerPrice: value,

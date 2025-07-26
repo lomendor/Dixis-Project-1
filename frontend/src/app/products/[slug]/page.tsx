@@ -13,6 +13,7 @@ import ModernCartButton from '@/components/cart/ModernCartButton';
 import { useCartActions } from '@/stores/cartStore';
 import { formatPrice } from '@/lib/utils/formatters';
 import { TransparentPricing } from '@/components/pricing/TransparentPricing';
+import { calculateProducerPriceFromFinal } from '@/lib/utils/priceCalculator';
 import { idToString } from '@/lib/api/client/apiTypes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -345,7 +346,7 @@ export default function ProductDetailPage() {
                 product={{
                   id: parseInt(idToString(typedProduct.id)),
                   name: typedProduct.name,
-                  producer_price: typedProduct.producerPrice || (productData.currentPrice / 1.24 / 1.12), // Estimate if not available
+                  producer_price: typedProduct.producerPrice || calculateProducerPriceFromFinal(productData.currentPrice).producerPrice,
                   producer: {
                     business_name: typedProduct.producerName || 'Παραγωγός',
                     commission_rate: typedProduct.commissionRate || 12
@@ -429,7 +430,7 @@ export default function ProductDetailPage() {
                 
                 <div className="text-right">
                   <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium mb-2">
-                    Λαμβάνει {formatPrice((typedProduct.producerPrice || (productData.currentPrice / 1.24 / 1.12)), 'EUR')}
+                    Λαμβάνει {formatPrice((typedProduct.producerPrice || calculateProducerPriceFromFinal(productData.currentPrice).producerPrice), 'EUR')}
                   </div>
                   <div className="text-xs text-gray-600">
                     {(typedProduct.commissionRate || 12) < 12 ? 'Premium Συνεργάτης' : 'Βασική Συνεργασία'}
@@ -764,7 +765,7 @@ export default function ProductDetailPage() {
             product={{
               id: parseInt(idToString(typedProduct.id)),
               name: typedProduct.name,
-              producer_price: typedProduct.producerPrice || (productData.currentPrice / 1.24 / 1.12),
+              producer_price: typedProduct.producerPrice || calculateProducerPriceFromFinal(productData.currentPrice).producerPrice,
               producer: {
                 business_name: typedProduct.producerName || 'Παραγωγός',
                 commission_rate: typedProduct.commissionRate || 12
@@ -862,7 +863,7 @@ export default function ProductDetailPage() {
                 product={{
                   id: parseInt(idToString(typedProduct.id)),
                   name: typedProduct.name,
-                  producer_price: typedProduct.producerPrice || (productData.currentPrice / 1.24 / 1.12),
+                  producer_price: typedProduct.producerPrice || calculateProducerPriceFromFinal(productData.currentPrice).producerPrice,
                   producer: {
                     business_name: typedProduct.producerName || 'Παραγωγός',
                     commission_rate: typedProduct.commissionRate || 12

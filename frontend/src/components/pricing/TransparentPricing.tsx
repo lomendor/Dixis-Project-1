@@ -3,6 +3,7 @@
 import React from 'react';
 import { PriceBreakdown, CompactPriceBreakdown } from './PriceBreakdown';
 import { InformationCircleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { calculatePrice } from '@/lib/utils/priceCalculator';
 
 interface Product {
   id: number;
@@ -42,10 +43,11 @@ export const TransparentPricing: React.FC<TransparentPricingProps> = ({
   }
 
   if (variant === 'card') {
-    const commission = producerPrice * (commissionRate / 100);
-    const priceBeforeVat = producerPrice + commission;
-    const vat = priceBeforeVat * 0.24;
-    const finalPrice = priceBeforeVat + vat;
+    const { commission, priceBeforeVat, vat, finalPrice } = calculatePrice({
+      producerPrice,
+      commissionRate,
+      vatRate: 24
+    });
 
     return (
       <div className={`${className}`}>
@@ -184,11 +186,12 @@ export const ProductPriceCard: React.FC<{
   const commissionRate = product?.producer?.commission_rate || 12;
   const producerPrice = product?.producer_price || 0;
   
-  // Calculate all prices safely
-  const commission = producerPrice * (commissionRate / 100);
-  const priceBeforeVat = producerPrice + commission;
-  const vat = priceBeforeVat * 0.24;
-  const finalPrice = priceBeforeVat + vat;
+  // Calculate all prices safely using centralized calculator
+  const { commission, priceBeforeVat, vat, finalPrice } = calculatePrice({
+    producerPrice,
+    commissionRate,
+    vatRate: 24
+  });
 
   return (
     <div className="space-y-2">

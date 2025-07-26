@@ -302,88 +302,15 @@ export const productDetailQueryOptions = (id: string | number) => {
           context: { feature: 'products', action: 'getProduct', id: String(id) }
         });
         
-        // FALLBACK: Try to provide mock data for the specific slug
-        try {
-          const { mockProducts } = await import('@/lib/api/models/product/mockData');
-          let mockProduct = mockProducts.find(p => p.slug === String(id));
-          
-          // If no specific mock found, create a generic one for the slug
-          if (!mockProduct) {
-            // Create a friendly name from slug
-            const friendlyName = String(id)
-              .split('-')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            
-            mockProduct = {
-              id: `mock-${String(id).replace(/-/g, '')}`,
-              name: friendlyName,
-              slug: String(id),
-              price: 4.50,
-              salePrice: undefined,
-              image: '/placeholder-product.svg',
-              description: 'Εξαιρετικό προϊόν υψηλής ποιότητας από Ελληνικούς παραγωγούς. Φρέσκο και νόστιμο.',
-              shortDescription: `Αυθεντικό ελληνικό προϊόν ${friendlyName.toLowerCase()}`,
-              stock: 100,
-              featured: true,
-              producerId: 1,
-              producerName: 'Ελαιώνες Καλαμάτας',
-              producerSlug: 'elaiones-kalamatas',
-              producerPrice: 3.15,
-              commissionRate: 12,
-              isOrganic: true,
-              isLocal: true,
-              isVegan: false,
-              isGlutenFree: false,
-              rating: 4.5,
-              reviewCount: 12,
-              categories: [],
-              tags: [],
-              unit: 'τεμάχιο',
-              weight: 500,
-              sku: `MOCK-${String(id).replace(/-/g, '').toUpperCase()}`,
-              origin: 'Ελλάδα'
-            };
-          }
-          
-          logger.info('🔄 Using mock product fallback', {
-            data: { slug: String(id), foundMock: !!mockProduct, generated: !mockProducts.find(p => p.slug === String(id)) },
-            context: { feature: 'products', action: 'mockFallback' }
-          });
-          
-          // Transform mock data to match expected Product type
-          return {
-            id: parseInt(String(mockProduct.id).replace(/[^0-9]/g, '') || '999'),
-            name: mockProduct.name,
-            slug: mockProduct.slug,
-            price: mockProduct.price,
-            salePrice: mockProduct.salePrice,
-            image: mockProduct.image,
-            description: mockProduct.description || 'Εξαιρετικό προϊόν υψηλής ποιότητας από Ελληνικούς παραγωγούς.',
-            shortDescription: mockProduct.shortDescription,
-            stock: mockProduct.stock || 100,
-            featured: mockProduct.featured || false,
-            producerId: mockProduct.producerId || 1,
-            producerName: mockProduct.producerName || 'Τοπικός Παραγωγός',
-            producerSlug: mockProduct.producerSlug || 'topikos-paragogos',
-            producerPrice: mockProduct.producerPrice || (mockProduct.price * 0.7),
-            commissionRate: mockProduct.commissionRate || 12,
-            isOrganic: mockProduct.isOrganic || true,
-            isLocal: mockProduct.isLocal || true,
-            isVegan: mockProduct.isVegan || false,
-            isGlutenFree: mockProduct.isGlutenFree || false,
-            rating: mockProduct.rating || 4.5,
-            reviewCount: mockProduct.reviewCount || 12,
-            categories: mockProduct.categories || [],
-            tags: mockProduct.tags || [],
-            unit: mockProduct.unit || 'τεμάχιο',
-            weight: mockProduct.weight || 500,
-            sku: mockProduct.sku || `MOCK-${String(id).replace(/-/g, '').toUpperCase()}`,
-            origin: mockProduct.origin || 'Ελλάδα'
-          };
-        } catch (mockError) {
-          logger.error('Mock fallback also failed:', toError(mockError), errorToContext(mockError));
-        }
+        // NO MOCK FALLBACK - Force use of real backend data only
+        logger.error('❌ Product API failed - no fallback available:', {
+          data: { 
+            error: toError(error),
+            slug: String(id),
+            endpoint: isSlug ? UNIFIED_ENDPOINTS.PRODUCTS.BY_SLUG(id) : UNIFIED_ENDPOINTS.PRODUCTS.DETAIL(id)
+          },
+          context: { feature: 'products', action: 'getProduct', id: String(id) }
+        });
         
         throw error; // Re-throw original error if no fallback available
       }

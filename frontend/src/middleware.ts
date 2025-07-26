@@ -14,7 +14,7 @@ const securityHeaders = {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https: http:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://www.google-analytics.com http://147.93.126.235:8000",
+    "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://www.google-analytics.com http://localhost:8000 http://127.0.0.1:8000 http://147.93.126.235:8000",
     "frame-src 'self' https://js.stripe.com https://checkout.stripe.com",
     "worker-src 'self' blob:",
     "manifest-src 'self'",

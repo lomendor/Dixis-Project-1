@@ -26,6 +26,7 @@ export default function ModernCartIcon({
   const { toggle } = useCartDrawer()
 
   const handleClick = () => {
+    console.log('🛒 Cart button clicked!', { onClick: !!onClick, toggle: !!toggle })
     if (onClick) {
       onClick()
     } else {
