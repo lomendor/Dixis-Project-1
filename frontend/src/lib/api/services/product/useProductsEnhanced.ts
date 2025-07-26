@@ -477,7 +477,7 @@ export function useEnhancedProduct(id: string | number) {
 
   return {
     product: query.data,
-    isLoading: query.isPending,
+    isLoading: query.isPending || query.isLoading,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch
