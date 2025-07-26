@@ -419,6 +419,64 @@ Route::prefix('v1')->group(function () {
         }
     });
 
+    // Get producer by slug (for frontend detail pages)
+    Route::get('/producers/slug/{slug}', function ($slug) {
+        try {
+            // Extract ID from slug (format: producer-{id})
+            $producerId = str_replace('producer-', '', $slug);
+
+            $producer = \App\Models\Producer::where('id', $producerId)
+                ->where('verified', true)
+                ->with(['products' => function($query) {
+                    $query->where('is_active', true)
+                          ->select('id', 'name', 'slug', 'price', 'discount_price', 'producer_id', 'description');
+                }])
+                ->first();
+
+            if (!$producer) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Producer not found'
+                ], 404);
+            }
+
+            // Transform for frontend
+            $transformedProducer = [
+                'id' => $producer->id,
+                'business_name' => $producer->business_name,
+                'slug' => 'producer-' . $producer->id,
+                'bio' => $producer->bio ?? $producer->description ?? 'Παραγωγός premium προϊόντων με παράδοση και ποιότητα.',
+                'description' => $producer->description,
+                'city' => $producer->city,
+                'region' => $producer->region,
+                'verified' => (bool) $producer->verified,
+                'rating' => $producer->rating,
+                'products' => $producer->products->map(function($product) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                        'price' => (float) $product->price,
+                        'discount_price' => $product->discount_price ? (float) $product->discount_price : null,
+                        'description' => $product->description
+                    ];
+                })
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Producer retrieved successfully',
+                'data' => $transformedProducer
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Producer not found: ' . $e->getMessage()
+            ], 404);
+        }
+    });
+
     // Get products for a specific producer
     Route::get('/producers/{id}/products', function ($id) {
         try {

@@ -75,6 +75,7 @@ export const CATEGORY_ENDPOINTS = {
 export const PRODUCER_ENDPOINTS = {
   LIST: createEndpoint('producers'),
   DETAIL: createParameterizedEndpoint('producers/:id'),
+  BY_SLUG: createParameterizedEndpoint('producers/slug/:slug'),
   PRODUCTS: createParameterizedEndpoint('producers/:id/products'),
   PROFILE: createParameterizedEndpoint('producers/:id/profile'),
   MEDIA: createParameterizedEndpoint('producers/:id/media'),

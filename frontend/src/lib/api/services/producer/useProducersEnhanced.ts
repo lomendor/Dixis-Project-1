@@ -125,12 +125,16 @@ export const useEnhancedProducers = (filters?: ProducerFilters) => {
 };
 
 // Fetch individual producer details
-const fetchProducer = async (id: number): Promise<Producer> => {
-  logger.info('Fetching producer with id:', id);
-  
+const fetchProducer = async (id: number | string): Promise<Producer> => {
+  logger.info('Fetching producer with id/slug:', id);
+
   try {
-    const url = API_ENDPOINTS.PRODUCERS.DETAIL(id);
-    
+    // Check if id is a slug (contains non-numeric characters) or numeric ID
+    const isSlug = isNaN(Number(id)) || String(id).includes('-');
+    const url = isSlug
+      ? API_ENDPOINTS.PRODUCERS.BY_SLUG(id)
+      : API_ENDPOINTS.PRODUCERS.DETAIL(id);
+
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/json',
@@ -142,19 +146,22 @@ const fetchProducer = async (id: number): Promise<Producer> => {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    
-    if (!data.success) {
-      throw new Error(data.message || 'Failed to fetch producer');
+    const result = await response.json();
+
+    // Handle Laravel API response format (data wrapped in 'data' field)
+    const data = result.data || result;
+
+    if (result.status === 'error') {
+      throw new Error(result.message || 'Failed to fetch producer');
     }
 
     // Transform API response to match frontend types
     const transformedProducer: Producer = {
-      ...data.data,
+      ...data,
       // Parse specialties if they're JSON strings
-      specialties: typeof data.data.specialties === 'string' 
-        ? JSON.parse(data.data.specialties) 
-        : data.data.specialties || [],
+      specialties: typeof data.specialties === 'string'
+        ? JSON.parse(data.specialties)
+        : data.specialties || [],
     };
 
     return transformedProducer;
@@ -171,9 +178,9 @@ const fetchProducer = async (id: number): Promise<Producer> => {
   }
 };
 
-export const useEnhancedProducer = (id: number) => {
+export const useEnhancedProducer = (id: number | string) => {
   const query = useQuery({
-    queryKey: [QueryKeys.PRODUCERS, id],
+    queryKey: [QueryKeys.PRODUCERS, String(id)],
     queryFn: () => fetchProducer(id),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

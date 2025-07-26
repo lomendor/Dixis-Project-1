@@ -223,7 +223,8 @@ export const productDetailQueryOptions = (id: string | number) => {
           image: data.image || data.main_image,
           description: data.description || '',
           shortDescription: data.short_description || data.shortDescription || '',
-          stock: data.stock || 0,
+          stock: data.stock || data.quantity || 100, // Default stock for active products
+          featured: data.is_featured !== undefined ? data.is_featured : data.featured || false,
           producerId: data.producer_id || data.producerId,
           producerName: data.producer_name || data.producerName || data.producer?.business_name,
           producerSlug: data.producer_slug || data.producerSlug || data.producer?.slug,

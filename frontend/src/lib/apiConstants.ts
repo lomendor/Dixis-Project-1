@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
   PRODUCTS: {
     LIST: () => `${LARAVEL_API_BASE}/products`,
     PRODUCT: (id: string | number) => `${LARAVEL_API_BASE}/products/${id}`,
+    BY_SLUG: (slug: string) => `${LARAVEL_API_BASE}/products/slug/${slug}`,
     FEATURED: () => `${LARAVEL_API_BASE}/products?is_featured=1&per_page=8`,
     SEARCH: () => `/api/products/search`, // Keep as proxy for complex search
     BASE: () => `${LARAVEL_API_BASE}/products`,
@@ -14,6 +15,7 @@ export const API_ENDPOINTS = {
     LIST: () => `${LARAVEL_API_BASE}/producers`,
     DETAIL: (id: string | number) => `${LARAVEL_API_BASE}/producers/${id}`,
     PRODUCER: (id: string | number) => `${LARAVEL_API_BASE}/producers/${id}`,
+    BY_SLUG: (slug: string) => `${LARAVEL_API_BASE}/producers/slug/${slug}`,
     PRODUCTS: (id: string | number) => `${LARAVEL_API_BASE}/producers/${id}/products`,
     SEARCH: () => `/api/producers/search`, // Keep as proxy for complex search
   },
