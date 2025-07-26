@@ -49,9 +49,9 @@ const ProfessionalNavbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch categories
+  // Fetch categories from Laravel API directly
   useEffect(() => {
-    fetch('/api/categories')
+    fetch('http://localhost:8000/api/v1/categories')
       .then(res => res.json())
       .then(data => {
         // Filter main categories (parent_id is null) and sort by order

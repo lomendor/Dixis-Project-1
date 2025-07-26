@@ -44,6 +44,7 @@ export const AUTH_ENDPOINTS = {
 export const PRODUCT_ENDPOINTS = {
   LIST: createEndpoint('products'),
   DETAIL: createParameterizedEndpoint('products/:id'),
+  BY_SLUG: createParameterizedEndpoint('products/slug/:slug'),
   SEARCH: createEndpoint('products/search'),
   FEATURED: createEndpoint('products/featured'),
   NEW: createEndpoint('products/new'),

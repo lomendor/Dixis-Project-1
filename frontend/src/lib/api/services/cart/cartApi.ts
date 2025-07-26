@@ -141,8 +141,8 @@ export class CartApiService {
   async getCart(cartId: string): Promise<Cart> {
     return this.tryApiCall(
       async () => {
-        // Use Next.js API proxy instead of direct backend call
-        const response = await fetch(`/api/cart/${cartId}`, {
+        // Use direct Laravel API call
+        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -177,8 +177,8 @@ export class CartApiService {
   ): Promise<CartItem> {
     return this.tryApiCall(
       async () => {
-        // Use Next.js API proxy instead of direct backend call
-        const response = await fetch(`/api/cart/${cartId}/items`, {
+        // Use direct Laravel API call
+        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/items`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -238,14 +238,13 @@ export class CartApiService {
   async updateItem(cartId: string, itemId: ID, quantity: number): Promise<CartItem> {
     return this.tryApiCall(
       async () => {
-        // Use Next.js API proxy instead of direct backend call
-        const response = await fetch(`/api/cart/${cartId}/items`, {
+        // Use direct Laravel API call
+        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/items/${itemId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            item_id: itemId,
             quantity
           })
         });
@@ -285,8 +284,8 @@ export class CartApiService {
   async removeItem(cartId: string, itemId: ID): Promise<void> {
     return this.tryApiCall(
       async () => {
-        // Use Next.js API proxy instead of direct backend call
-        const response = await fetch(`/api/cart/${cartId}/items?item_id=${itemId}`, {
+        // Use direct Laravel API call
+        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/items/${itemId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -320,8 +319,8 @@ export class CartApiService {
   async clearCart(cartId: string): Promise<void> {
     return this.tryApiCall(
       async () => {
-        // Use Next.js API proxy instead of direct backend call
-        const response = await fetch(`/api/cart/${cartId}`, {
+        // Use direct Laravel API call
+        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/clear`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

@@ -42,9 +42,12 @@ export const API_ENDPOINTS = {
   CART_ITEM: (cartId: string, itemId: string) => UNIFIED_ENDPOINTS.CART.UPDATE_ITEM(itemId),
   CART_CLEAR: (cartId: string) => UNIFIED_ENDPOINTS.CART.CLEAR,
 
-  // Categories - Mapped to unified endpoints
-  CATEGORIES: `${API_URL}/categories`,
-  CATEGORY: (id: string) => `${API_URL}/categories/${id}`,
+  // Categories - Direct Laravel API (MIGRATED 2025-01-26)
+  CATEGORIES: `http://localhost:8000/api/v1/categories`,
+  CATEGORY: (id: string) => `http://localhost:8000/api/v1/categories/${id}`,
+  
+  // Health - Direct Laravel API (MIGRATED 2025-01-26)
+  HEALTH_BACKEND: `http://localhost:8000/api/health`,
   
   // Producers
   PRODUCERS: `${API_URL}/producers`,

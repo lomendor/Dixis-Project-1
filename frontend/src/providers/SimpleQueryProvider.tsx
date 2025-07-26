@@ -41,15 +41,11 @@ export function SimpleQueryProvider({
     setMounted(true);
   }, []);
 
-  // Return null during SSR
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always provide QueryClient, even during SSR
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {process.env.NODE_ENV === 'development' && (
+      {mounted && process.env.NODE_ENV === 'development' && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
     </QueryClientProvider>

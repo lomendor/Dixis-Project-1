@@ -138,7 +138,7 @@ export default function B2BProductsPage() {
         setLoading(true);
         
         // Call real backend API for B2B products via proxy
-        const response = await fetch('/api/products?b2b_available=1&per_page=100');
+        const response = await fetch('http://localhost:8000/api/v1/products?b2b_available=1&per_page=100');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

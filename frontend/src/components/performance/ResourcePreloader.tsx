@@ -171,9 +171,8 @@ export default function ResourcePreloader({
         'http://localhost:8000/api/producers/featured'
       ],
       '/products': [
-        'http://localhost:8000/api/products',
-        'http://localhost:8000/api/categories',
-        'http://localhost:8000/api/filters'
+        'http://localhost:8000/api/v1/products',
+        'http://localhost:8000/api/v1/categories'
       ],
       '/dashboard': [
         'http://localhost:8000/api/user/profile',
@@ -272,7 +271,7 @@ export default function ResourcePreloader({
           if (pathname.includes('/product/')) {
             const productId = pathname.split('/').pop();
             if (productId) {
-              fetch(`http://localhost:8000/api/products/${productId}`).catch(() => {});
+              fetch(`http://localhost:8000/api/v1/products/${productId}`).catch(() => {});
             }
           }
         };

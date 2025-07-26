@@ -21,8 +21,8 @@ import { logger } from '@/lib/logging/productionLogger';
  * These values should NEVER change without proper migration
  */
 export const API_CORE_CONFIG = {
-  // Base URL - Single source of truth (VPS API for all environments during integration testing)
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://147.93.126.235:8000',
+  // Base URL - Single source of truth (Local development)
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
 
   // API Version - Stable versioning
   VERSION: 'v1',
@@ -127,7 +127,7 @@ export const buildApiEndpoint = (path: string) => {
   // Remove leading slash if present
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   
-  return `${config.PREFIX}/${cleanPath}`;
+  return `${config.BASE_URL}/${config.VERSION}/${cleanPath}`;
 };
 
 /**

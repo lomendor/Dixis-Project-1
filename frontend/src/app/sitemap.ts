@@ -163,11 +163,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let productPages: MetadataRoute.Sitemap = [];
     let producerPages: MetadataRoute.Sitemap = [];
     
-    // Try to fetch products from API
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    // Try to fetch products from Laravel API directly
+    const apiUrl = 'http://localhost:8000';
     
     try {
-      const productsResponse = await fetch(`${apiUrl}/api/products?per_page=100`, {
+      const productsResponse = await fetch(`${apiUrl}/api/v1/products?per_page=100`, {
         headers: { 'Accept': 'application/json' },
       });
       
@@ -187,7 +187,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     try {
-      const producersResponse = await fetch(`${apiUrl}/api/producers?per_page=100`, {
+      const producersResponse = await fetch(`http://localhost:8000/api/v1/producers?per_page=100`, {
         headers: { 'Accept': 'application/json' },
       });
       

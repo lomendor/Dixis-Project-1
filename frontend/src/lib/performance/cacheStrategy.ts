@@ -268,11 +268,11 @@ export async function preloadCriticalData(): Promise<void> {
     // Preload categories
     await cachedFetch('/api/categories', {}, cacheStrategies.categories);
     
-    // Preload featured products
-    await cachedFetch('/api/products/featured?limit=8', {}, cacheStrategies.products);
+    // Preload featured products (direct Laravel API)
+    await cachedFetch('http://localhost:8000/api/v1/products?is_featured=1&per_page=8', {}, cacheStrategies.products);
     
-    // Preload featured producers
-    await cachedFetch('/api/producers/featured?limit=6', {}, cacheStrategies.producers);
+    // Preload featured producers (direct Laravel API)
+    await cachedFetch('http://localhost:8000/api/v1/producers?is_featured=1&per_page=6', {}, cacheStrategies.producers);
     
     logger.info('Critical data preloaded successfully');
   } catch (error) {

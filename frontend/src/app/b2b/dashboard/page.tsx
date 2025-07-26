@@ -58,7 +58,7 @@ export default function B2BDashboardPage() {
   const fetchB2BProducts = async () => {
     try {
       // Fetch B2B products from correct API endpoint
-      const response = await fetch('/api/products?b2b_available=1&per_page=12');
+      const response = await fetch('http://localhost:8000/api/v1/products?b2b_available=1&per_page=12');
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);

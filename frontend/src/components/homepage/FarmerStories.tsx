@@ -20,7 +20,7 @@ export default function FarmerStories() {
     async function fetchProducers() {
       try {
         console.log('🔄 Fetching producers...');
-        const response = await fetch('/api/producers?per_page=4');
+        const response = await fetch('http://localhost:8000/api/v1/producers?per_page=4');
         console.log('📡 Producers response status:', response.status);
 
         if (response.ok) {

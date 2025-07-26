@@ -1,66 +1,94 @@
-// Use Next.js API routes as fallback when Laravel backend is not available
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+// Direct Laravel API configuration for consistent performance
+export const LARAVEL_API_BASE = 'http://localhost:8000/api/v1';
 export const API_VERSION = 'v1';
-
-// Helper to get the correct API base URL
-function getApiBaseUrl(): string {
-  if (API_BASE_URL) {
-    return API_BASE_URL;
-  }
-
-  // Use Next.js API proxy routes for frontend calls
-  if (typeof window !== 'undefined') {
-    return ''; // Empty string means relative URLs for browser (will use proxy)
-  }
-
-  // For server-side calls, use the Laravel backend directly
-  return 'http://localhost:8000';
-}
 
 export const API_ENDPOINTS = {
   PRODUCTS: {
-    LIST: () => `${getApiBaseUrl()}/api/products`,
-    PRODUCT: (id: string | number) => `${getApiBaseUrl()}/api/products/${id}`,
-    FEATURED: () => `${getApiBaseUrl()}/api/products/featured`,
-    SEARCH: () => `${getApiBaseUrl()}/api/products/search`,
-    BASE: () => `${getApiBaseUrl()}/api/products`,
+    LIST: () => `${LARAVEL_API_BASE}/products`,
+    PRODUCT: (id: string | number) => `${LARAVEL_API_BASE}/products/${id}`,
+    FEATURED: () => `${LARAVEL_API_BASE}/products?is_featured=1&per_page=8`,
+    SEARCH: () => `/api/products/search`, // Keep as proxy for complex search
+    BASE: () => `${LARAVEL_API_BASE}/products`,
   },
   PRODUCERS: {
-    LIST: () => `${getApiBaseUrl()}/api/producers`,
-    DETAIL: (id: string | number) => `${getApiBaseUrl()}/api/producers/${id}`,
-    PRODUCER: (id: string | number) => `${getApiBaseUrl()}/api/producers/${id}`,
-    PRODUCTS: (id: string | number) => `${getApiBaseUrl()}/api/producers/${id}/products`,
+    LIST: () => `${LARAVEL_API_BASE}/producers`,
+    DETAIL: (id: string | number) => `${LARAVEL_API_BASE}/producers/${id}`,
+    PRODUCER: (id: string | number) => `${LARAVEL_API_BASE}/producers/${id}`,
+    PRODUCTS: (id: string | number) => `${LARAVEL_API_BASE}/producers/${id}/products`,
+    SEARCH: () => `/api/producers/search`, // Keep as proxy for complex search
   },
   CATEGORIES: {
-    LIST: () => `${getApiBaseUrl()}/api/categories`,
-    CATEGORY: (id: string | number) => `${getApiBaseUrl()}/api/categories/${id}`,
-    PRODUCTS: (id: string | number) => `${getApiBaseUrl()}/api/categories/${id}/products`,
+    LIST: () => `${LARAVEL_API_BASE}/categories`,
+    CATEGORY: (id: string | number) => `${LARAVEL_API_BASE}/categories/${id}`,
+    PRODUCTS: (id: string | number) => `${LARAVEL_API_BASE}/categories/${id}/products`,
   },
   RECOMMENDATIONS: {
-    RELATED: (id: string | number) => `${getApiBaseUrl()}/api/products/${id}/related`,
-    SIMILAR: (id: string | number) => `${getApiBaseUrl()}/api/products/${id}/similar`,
+    RELATED: (id: string | number) => `/api/products/${id}/related`, // Keep as proxy
+    SIMILAR: (id: string | number) => `/api/products/${id}/similar`, // Keep as proxy
   },
-  ORDERS: () => `${getApiBaseUrl()}/api/orders`,
+  ORDERS: () => `/api/orders`, // Keep as proxy for complex business logic
   AUTH: {
-    LOGIN: () => `${getApiBaseUrl()}/api/auth/login`,
-    REGISTER: () => `${getApiBaseUrl()}/api/auth/register`,
-    LOGOUT: () => `${getApiBaseUrl()}/api/auth/logout`,
-    ME: () => `${getApiBaseUrl()}/api/auth/me`,
+    LOGIN: () => `/api/auth/login`, // Keep as proxy for security
+    REGISTER: () => `/api/auth/register`, // Keep as proxy for security
+    LOGOUT: () => `/api/auth/logout`, // Keep as proxy for security
+    ME: () => `/api/auth/me`, // Keep as proxy for security
   },
-  USERS: () => `${getApiBaseUrl()}/api/users`,
-  ADOPTIONS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/adoptions`,
-  ADOPTABLE_ITEMS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/adoptable-items`,
-  REVIEWS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/reviews`,
-  FAVORITES: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/favorites`,
-  CART: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/cart`,
-  SEARCH: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/search`,
-  ANALYTICS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/analytics`,
-  NOTIFICATIONS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/notifications`,
-  UPLOADS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/uploads`,
-  PAYMENTS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/payments`,
-  SHIPPING: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/shipping`,
-  ADMIN: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/admin`,
-  REPORTS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/reports`,
-  SETTINGS: () => `${getApiBaseUrl()}/api/laravel/${API_VERSION}/settings`
+  USERS: () => `${LARAVEL_API_BASE}/user`,
+  // Cart operations - direct Laravel API
+  CART: {
+    GUEST: () => `${LARAVEL_API_BASE}/cart/guest`,
+    GET: (cartId: string) => `${LARAVEL_API_BASE}/cart/${cartId}`,
+    ITEMS: (cartId: string) => `${LARAVEL_API_BASE}/cart/${cartId}/items`,
+    ITEM: (cartId: string, itemId: string) => `${LARAVEL_API_BASE}/cart/${cartId}/items/${itemId}`,
+  },
+  // Greek market specific endpoints - direct Laravel API
+  PAYMENTS: {
+    GREEK_METHODS: () => `${LARAVEL_API_BASE}/payments/greek/methods`,
+    VIVA_WALLET: {
+      CREATE: () => `${LARAVEL_API_BASE}/payments/greek/viva-wallet/create`,
+      CALLBACK: () => `${LARAVEL_API_BASE}/payments/greek/viva-wallet/callback`,
+    },
+    CREATE_INTENT: () => `/api/payment/create-intent`, // Keep as proxy for Stripe security
+    CONFIRM: () => `${LARAVEL_API_BASE}/payment/confirm`,
+  },
+  SHIPPING: {
+    GREEK_CARRIERS: () => `${LARAVEL_API_BASE}/shipping/greek/carriers`,
+    GREEK_RATES: () => `${LARAVEL_API_BASE}/shipping/greek/rates`,
+    GREEK_ZONES: () => `${LARAVEL_API_BASE}/shipping/greek/zones`,
+    TRACK: () => `${LARAVEL_API_BASE}/shipping/greek/track`,
+  },
+  VAT: {
+    GREEK_RATES: () => `${LARAVEL_API_BASE}/vat/greek/rates`,
+    GREEK_CALCULATE: () => `${LARAVEL_API_BASE}/vat/greek/cart`,
+    POSTCODE_CHECK: () => `${LARAVEL_API_BASE}/vat/greek/postcode-check`,
+    INVOICE: () => `${LARAVEL_API_BASE}/vat/greek/invoice`,
+  },
+  // Complex business logic - keep as proxies
+  TAX_CALCULATE: () => `/api/tax/calculate`,
+  MONITORING_HEALTH: () => `/api/monitoring/health`,
+  // Legacy endpoints for gradual migration
+  SEARCH: () => `/api/search`,
+  ANALYTICS: () => `/api/analytics`,
+  NOTIFICATIONS: () => `/api/notifications`,
+  UPLOADS: () => `/api/uploads`,
+  ADMIN: () => `/api/admin`,
+  REPORTS: () => `/api/reports`,
+  SETTINGS: () => `/api/settings`
+};
+
+// Greek market specific configurations
+export const GREEK_MARKET = {
+  VAT_RATES: {
+    MAINLAND: 0.24, // 24% standard VAT
+    ISLANDS: 0.13,  // 13% reduced VAT for islands
+    REDUCED: 0.06,  // 6% for basic foods
+  },
+  SHIPPING: {
+    FREE_THRESHOLD: 50, // €50+ free shipping
+    COD_FEE: 2.5,      // €2.50 cash on delivery fee
+    ISLAND_SURCHARGE: 7.5, // €7.50 island delivery surcharge
+  },
+  CURRENCY: 'EUR',
+  LANGUAGE: 'el',
 };
 

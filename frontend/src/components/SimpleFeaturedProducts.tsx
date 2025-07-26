@@ -20,7 +20,7 @@ export default function SimpleFeaturedProducts() {
   const { data: products, isLoading, isError } = useQuery({
     queryKey: ['featured-products'],
     queryFn: async (): Promise<Product[]> => {
-      const response = await fetch('/api/products/featured');
+      const response = await fetch('http://localhost:8000/api/v1/products?is_featured=1&per_page=8');
       if (!response.ok) {
         throw new Error('Failed to fetch products');
       }

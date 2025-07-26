@@ -187,7 +187,13 @@ export const productDetailQueryOptions = (id: string | number) => {
     queryKey: QueryKeys.products.detail(String(id)),
     queryFn: async ({ signal }): Promise<Product> => {
       try {
-        const response = await fetch(API_ENDPOINTS.PRODUCTS.PRODUCT(id), {
+        // Check if id is a slug (contains non-numeric characters) or numeric ID
+        const isSlug = isNaN(Number(id)) || String(id).includes('-');
+        const endpoint = isSlug
+          ? API_ENDPOINTS.PRODUCTS.BY_SLUG(id)
+          : API_ENDPOINTS.PRODUCTS.DETAIL(id);
+
+        const response = await fetch(endpoint, {
           signal,
           headers: {
             'Accept': 'application/json',
@@ -199,8 +205,11 @@ export const productDetailQueryOptions = (id: string | number) => {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
-        const data = await response.json();
-        
+        const result = await response.json();
+
+        // Handle Laravel API response format (data wrapped in 'data' field)
+        const data = result.data || result;
+
         // Transform the response to match the Product type if needed
         // This ensures compatibility with both backend and mock data formats
         return {

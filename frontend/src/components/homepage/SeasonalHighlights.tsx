@@ -41,7 +41,7 @@ export default function SeasonalHighlights() {
     async function fetchProducts() {
       try {
         console.log('🔄 Fetching products...');
-        const response = await fetch('/api/products?per_page=6');
+        const response = await fetch('http://localhost:8000/api/v1/products?per_page=6');
         console.log('📡 Response status:', response.status);
 
         if (response.ok) {

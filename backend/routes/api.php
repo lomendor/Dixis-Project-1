@@ -106,6 +106,46 @@ Route::prefix('v1')->group(function () {
             ], 404);
         }
     });
+
+    // Get product by slug (for frontend detail pages)
+    Route::get('/products/slug/{slug}', function ($slug) {
+        try {
+            $product = \App\Models\Product::where('slug', $slug)
+                ->where('is_active', true)
+                ->with('producer')
+                ->firstOrFail();
+
+            // Transform for frontend
+            $transformedProduct = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'price' => (float) $product->price,
+                'discount_price' => $product->discount_price ? (float) $product->discount_price : null,
+                'description' => $product->description,
+                'producer_id' => $product->producer_id,
+                'is_featured' => (bool) $product->is_featured,
+                'is_active' => (bool) $product->is_active,
+                'producer' => $product->producer ? [
+                    'id' => $product->producer->id,
+                    'business_name' => $product->producer->business_name,
+                    'city' => $product->producer->city,
+                    'region' => $product->producer->region
+                ] : null
+            ];
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Product retrieved successfully',
+                'data' => $transformedProduct
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Product not found: ' . $e->getMessage()
+            ], 404);
+        }
+    });
     
     // Guest Cart System (SIMPLE MVP - Session-based)
     Route::post('/cart/guest', function (Request $request) {
@@ -375,6 +415,41 @@ Route::prefix('v1')->group(function () {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to retrieve producers: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+
+    // Get products for a specific producer
+    Route::get('/producers/{id}/products', function ($id) {
+        try {
+            $producer = \App\Models\Producer::find($id);
+            
+            if (!$producer) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Producer not found'
+                ], 404);
+            }
+
+            $products = \App\Models\Product::where('producer_id', $id)
+                ->where('is_active', true)
+                ->select('id', 'name', 'slug', 'price', 'discount_price', 'description', 'producer_id', 'is_featured')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Producer products retrieved successfully',
+                'data' => $products,
+                'count' => $products->count(),
+                'producer' => [
+                    'id' => $producer->id,
+                    'business_name' => $producer->business_name
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve producer products: ' . $e->getMessage()
             ], 500);
         }
     });
