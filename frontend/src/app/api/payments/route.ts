@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logging/productionLogger';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { buildApiUrl } from '@/lib/api/core/config';
+import { buildApiUrl } from '@/lib/api/config/unified';
 
 export async function POST(request: NextRequest) {
   try {

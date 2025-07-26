@@ -1,48 +1,62 @@
-'use client';
-
-import { useParams } from 'next/navigation';
-import { useEnhancedProducer } from '@/lib/api/services/producer/useProducersEnhanced';
-import { ProducerImage } from '@/components/ui/OptimizedImage';
-import { ProducerProfileLoading } from '@/components/ui/LoadingStates';
+// Server-side producer detail page following producers page pattern
 import Link from 'next/link';
+import { buildApiUrl } from '@/lib/api/config/unified';
 
-export default function ProducerDetailPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  
-  // Extract ID from slug (format: business-name-id)
-  const producerId = parseInt(slug?.split('-').pop() || '0');
-  
-  const {
-    producer,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useEnhancedProducer(producerId);
+interface Producer {
+  id: number;
+  business_name: string;
+  slug: string;
+  bio: string;
+  location: string;
+  profile_image: string;
+  specialties: string[];
+  verification_status: string;
+  rating: number;
+  total_products: number;
+  review_count: number;
+  website_url?: string;
+  processing_time_days?: number;
+  minimum_order_amount?: number;
+}
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <ProducerProfileLoading />
-      </div>
-    );
+interface ProducerDetailPageProps {
+  params: { slug: string };
+}
+
+export default async function ProducerDetailPage({ params }: ProducerDetailPageProps) {
+  const { slug } = params;
+  let producer: Producer | null = null;
+  let error = null;
+  
+  try {
+    // Server-side fetch - no CORS issues, same pattern as products page
+    const response = await fetch(buildApiUrl(`producers/slug/${slug}`), {
+      next: { revalidate: 60 },
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      producer = data.data || data;
+    } else {
+      error = `Backend returned status ${response.status}`;
+    }
+  } catch (err) {
+    error = `Failed to fetch producer: ${err}`;
+    console.error('Producer fetch error:', err);
   }
 
-  if (isError || !producer) {
+  if (error || !producer) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-red-800 mb-2">Σφάλμα φόρτωσης</h2>
-            <p className="text-red-600 mb-4">{error?.message || 'Ο παραγωγός δεν βρέθηκε'}</p>
+            <p className="text-red-600 mb-4">{error || 'Ο παραγωγός δεν βρέθηκε'}</p>
             <div className="space-x-4">
-              <button
-                onClick={() => refetch()}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
-              >
-                Δοκιμή ξανά
-              </button>
               <Link
                 href="/producers"
                 className="inline-block bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
@@ -81,7 +95,7 @@ export default function ProducerDetailPage() {
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         {producer.profile_image && (
           <div className="h-64 bg-gray-200 relative">
-            <ProducerImage
+            <img
               src={producer.profile_image}
               alt={producer.business_name}
               className="w-full h-full object-cover"

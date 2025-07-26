@@ -2,6 +2,7 @@
 
 import { ApiClient, ApiResponse, ApiError, RequestConfig } from './apiTypes';
 import { csrfProtection } from '@/lib/security/csrfProtection';
+import { UNIFIED_API_CONFIG } from '../config/unified';
 
 /**
  * UNIFIED API CLIENT - Single source of truth for all API calls
@@ -11,7 +12,7 @@ import { csrfProtection } from '@/lib/security/csrfProtection';
 /**
  * Base API URL from environment variables
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = UNIFIED_API_CONFIG.BASE_URL;
 const API_VERSION = 'v1';
 
 /**

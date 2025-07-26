@@ -13,6 +13,7 @@
 // Import the new unified API configuration and endpoints
 import { getApiConfig } from '../lib/api/core/config';
 import { API_ENDPOINTS as UNIFIED_ENDPOINTS } from '../lib/api/core/endpoints';
+import { UNIFIED_ENDPOINTS as NEW_UNIFIED_ENDPOINTS } from '../lib/api/config/unified';
 
 /**
  * Legacy API_URL export for backward compatibility
@@ -42,12 +43,12 @@ export const API_ENDPOINTS = {
   CART_ITEM: (cartId: string, itemId: string) => UNIFIED_ENDPOINTS.CART.UPDATE_ITEM(itemId),
   CART_CLEAR: (cartId: string) => UNIFIED_ENDPOINTS.CART.CLEAR,
 
-  // Categories - Direct Laravel API (MIGRATED 2025-01-26)
-  CATEGORIES: `http://localhost:8000/api/v1/categories`,
-  CATEGORY: (id: string) => `http://localhost:8000/api/v1/categories/${id}`,
+  // Categories - Using unified configuration (MIGRATED 2025-01-26)
+  CATEGORIES: NEW_UNIFIED_ENDPOINTS.CATEGORIES.LIST(),
+  CATEGORY: (id: string) => NEW_UNIFIED_ENDPOINTS.CATEGORIES.DETAIL(id),
   
-  // Health - Direct Laravel API (MIGRATED 2025-01-26)
-  HEALTH_BACKEND: `http://localhost:8000/api/health`,
+  // Health - Using unified configuration (MIGRATED 2025-01-26)
+  HEALTH_BACKEND: NEW_UNIFIED_ENDPOINTS.SYSTEM.HEALTH(),
   
   // Producers
   PRODUCERS: `${API_URL}/producers`,

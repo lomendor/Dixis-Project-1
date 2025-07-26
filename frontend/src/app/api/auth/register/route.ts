@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { buildApiUrl } from '@/lib/api/core/config';
+import { buildApiUrl } from '@/lib/api/config/unified';
 import { createApiResponse } from '@/lib/api/production';
 
 export async function POST(request: NextRequest) {

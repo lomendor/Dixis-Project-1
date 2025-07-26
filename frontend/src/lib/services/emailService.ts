@@ -1,5 +1,6 @@
 import { logger } from '@/lib/logging/productionLogger';
 import { toError, errorToContext } from '@/lib/utils/errorUtils';
+import { UNIFIED_API_CONFIG } from '@/lib/api/config/unified';
 
 /**
  * Email Service for Dixis Fresh
@@ -57,7 +58,7 @@ export interface OrderConfirmationData {
 }
 
 class EmailService {
-  private readonly baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  private readonly baseUrl = UNIFIED_API_CONFIG.BASE_URL;
 
   /**
    * Send order confirmation email

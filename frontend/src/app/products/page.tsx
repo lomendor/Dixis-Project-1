@@ -1,7 +1,7 @@
 // Working server-side products page
 import Link from 'next/link';
 import ServerProductCartButton from '@/components/products/ServerProductCartButton';
-import { buildApiUrl } from '@/lib/api/core/config';
+import { UNIFIED_ENDPOINTS } from '@/lib/api/config/unified';
 
 interface Product {
   id: number;
@@ -29,7 +29,7 @@ export default async function ServerProductsPage() {
   
   try {
     // Fetch directly from Laravel backend with longer timeout
-    const response = await fetch(buildApiUrl('api/v1/products?per_page=100'), {
+    const response = await fetch(UNIFIED_ENDPOINTS.PRODUCTS.LIST() + '?per_page=100', {
       next: { revalidate: 60 },
       headers: {
         'Accept': 'application/json',

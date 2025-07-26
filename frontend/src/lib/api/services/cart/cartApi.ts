@@ -1,10 +1,9 @@
 'use client';
 
 import { toError, errorToContext } from '@/lib/utils/errorUtils';
-
 import { logger } from '@/lib/logging/productionLogger';
-
 import { apiClient } from '@/lib/api/client/apiClient';
+import { UNIFIED_ENDPOINTS } from '@/lib/api/config/unified';
 import { Cart, CartItem, CartItemAttributes, BulkOrderRequest, B2BCartSummary } from '@/lib/api/models/cart/types';
 import { ID } from '@/lib/api/client/apiTypes';
 
@@ -141,8 +140,8 @@ export class CartApiService {
   async getCart(cartId: string): Promise<Cart> {
     return this.tryApiCall(
       async () => {
-        // Use direct Laravel API call
-        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}`, {
+        // Use unified configuration
+        const response = await fetch(UNIFIED_ENDPOINTS.CART.GET(cartId), {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -177,8 +176,8 @@ export class CartApiService {
   ): Promise<CartItem> {
     return this.tryApiCall(
       async () => {
-        // Use direct Laravel API call
-        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/items`, {
+        // Use unified configuration
+        const response = await fetch(UNIFIED_ENDPOINTS.CART.ITEMS(cartId), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -238,8 +237,8 @@ export class CartApiService {
   async updateItem(cartId: string, itemId: ID, quantity: number): Promise<CartItem> {
     return this.tryApiCall(
       async () => {
-        // Use direct Laravel API call
-        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/items/${itemId}`, {
+        // Use unified configuration
+        const response = await fetch(UNIFIED_ENDPOINTS.CART.REMOVE_ITEM(cartId, itemId.toString()), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -284,8 +283,8 @@ export class CartApiService {
   async removeItem(cartId: string, itemId: ID): Promise<void> {
     return this.tryApiCall(
       async () => {
-        // Use direct Laravel API call
-        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/items/${itemId}`, {
+        // Use unified configuration
+        const response = await fetch(UNIFIED_ENDPOINTS.CART.REMOVE_ITEM(cartId, itemId.toString()), {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -319,8 +318,8 @@ export class CartApiService {
   async clearCart(cartId: string): Promise<void> {
     return this.tryApiCall(
       async () => {
-        // Use direct Laravel API call
-        const response = await fetch(`http://localhost:8000/api/v1/cart/${cartId}/clear`, {
+        // Use unified configuration
+        const response = await fetch(`${UNIFIED_ENDPOINTS.CART.GET(cartId)}/clear`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',

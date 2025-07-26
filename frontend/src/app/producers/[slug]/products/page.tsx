@@ -1,53 +1,83 @@
-'use client';
-
-import { useParams } from 'next/navigation';
+// Server-side producer products page using real Laravel API data
 import Link from 'next/link';
-import { useEnhancedProducer } from '@/lib/api/services/producer/useProducersEnhanced';
-import { useEnhancedProducts } from '@/lib/api/services/product/useProductsEnhanced';
-import { ProductImage, ProducerImage } from '@/components/ui/OptimizedImage';
-import { ProductPriceCard } from '@/components/pricing/TransparentPricing';
-import ModernCartButton from '@/components/cart/ModernCartButton';
-import { ProductsGridLoading, ProducerProfileLoading } from '@/components/ui/LoadingStates';
-import { useState } from 'react';
+import { buildApiUrl } from '@/lib/api/config/unified';
 
-export default function ProducerProductsPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const [sortBy, setSortBy] = useState<'name' | 'price' | 'newest'>('newest');
+interface Producer {
+  id: number;
+  business_name: string;
+  slug: string;
+  bio: string;
+  location: string;
+  profile_image: string;
+  verification_status: string;
+  rating: number;
+  review_count: number;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  price: number;
+  discount_price: number | null;
+  description: string;
+}
+
+interface ProducerProductsPageProps {
+  params: { slug: string };
+}
+
+export default async function ProducerProductsPage({ params }: ProducerProductsPageProps) {
+  const { slug } = params;
+  let producer: Producer | null = null;
+  let products: Product[] = [];
+  let error = null;
   
-  // Extract ID from slug (format: business-name-id)
-  const producerId = parseInt(slug?.split('-').pop() || '0');
-  
-  const {
-    producer,
-    isLoading: producerLoading,
-    isError: producerError,
-    error: producerErrorMsg,
-  } = useEnhancedProducer(producerId);
-
-  const {
-    products,
-    isLoading: productsLoading,
-    isError: productsError,
-    error: productsErrorMsg,
-    refetch
-  } = useEnhancedProducts({ producer_id: producerId });
-
-  if (producerLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <ProducerProfileLoading />
-      </div>
-    );
+  try {
+    // Fetch producer data first
+    const producerResponse = await fetch(buildApiUrl(`producers/slug/${slug}`), {
+      next: { revalidate: 60 },
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (producerResponse.ok) {
+      const producerData = await producerResponse.json();
+      producer = producerData.data || producerData;
+      
+      // Now fetch products for this producer using the real producer ID
+      if (producer) {
+        const productsResponse = await fetch(buildApiUrl(`producers/${producer.id}/products`), {
+          next: { revalidate: 60 },
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          // Use the products array from the producer detail response if available
+          products = producer.products || productsData.data || [];
+        }
+      }
+    } else {
+      error = `Backend returned status ${producerResponse.status}`;
+    }
+  } catch (err) {
+    error = `Failed to fetch data: ${err}`;
+    console.error('Producer products fetch error:', err);
   }
 
-  if (producerError || !producer) {
+  if (error || !producer) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-red-800 mb-2">Σφάλμα φόρτωσης</h2>
-            <p className="text-red-600 mb-4">{producerErrorMsg?.message || 'Ο παραγωγός δεν βρέθηκε'}</p>
+            <p className="text-red-600 mb-4">{error || 'Ο παραγωγός δεν βρέθηκε'}</p>
             <Link
               href="/producers"
               className="inline-block bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors"
@@ -59,19 +89,6 @@ export default function ProducerProductsPage() {
       </div>
     );
   }
-
-  // Sort products
-  const sortedProducts = products ? [...products].sort((a, b) => {
-    switch (sortBy) {
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'price':
-        return a.producer_price - b.producer_price;
-      case 'newest':
-      default:
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    }
-  }) : [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -90,13 +107,7 @@ export default function ProducerProductsPage() {
             </Link>
           </li>
           <li className="text-gray-400">/</li>
-          <li>
-            <Link href={`/producers/${slug}`} className="text-gray-500 hover:text-gray-700">
-              {producer.business_name}
-            </Link>
-          </li>
-          <li className="text-gray-400">/</li>
-          <li className="text-gray-900">Προϊόντα</li>
+          <li className="text-gray-900">Προϊόντα από {producer.business_name}</li>
         </ol>
       </nav>
 
@@ -105,7 +116,7 @@ export default function ProducerProductsPage() {
         <div className="md:flex">
           {producer.profile_image && (
             <div className="md:w-48 h-48 bg-gray-200 relative">
-              <ProducerImage
+              <img
                 src={producer.profile_image}
                 alt={producer.business_name}
                 className="w-full h-full object-cover"
@@ -162,65 +173,28 @@ export default function ProducerProductsPage() {
       </div>
 
       {/* Products Section */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mb-6">
         <h2 className="text-xl font-semibold text-gray-900">
           {products?.length ? `${products.length} Προϊόντα` : 'Προϊόντα'}
         </h2>
-        
-        {products && products.length > 0 && (
-          <div className="flex items-center space-x-4">
-            <label className="text-sm text-gray-600">Ταξινόμηση:</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            >
-              <option value="newest">Νεότερα πρώτα</option>
-              <option value="name">Αλφαβητικά</option>
-              <option value="price">Τιμή (χαμηλή πρώτα)</option>
-            </select>
-          </div>
-        )}
       </div>
 
       {/* Products Grid */}
-      {productsLoading ? (
-        <ProductsGridLoading />
-      ) : productsError ? (
-        <div className="text-center py-12">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 inline-block">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">Σφάλμα φόρτωσης προϊόντων</h3>
-            <p className="text-red-600 mb-4">{productsErrorMsg?.message || 'Αποτυχία φόρτωσης προϊόντων'}</p>
-            <button
-              onClick={() => refetch()}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
-            >
-              Δοκιμή ξανά
-            </button>
-          </div>
-        </div>
-      ) : sortedProducts.length > 0 ? (
+      {products.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedProducts.map((product) => (
+          {products.map((product) => (
             <div
               key={product.id}
               className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
             >
               <Link href={`/products/${product.slug}`}>
                 {/* Product Image */}
-                <div className="aspect-square relative overflow-hidden">
-                  <ProductImage
-                    src={product.images?.[0]?.url || '/placeholder-product.jpg'}
+                <div className="aspect-square relative overflow-hidden bg-gray-200">
+                  <img
+                    src="/placeholder-product.jpg"
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  {product.is_organic && (
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                        ΒΙΟ
-                      </span>
-                    </div>
-                  )}
                 </div>
               </Link>
 
@@ -232,27 +206,40 @@ export default function ProducerProductsPage() {
                   </h3>
                 </Link>
                 
-                {product.shortDescription && (
+                {product.description && (
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {product.shortDescription}
+                    {product.description}
                   </p>
                 )}
 
                 {/* Pricing */}
                 <div className="mb-3">
-                  <ProductPriceCard product={product} />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      {product.discount_price ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-green-600">
+                            €{product.discount_price.toFixed(2)}
+                          </span>
+                          <span className="text-sm text-gray-500 line-through">
+                            €{product.price.toFixed(2)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-lg font-bold text-green-600">
+                          €{product.price.toFixed(2)}
+                        </span>
+                      )}
+                      <div className="text-xs text-gray-500">(τελική τιμή)</div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="space-y-2">
-                  <ModernCartButton
-                    productId={product.id}
-                    productName={product.name}
-                    price={product.price}
-                    variant="primary"
-                    size="sm"
-                    className="w-full"
-                  />
+                  <button className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                    Προσθήκη στο Καλάθι
+                  </button>
                   <Link
                     href={`/products/${product.slug}`}
                     className="block w-full text-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"

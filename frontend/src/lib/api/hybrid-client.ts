@@ -10,6 +10,7 @@
  */
 
 import { ROUTE_CLASSIFICATION, PERFORMANCE_TARGETS, type APIRoute, type PerformanceMetrics } from './types/api-architecture';
+import { UNIFIED_API_CONFIG } from './config/unified';
 
 /**
  * API Client Configuration
@@ -69,7 +70,7 @@ export class HybridAPIClient {
 
   constructor(config?: Partial<APIClientConfig>) {
     this.config = {
-      laravelBase: process.env.NEXT_PUBLIC_LARAVEL_API || 'http://localhost:8000/api/v1',
+      laravelBase: UNIFIED_API_CONFIG.BASE_URL + UNIFIED_API_CONFIG.PREFIX,
       proxyBase: '/api',
       timeout: 10000,
       retries: 2,

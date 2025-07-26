@@ -4,6 +4,7 @@
 
 import { logger } from '@/lib/logging/productionLogger';
 import { toError, errorToContext } from '@/lib/utils/errorUtils';
+import { UNIFIED_ENDPOINTS } from '@/lib/api/config/unified';
 
 interface CacheConfig {
   ttl: number; // Time to live in seconds
@@ -268,11 +269,11 @@ export async function preloadCriticalData(): Promise<void> {
     // Preload categories
     await cachedFetch('/api/categories', {}, cacheStrategies.categories);
     
-    // Preload featured products (direct Laravel API)
-    await cachedFetch('http://localhost:8000/api/v1/products?is_featured=1&per_page=8', {}, cacheStrategies.products);
+    // Preload featured products (unified configuration)
+    await cachedFetch(UNIFIED_ENDPOINTS.PRODUCTS.FEATURED(), {}, cacheStrategies.products);
     
-    // Preload featured producers (direct Laravel API)
-    await cachedFetch('http://localhost:8000/api/v1/producers?is_featured=1&per_page=6', {}, cacheStrategies.producers);
+    // Preload featured producers (unified configuration)
+    await cachedFetch(UNIFIED_ENDPOINTS.PRODUCERS.FEATURED(), {}, cacheStrategies.producers);
     
     logger.info('Critical data preloaded successfully');
   } catch (error) {

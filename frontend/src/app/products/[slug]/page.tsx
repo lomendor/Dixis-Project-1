@@ -6,7 +6,7 @@ import { toError, errorToContext, stringToContext } from '@/lib/utils/errorUtils
 import React, { useState, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion'; // Temporarily disabled for testing
 import { useEnhancedProduct } from '@/lib/api/services/product/useProductsEnhanced';
 import { Product } from '@/lib/api/models/product/types';
 import ModernCartButton from '@/components/cart/ModernCartButton';
@@ -141,16 +141,33 @@ export default function ProductDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Προϊόν δεν βρέθηκε</h1>
-          <p className="text-gray-600 mb-6">
-            {error?.message || 'Το προϊόν που ψάχνετε δεν υπάρχει ή έχει αφαιρεθεί.'}
-          </p>
-          <Link
-            href="/products"
-            className="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200"
-          >
-            <ArrowLeftIcon className="w-5 h-5 mr-2" />
-            Επιστροφή στα Προϊόντα
-          </Link>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-red-800 font-medium mb-2">
+              {error?.message || 'Το προϊόν που ψάχνετε δεν υπάρχει ή έχει αφαιρεθεί.'}
+            </p>
+            {error?.message?.includes('Failed to fetch') && (
+              <p className="text-red-600 text-sm">
+                🔧 Πιθανό πρόβλημα σύνδεσης με τον server. Δοκιμάστε να ανανεώσετε τη σελίδα.
+              </p>
+            )}
+            {error?.message?.includes('HTTP') && (
+              <p className="text-red-600 text-sm">
+                📡 API Error: {error.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500 mb-4">
+              🔍 Slug που αναζητήθηκε: <code className="bg-gray-100 px-2 py-1 rounded">{slug}</code>
+            </p>
+            <Link
+              href="/products"
+              className="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200"
+            >
+              <ArrowLeftIcon className="w-5 h-5 mr-2" />
+              Επιστροφή στα Προϊόντα
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -268,12 +285,10 @@ export default function ProductDetailPage() {
           {productData.galleryImages.length > 1 && (
             <div className="grid grid-cols-4 gap-3">
               {productData.galleryImages.map((image, index) => (
-                <motion.button
+                <button
                   key={index}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`aspect-square bg-white rounded-xl overflow-hidden border-2 transition-all duration-200 shadow-lg hover:shadow-xl relative ${
+                  className={`aspect-square bg-white rounded-xl overflow-hidden border-2 transition-all duration-200 shadow-lg hover:shadow-xl relative hover:scale-105 ${
                     selectedImageIndex === index 
                       ? 'border-green-500 ring-2 ring-green-200' 
                       : 'border-gray-200 hover:border-green-300'
@@ -287,7 +302,7 @@ export default function ProductDetailPage() {
                   {selectedImageIndex === index && (
                     <div className="absolute inset-0 bg-green-500/20 backdrop-blur-sm" />
                   )}
-                </motion.button>
+                </button>
               ))}
             </div>
           )}

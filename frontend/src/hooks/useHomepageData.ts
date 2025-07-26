@@ -1,7 +1,7 @@
 'use client';
 
 import { toError, errorToContext } from '@/lib/utils/errorUtils';
-import { buildApiUrl } from '@/lib/api/core/config';
+import { buildApiUrl } from '@/lib/api/config/unified';
 import { logger } from '@/lib/logging/productionLogger';
 
 import { useState, useEffect } from 'react';

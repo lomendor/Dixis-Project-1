@@ -1,6 +1,6 @@
 // Server-side producers page following products page pattern
 import Link from 'next/link';
-import { buildApiUrl } from '@/lib/api/core/config';
+import { buildApiUrl } from '@/lib/api/config/unified';
 
 interface Producer {
   id: number;
@@ -19,7 +19,7 @@ export default async function ServerProducersPage() {
   
   try {
     // Server-side fetch - no CORS issues, same pattern as products page
-    const response = await fetch(buildApiUrl('api/v1/producers'), {
+    const response = await fetch(buildApiUrl('producers'), {
       next: { revalidate: 60 },
       headers: {
         'Accept': 'application/json',
@@ -129,10 +129,10 @@ export default async function ServerProducersPage() {
                 )}
                 
                 <Link 
-                  href={`/producers/${producer.slug}`}
+                  href={`/producers/${producer.slug}/products`}
                   className="btn-primary w-full justify-center text-center"
                 >
-                  Δείτε την Ιστορία
+                  Δείτε τα Προϊόντα
                 </Link>
               </div>
             </div>

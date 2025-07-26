@@ -1,7 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logging/productionLogger';
-
+import { UNIFIED_ENDPOINTS } from '@/lib/api/config/unified';
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -166,18 +166,18 @@ export default function ResourcePreloader({
     // Preload common API endpoints based on current route
     const apiPreloadMap: Record<string, string[]> = {
       '/': [
-        'http://localhost:8000/api/products/featured',
-        'http://localhost:8000/api/categories',
-        'http://localhost:8000/api/producers/featured'
+        UNIFIED_ENDPOINTS.PRODUCTS.FEATURED(),
+        UNIFIED_ENDPOINTS.CATEGORIES.LIST(),
+        UNIFIED_ENDPOINTS.PRODUCERS.FEATURED()
       ],
       '/products': [
-        'http://localhost:8000/api/v1/products',
-        'http://localhost:8000/api/v1/categories'
+        UNIFIED_ENDPOINTS.PRODUCTS.LIST(),
+        UNIFIED_ENDPOINTS.CATEGORIES.LIST()
       ],
       '/dashboard': [
-        'http://localhost:8000/api/user/profile',
-        'http://localhost:8000/api/orders',
-        'http://localhost:8000/api/analytics/summary'
+        '/api/user/profile', // Next.js API route
+        '/api/orders',       // Next.js API route
+        '/api/analytics/summary' // Next.js API route
       ],
       '/cart': [
         '/api/shipping/rates',
@@ -271,7 +271,7 @@ export default function ResourcePreloader({
           if (pathname.includes('/product/')) {
             const productId = pathname.split('/').pop();
             if (productId) {
-              fetch(`http://localhost:8000/api/v1/products/${productId}`).catch(() => {});
+              fetch(UNIFIED_ENDPOINTS.PRODUCTS.DETAIL(productId)).catch(() => {});
             }
           }
         };
@@ -310,7 +310,7 @@ export default function ResourcePreloader({
         // If user scrolled past 50%, they're engaged - preload more content
         if (scrollPercentage > 50) {
           preloadResource({
-            href: 'http://localhost:8000/api/products/recommended',
+            href: UNIFIED_ENDPOINTS.PRODUCTS.LIST() + '?recommended=1',
             as: 'fetch'
           });
         }
@@ -318,7 +318,7 @@ export default function ResourcePreloader({
         // If user scrolled to bottom, preload next page
         if (scrollPercentage > 90) {
           preloadResource({
-            href: 'http://localhost:8000/api/products?page=2',
+            href: UNIFIED_ENDPOINTS.PRODUCTS.LIST() + '?page=2',
             as: 'fetch'
           });
         }
@@ -336,7 +336,7 @@ export default function ResourcePreloader({
       if (timeOnPage > 30000) {
         // Preload related content
         preloadResource({
-          href: 'http://localhost:8000/api/products/related',
+          href: UNIFIED_ENDPOINTS.PRODUCTS.LIST() + '?related=1',
           as: 'fetch'
         });
       }

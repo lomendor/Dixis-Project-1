@@ -7,7 +7,7 @@ import { Producer, ProducerFilters } from '@/lib/api/models/producer/types';
 import { mockProducers } from '@/lib/api/models/producer/mockData';
 import { QueryKeys } from '@/lib/api/utils/queryUtils';
 import { logger } from '@/utils/logger';
-import { API_ENDPOINTS } from '@/lib/apiConstants';
+import { UNIFIED_ENDPOINTS } from '../../config/unified';
 
 // Real API call to Laravel backend
 const fetchProducers = async (filters?: ProducerFilters): Promise<Producer[]> => {
@@ -28,7 +28,7 @@ const fetchProducers = async (filters?: ProducerFilters): Promise<Producer[]> =>
       });
     }
     
-    const url = `${API_ENDPOINTS.PRODUCERS.LIST()}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    const url = `${UNIFIED_ENDPOINTS.PRODUCERS.LIST()}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     
     const response = await fetch(url, {
       headers: {
@@ -132,8 +132,8 @@ const fetchProducer = async (id: number | string): Promise<Producer> => {
     // Check if id is a slug (contains non-numeric characters) or numeric ID
     const isSlug = isNaN(Number(id)) || String(id).includes('-');
     const url = isSlug
-      ? API_ENDPOINTS.PRODUCERS.BY_SLUG(id)
-      : API_ENDPOINTS.PRODUCERS.DETAIL(id);
+      ? UNIFIED_ENDPOINTS.PRODUCERS.BY_SLUG(id)
+      : UNIFIED_ENDPOINTS.PRODUCERS.DETAIL(id);
 
     const response = await fetch(url, {
       headers: {
@@ -169,7 +169,10 @@ const fetchProducer = async (id: number | string): Promise<Producer> => {
     logger.error('Failed to fetch producer from API, falling back to mock data:', toError(error), errorToContext(error));
     
     // Fallback to mock data if API fails
-    const producer = mockProducers.find(p => p.id === id);
+    // Search by both ID and slug to handle different formats
+    const producer = mockProducers.find(p => 
+      p.id === id || p.slug === id || String(p.id) === String(id)
+    );
     if (!producer) {
       throw new Error(`Producer with id ${id} not found`);
     }
