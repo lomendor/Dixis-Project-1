@@ -1164,10 +1164,27 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Add to Cart Button */}
-                <button className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  <Heart className="h-4 w-4" />
-                  <span>Προσθήκη στο Καλάθι</span>
-                </button>
+                <ModernCartButton
+                  productId={`related-${index + 1}`}
+                  productName={index === 0 ? 'Βιολογικές Ντομάτες' : 
+                               index === 1 ? 'Κρητικά Αγγούρια' : 
+                               index === 2 ? 'Έξτρα Παρθένο Ελαιόλαδο' : 'Καυτερές Πιπεριές'}
+                  price={12.50 + index * 2.30}
+                  maxQuantity={50}
+                  size="md"
+                  variant="primary"
+                  showQuantityControls={false}
+                  className="w-full"
+                  attributes={{
+                    productName: index === 0 ? 'Βιολογικές Ντομάτες' : 
+                                 index === 1 ? 'Κρητικά Αγγούρια' : 
+                                 index === 2 ? 'Έξτρα Παρθένο Ελαιόλαδο' : 'Καυτερές Πιπεριές',
+                    price: 12.50 + index * 2.30,
+                    image: undefined,
+                    producer: typedProduct.producerName,
+                    slug: `related-product-${index + 1}`
+                  }}
+                />
               </div>
             </div>
           ))}
