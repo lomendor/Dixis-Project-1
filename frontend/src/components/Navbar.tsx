@@ -12,10 +12,12 @@ import { AvatarImage } from '@/components/ui/OptimizedImage';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { DixisLogoCustom } from '@/components/ui/DixisLogo';
+import ModernCartDrawer from './cart/ModernCartDrawer';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
 
   // Unified auth hooks
   const { user, isAuthenticated, logout } = useAuth();
@@ -67,7 +69,7 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-4">
-            <HeaderCartIcon />
+            <HeaderCartIcon onClick={() => setIsCartDrawerOpen(true)} />
 
             {isAuthenticated && user ? (
               <div className="relative">
@@ -188,7 +190,7 @@ export default function Navbar() {
 
           {/* Mobile Actions */}
           <div className="md:hidden flex items-center space-x-3">
-            <HeaderCartIcon />
+            <HeaderCartIcon onClick={() => setIsCartDrawerOpen(true)} />
             <button
               className="mobile-btn-icon text-gray-700 hover:text-green-600 touch-feedback p-2 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
               onClick={() => setIsOpen(!isOpen)}
@@ -202,6 +204,12 @@ export default function Navbar() {
 
         {/* Enhanced Mobile Navigation */}
         <MobileNavigation isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        
+        {/* Cart Drawer */}
+        <ModernCartDrawer 
+          isOpen={isCartDrawerOpen} 
+          onClose={() => setIsCartDrawerOpen(false)} 
+        />
       </div>
     </nav>
   );

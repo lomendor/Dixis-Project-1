@@ -69,9 +69,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </div>
       </footer>
 
-      {/* Cart Drawer */}
-      <ModernCartDrawer />
-      
       {/* Mobile Cart Indicator - Bottom Sticky */}
       <MobileCartIndicator />
     </>

@@ -22,8 +22,6 @@ interface CartState {
   isLoading: boolean
   error: string | null
   
-  // UI state
-  isDrawerOpen: boolean
   lastAddedItem: CartItem | null
   
   // Computed values
@@ -47,10 +45,6 @@ interface CartActions {
   updateBulkQuantity: (itemId: ID, quantity: number) => Promise<void>
   clearCart: () => Promise<void>
   
-  // UI actions
-  openDrawer: () => void
-  closeDrawer: () => void
-  toggleDrawer: () => void
   
   // Utility actions - enhanced for both types
   getProductQuantity: (productId: ID) => number
@@ -96,7 +90,6 @@ const defaultCartState: CartState = {
   cart: null,
   isLoading: false,
   error: null,
-  isDrawerOpen: false,
   lastAddedItem: null,
   itemCount: 0,
   subtotal: 0,
@@ -508,11 +501,6 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
       });
     }
   },
-  
-  // UI actions
-  openDrawer: () => set({ isDrawerOpen: true }),
-  closeDrawer: () => set({ isDrawerOpen: false }),
-  toggleDrawer: () => set(state => ({ isDrawerOpen: !state.isDrawerOpen })),
   
   // Enhanced utility actions for both types
   getProductQuantity: (productId: ID) => {
@@ -1004,9 +992,6 @@ export const useCartStore = () => {
       removeFromCart: async () => {},
       updateQuantity: async () => {},
       clearCart: () => {},
-      openDrawer: () => {},
-      closeDrawer: () => {},
-      toggleDrawer: () => {},
       refreshCart: async () => {},
       getItemQuantity: () => 0,
       isInCart: () => false,
@@ -1055,25 +1040,6 @@ export const useCartError = () => {
   return store?.error || null
 }
 
-export const useCartDrawer = () => {
-  const store = useCartStore()
-  
-  // Debug hydration state
-  const isHydrated = store && typeof store.toggleDrawer === 'function'
-  
-  return {
-    isOpen: store?.isDrawerOpen || false,
-    open: isHydrated ? store.openDrawer : (() => {
-      console.warn('⚠️ Cart drawer open function not available - store not hydrated')
-    }),
-    close: isHydrated ? store.closeDrawer : (() => {
-      console.warn('⚠️ Cart drawer close function not available - store not hydrated')
-    }),
-    toggle: isHydrated ? store.toggleDrawer : (() => {
-      console.warn('⚠️ Cart drawer toggle function not available - store not hydrated')
-    }),
-  }
-}
 
 export const useCartSummary = () => {
   const store = useCartStore()

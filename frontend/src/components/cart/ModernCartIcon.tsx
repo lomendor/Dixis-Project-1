@@ -23,19 +23,10 @@ export default function ModernCartIcon({
   onClick,
 }: ModernCartIconProps) {
   const { itemCount, total, currency } = useCartSummary()
-  const { toggle } = useCartDrawer()
 
   const handleClick = () => {
-    console.log('🛒 Cart icon clicked', {
-      hasOnClick: !!onClick,
-      hasToggle: !!toggle,
-      toggleType: typeof toggle
-    });
-    
     if (onClick) {
       onClick()
-    } else {
-      toggle()
     }
   }
 
@@ -135,13 +126,14 @@ export function CompactCartIcon({
 // Header variant with total
 export function HeaderCartIcon({
   className = '',
+  onClick,
   ...props
 }: ModernCartIconProps) {
   const { itemCount } = useCartSummary()
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <ModernCartIcon {...props} showTotal={false} />
+      <ModernCartIcon {...props} onClick={onClick} showTotal={false} />
       {itemCount > 0 && (
         <div className="hidden sm:block">
           <div className="text-sm text-gray-600">

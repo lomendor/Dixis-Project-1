@@ -26,25 +26,19 @@ import Image from 'next/image'
 import { logger } from '@/lib/logging/productionLogger'
 import { errorToContext, toError } from '@/lib/utils/errorUtils'
 
-export default function ModernCartDrawer() {
+interface ModernCartDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ModernCartDrawer({ isOpen, onClose }: ModernCartDrawerProps) {
   const cartStore = useCartStore()
   const cart: Cart | null = cartStore.cart
   const isLoading = cartStore.isLoading
   const lastAddedItem = cartStore.lastAddedItem
 
-  const { isOpen, close } = useCartDrawer()
   const { itemCount, subtotal, total, currency } = useCartSummary()
   const { updateQuantity, removeFromCart, clearCart } = useCartActions()
-
-  // Debug cart drawer mounting and state
-  useEffect(() => {
-    console.log('🛒 ModernCartDrawer mounted');
-    return () => console.log('🛒 ModernCartDrawer unmounted');
-  }, [])
-
-  useEffect(() => {
-    console.log('🛒 Cart drawer state changed:', { isOpen });
-  }, [isOpen])
 
 
   // Mobile-specific state
@@ -70,7 +64,7 @@ export default function ModernCartDrawer() {
 
     // Close drawer if swiped right more than 100px or with sufficient velocity
     if (info.offset.x > 100 || info.velocity.x > 500) {
-      close()
+      onClose()
     }
   }
 
@@ -179,7 +173,7 @@ export default function ModernCartDrawer() {
       `}</style>
 
       <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={close}>
+        <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-500"
@@ -257,7 +251,7 @@ export default function ModernCartDrawer() {
                             className={`relative text-gray-400 hover:text-gray-500 touch-manipulation ${
                               isMobile ? '-m-1 p-3' : '-m-2 p-2'
                             }`}
-                            onClick={close}
+                            onClick={onClose}
                           >
                             <span className="absolute -inset-0.5" />
                             <span className="sr-only">Κλείσιμο panel</span>
@@ -283,7 +277,7 @@ export default function ModernCartDrawer() {
                               <div className="mt-4">
                                 <Link
                                   href="/products"
-                                  onClick={close}
+                                  onClick={onClose}
                                   className={`inline-flex items-center rounded-lg bg-gradient-to-r from-green-600 to-green-700 text-white shadow-sm hover:from-green-700 hover:to-green-800 transition-all touch-manipulation ${
                                     isMobile
                                       ? 'px-6 py-3 text-base font-semibold'
@@ -395,7 +389,7 @@ export default function ModernCartDrawer() {
                                                 <h4 className={`font-medium text-gray-900 ${isMobile ? 'text-sm' : 'text-xs'}`}>
                                                   <Link
                                                     href={`/products/${item.slug}`}
-                                                    onClick={close}
+                                                    onClick={onClose}
                                                     className="hover:text-green-600 transition-colors"
                                                   >
                                                     {item.productName}
@@ -574,7 +568,7 @@ export default function ModernCartDrawer() {
                         <div className={`${isMobile ? 'space-y-3' : 'space-y-3'}`}>
                           <Link
                             href="/checkout"
-                            onClick={close}
+                            onClick={onClose}
                             className={`flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:from-green-700 hover:to-green-800 transition-all touch-manipulation transform hover:scale-105 ${
                               isMobile
                                 ? 'px-6 py-4 text-lg font-bold'
@@ -588,7 +582,7 @@ export default function ModernCartDrawer() {
                           <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'space-x-2'}`}>
                             <Link
                               href="/cart"
-                              onClick={close}
+                              onClick={onClose}
                               className={`flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 transition-colors touch-manipulation ${
                                 isMobile
                                   ? 'w-full px-6 py-3 text-base font-medium'
@@ -600,7 +594,7 @@ export default function ModernCartDrawer() {
                             </Link>
                             <button
                               type="button"
-                              onClick={close}
+                              onClick={onClose}
                               className={`flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 transition-colors touch-manipulation ${
                                 isMobile
                                   ? 'w-full px-6 py-3 text-base font-medium'
