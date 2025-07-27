@@ -643,6 +643,13 @@ export default function ProductDetailPage() {
               variant="primary"
               showQuantityControls={true}
               className="w-full"
+              attributes={{
+                productName: typedProduct.name,
+                price: productData.currentPrice,
+                image: typedProduct.images?.[0]?.url || '/images/placeholder-product.svg',
+                producer: typedProduct.producerName,
+                slug: typedProduct.slug
+              }}
             />
 
             {/* Action Buttons */}

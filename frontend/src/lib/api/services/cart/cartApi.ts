@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api/client/apiClient';
 import { UNIFIED_ENDPOINTS } from '@/lib/api/config/unified';
 import { Cart, CartItem, CartItemAttributes, BulkOrderRequest, B2BCartSummary } from '@/lib/api/models/cart/types';
 import { ID } from '@/lib/api/client/apiTypes';
+import { getCartMode } from '@/lib/utils/backendDetection';
 
 // Use environment flag to determine if we use real API or fallback
 const USE_REAL_CART_API = process.env.NEXT_PUBLIC_USE_REAL_CART === 'true';
@@ -28,19 +29,20 @@ function createMockCart(): Cart {
 }
 
 function createMockCartItem(productId: ID, quantity: number, attributes?: CartItemAttributes): CartItem {
-  const price = 15.99; // Mock price
+  // Use attributes price if provided, otherwise fallback to mock price
+  const price = attributes?.price || 15.99;
   const subtotal = price * quantity;
 
   return {
     id: 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
     productId: productId.toString(),
-    productName: `Mock Product ${productId}`,
+    productName: attributes?.productName || `Mock Product ${productId}`,
     price,
     quantity,
     subtotal,
     attributes: attributes || {},
-    image: undefined,
-    slug: `mock-product-${productId}`,
+    image: attributes?.image || '/images/placeholder-product.svg',
+    slug: attributes?.slug || `mock-product-${productId}`,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -71,15 +73,31 @@ export class CartApiService {
   }
 
   private async tryApiCall<T>(apiCall: () => Promise<T>, fallback: () => T): Promise<T> {
+    // Check cart mode first
+    const cartMode = await getCartMode();
+    
+    if (cartMode === 'local') {
+      logger.info('🔄 Using local cart mode (backend unavailable or disabled)');
+      try {
+        const fallbackResult = fallback();
+        logger.info('🔄 Local cart operation successful');
+        return fallbackResult;
+      } catch (fallbackError) {
+        logger.error('❌ Local cart operation failed:', toError(fallbackError), errorToContext(fallbackError));
+        throw fallbackError;
+      }
+    }
+
+    // Try API call
     try {
       const result = await apiCall();
       logger.info('✅ Cart API call successful');
       return result;
     } catch (error) {
-      logger.error('❌ Cart API call failed, using fallback:', toError(error), errorToContext(error));
+      logger.error('❌ Cart API call failed, falling back to local mode:', toError(error), errorToContext(error));
       try {
         const fallbackResult = fallback();
-        logger.info('🔄 Cart fallback successful');
+        logger.info('🔄 Cart fallback to local mode successful');
         return fallbackResult;
       } catch (fallbackError) {
         logger.error('❌ Cart fallback also failed:', toError(fallbackError), errorToContext(fallbackError));
