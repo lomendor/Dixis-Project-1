@@ -971,6 +971,14 @@ export const useCartStore = () => {
   const store = useCartStoreBase()
   const [isHydrated, setIsHydrated] = useState(false)
   
+  // Expose store to window for debugging in development
+  useEffect(() => {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      (window as any).useCartStore = useCartStoreBase;
+      console.log('🛒 Cart store exposed to window.useCartStore');
+    }
+  }, [])
+  
   useEffect(() => {
     // Only hydrate once on mount with additional guard
     if (typeof window !== 'undefined' && !isHydrated && !hydrationCompleted) {
@@ -1050,16 +1058,19 @@ export const useCartError = () => {
 export const useCartDrawer = () => {
   const store = useCartStore()
   
+  // Debug hydration state
+  const isHydrated = store && typeof store.toggleDrawer === 'function'
+  
   return {
     isOpen: store?.isDrawerOpen || false,
-    open: store?.openDrawer || (() => {
-      console.warn('⚠️ Cart drawer open function not available')
+    open: isHydrated ? store.openDrawer : (() => {
+      console.warn('⚠️ Cart drawer open function not available - store not hydrated')
     }),
-    close: store?.closeDrawer || (() => {
-      console.warn('⚠️ Cart drawer close function not available')
+    close: isHydrated ? store.closeDrawer : (() => {
+      console.warn('⚠️ Cart drawer close function not available - store not hydrated')
     }),
-    toggle: store?.toggleDrawer || (() => {
-      console.warn('⚠️ Cart drawer toggle function not available')
+    toggle: isHydrated ? store.toggleDrawer : (() => {
+      console.warn('⚠️ Cart drawer toggle function not available - store not hydrated')
     }),
   }
 }

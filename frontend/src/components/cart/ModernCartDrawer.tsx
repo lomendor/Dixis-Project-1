@@ -36,6 +36,16 @@ export default function ModernCartDrawer() {
   const { itemCount, subtotal, total, currency } = useCartSummary()
   const { updateQuantity, removeFromCart, clearCart } = useCartActions()
 
+  // Debug cart drawer mounting and state
+  useEffect(() => {
+    console.log('🛒 ModernCartDrawer mounted');
+    return () => console.log('🛒 ModernCartDrawer unmounted');
+  }, [])
+
+  useEffect(() => {
+    console.log('🛒 Cart drawer state changed:', { isOpen });
+  }, [isOpen])
+
 
   // Mobile-specific state
   const [isMobile, setIsMobile] = useState(false)
