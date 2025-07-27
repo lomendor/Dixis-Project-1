@@ -3,7 +3,7 @@
 import { create } from 'zustand'
 import { Cart, CartItem, CartItemAttributes, ProductCartItem, AdoptionCartItem, isProductCartItem } from '@/lib/api/models/cart/types'
 import { idToString, ID } from '@/lib/api/client/apiTypes'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { cartApi } from '@/lib/api/services/cart/cartApi'
 import { logger } from '@/lib/logging/productionLogger'
 import { toError, getErrorMessage, errorToContext, stringToContext } from '@/lib/utils/errorUtils'
@@ -1049,11 +1049,29 @@ export const useCartError = () => {
 
 export const useCartDrawer = () => {
   const store = useCartStore()
+  
+  // Debug logging for cart drawer
+  React.useEffect(() => {
+    console.log('🛒 useCartDrawer initialized:', {
+      store: !!store,
+      openDrawer: !!store?.openDrawer,
+      closeDrawer: !!store?.closeDrawer,
+      toggleDrawer: !!store?.toggleDrawer,
+      isDrawerOpen: store?.isDrawerOpen
+    })
+  }, [store])
+  
   return {
     isOpen: store?.isDrawerOpen || false,
-    open: store?.openDrawer || (() => {}),
-    close: store?.closeDrawer || (() => {}),
-    toggle: store?.toggleDrawer || (() => {}),
+    open: store?.openDrawer || (() => {
+      console.warn('⚠️ Cart drawer open function not available')
+    }),
+    close: store?.closeDrawer || (() => {
+      console.warn('⚠️ Cart drawer close function not available')
+    }),
+    toggle: store?.toggleDrawer || (() => {
+      console.warn('⚠️ Cart drawer toggle function not available')
+    }),
   }
 }
 

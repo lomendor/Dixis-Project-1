@@ -174,8 +174,19 @@ export default function ModernCartButton({
   // Regular add to cart button
   return (
     <motion.button
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ 
+        scale: 1.02,
+        boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)"
+      }}
       whileTap={{ scale: 0.98 }}
+      animate={showSuccess ? {
+        backgroundColor: ["rgb(59, 130, 246)", "rgb(34, 197, 94)", "rgb(59, 130, 246)"],
+        scale: [1, 1.05, 1]
+      } : {}}
+      transition={showSuccess ? {
+        backgroundColor: { duration: 0.6, ease: "easeInOut" },
+        scale: { duration: 0.3, ease: "easeInOut" }
+      } : { duration: 0.2 }}
       onClick={handleAddToCart}
       disabled={disabled || isLoading || isAdding}
       className={baseClasses}
@@ -184,13 +195,34 @@ export default function ModernCartButton({
         {showSuccess ? (
           <motion.div
             key="success"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0, opacity: 0, y: 10 }}
+            animate={{ 
+              scale: [0, 1.2, 1], 
+              opacity: 1, 
+              y: 0 
+            }}
+            exit={{ scale: 0, opacity: 0, y: -10 }}
+            transition={{
+              scale: { duration: 0.5, ease: "easeOut" },
+              opacity: { duration: 0.3 },
+              y: { duration: 0.3 }
+            }}
             className="flex items-center space-x-2"
           >
-            <CheckIcon className="w-5 h-5 text-green-500" />
+            <motion.div
+              initial={{ rotate: -180, scale: 0 }}
+              animate={{ rotate: 0, scale: 1 }}
+              transition={{ duration: 0.5, ease: "backOut" }}
+            >
+              <CheckIcon className="w-5 h-5 text-white" />
+            </motion.div>
             <span>Προστέθηκε!</span>
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="absolute inset-0 border-2 border-green-400 rounded-lg"
+            />
           </motion.div>
         ) : isAdding || isLoading ? (
           <motion.div
@@ -210,12 +242,18 @@ export default function ModernCartButton({
         ) : (
           <motion.div
             key="default"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.2 }}
             className="flex items-center space-x-2"
           >
-            <ShoppingCartIcon className="w-5 h-5" />
+            <motion.div
+              whileHover={{ rotate: [0, -10, 10, 0] }}
+              transition={{ duration: 0.3 }}
+            >
+              <ShoppingCartIcon className="w-5 h-5" />
+            </motion.div>
             <span>
               {itemInCart ? 'Στο Καλάθι' : 'Προσθήκη στο Καλάθι'}
             </span>
