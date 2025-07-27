@@ -24,18 +24,24 @@ import {
   TruckIcon,
   ShieldCheckIcon,
   ArrowLeftIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { Leaf, MapPin, Award, Clock, Users, Truck, Star, Heart, Camera, Calendar, TreePine, Sprout, Sun } from 'lucide-react';
+import { Leaf, MapPin, Award, Clock, Users, Truck, Star, Heart, Camera, Calendar, TreePine, Sprout, Sun, Expand } from 'lucide-react';
 import { ProductImage, ThumbnailImage } from '@/components/ui/OptimizedImage';
+import Lightbox from '@/components/ui/Lightbox';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'reviews' | 'pricing'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'nutrition'>('description');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showDetailedPricing, setShowDetailedPricing] = useState(false);
+  const [imageZoom, setImageZoom] = useState({ x: 50, y: 50 });
+  const [isImageHovered, setIsImageHovered] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
 
   // Add error logging
   const { product, isLoading, isError, error } = useEnhancedProduct(slug);
@@ -231,18 +237,60 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Enhanced Product Images */}
         <div className="space-y-6">
-          {/* Main Image with Premium Frame */}
+          {/* Main Image with Premium Frame and Zoom */}
           <div className="relative group">
-            <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200 relative">
+            <div 
+              className="aspect-square bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200 relative cursor-zoom-in"
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                setImageZoom({ x, y });
+              }}
+              onMouseEnter={() => setIsImageHovered(true)}
+              onMouseLeave={() => {
+                setIsImageHovered(false);
+                setImageZoom({ x: 50, y: 50 });
+              }}
+              onClick={() => setShowLightbox(true)}
+            >
               <ProductImage
                 src={productData.galleryImages[selectedImageIndex]}
                 alt={typedProduct.name}
                 priority={true}
-                className="group-hover:scale-110 transition-transform duration-500"
+                className="transition-transform duration-300 ease-out"
+                style={{
+                  transform: isImageHovered 
+                    ? `scale(2) translate(${50 - imageZoom.x}%, ${50 - imageZoom.y}%)`
+                    : 'scale(1)',
+                  transformOrigin: `${imageZoom.x}% ${imageZoom.y}%`
+                }}
               />
               
               {/* Premium Overlay Badges */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+              
+              {/* Zoom Indicator */}
+              {!isImageHovered && (
+                <div className="absolute bottom-4 left-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center backdrop-blur-sm pointer-events-none transition-opacity duration-300">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                  </svg>
+                  Zoom
+                </div>
+              )}
+              
+              {/* Expand Icon */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowLightbox(true);
+                }}
+                className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                aria-label="View fullscreen"
+              >
+                <Expand className="w-4 h-4" />
+              </button>
               
               {/* Certification Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -327,6 +375,24 @@ export default function ProductDetailPage() {
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{typedProduct.name}</h1>
+            
+            {/* Trust Indicators */}
+            <div className="flex flex-wrap items-center gap-4 mb-4">
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Award className="h-4 w-4 text-green-600" />
+                <span>Πιστοποιημένος παραγωγός</span>
+              </div>
+              
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Truck className="h-4 w-4 text-blue-600" />
+                <span>Παράδοση σε 2-3 ημέρες</span>
+              </div>
+              
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Calendar className="h-4 w-4 text-purple-600" />
+                <span>30 ημέρες εγγύηση επιστροφής</span>
+              </div>
+            </div>
 
             {/* Rating */}
             {typedProduct.rating && (
@@ -386,6 +452,56 @@ export default function ProductDetailPage() {
             )}
           </div>
 
+          {/* Quick Product Specs - Moved from tabs for immediate visibility */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+              <InformationCircleIcon className="w-4 h-4 mr-2 text-green-600" />
+              Βασικά Χαρακτηριστικά
+            </h3>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Βάρος:</span>
+                <span className="font-medium">{typedProduct.weight || '150-200'}g</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Προέλευση:</span>
+                <span className="font-medium">{typedProduct.origin || 'Θεσσαλία'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Μονάδα:</span>
+                <span className="font-medium">{typedProduct.unit || 'τεμάχιο'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Εποχή:</span>
+                <span className="font-medium">Ιούν-Αύγ</span>
+              </div>
+            </div>
+            
+            {/* Quick badges for certifications */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              {typedProduct.isOrganic && (
+                <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                  🌿 Βιολογικό
+                </span>
+              )}
+              {typedProduct.isLocal && (
+                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                  🏛️ Ελληνικό
+                </span>
+              )}
+              {typedProduct.isVegan && (
+                <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-medium">
+                  🌱 Vegan
+                </span>
+              )}
+              {typedProduct.isGlutenFree && (
+                <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-medium">
+                  🌾 Χωρίς Γλουτένη
+                </span>
+              )}
+            </div>
+          </div>
+
           {/* Enhanced Producer Storytelling Section */}
           {typedProduct.producerName && (
             <div className="bg-gradient-to-br from-green-50 via-white to-blue-50 rounded-2xl p-6 border border-green-200 shadow-lg">
@@ -438,78 +554,36 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Producer Story */}
-              <div className="mb-6">
-                <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                  <TreePine className="mr-2 h-4 w-4 text-green-600" />
-                  Η Ιστορία του Παραγωγού
-                </h4>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  "Η οικογένειά μας καλλιεργεί βιολογικά προϊόντα στην Κρήτη εδώ και τρεις γενιές. 
-                  Χρησιμοποιούμε παραδοσιακές μεθόδους που μας έμαθαν οι παππούδες μας, 
-                  συνδυάζοντάς τες με σύγχρονες βιολογικές τεχνικές για να σας προσφέρουμε 
-                  την καλύτερη δυνατή ποιότητα."
-                </p>
-                
-                {/* Farm Specialties */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
+              {/* Producer Quick Info - Compact */}
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
                     Βιολογική Καλλιέργεια
                   </span>
-                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                    Παραδοσιακές Μέθοδοι
-                  </span>
-                  <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-medium">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
                     Οικογενειακή Επιχείρηση
                   </span>
+                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
+                    Πιστοποιημένος
+                  </span>
                 </div>
-
-                {/* Farm Stats */}
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="bg-white rounded-lg p-3 border border-gray-200">
-                    <div className="text-lg font-bold text-green-600">37</div>
-                    <div className="text-xs text-gray-600">Χρόνια Εμπειρίας</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 border border-gray-200">
-                    <div className="text-lg font-bold text-blue-600">15</div>
-                    <div className="text-xs text-gray-600">Στρέμματα Αγρού</div>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 border border-gray-200">
-                    <div className="text-lg font-bold text-amber-600">4.9</div>
-                    <div className="text-xs text-gray-600">Αξιολόγηση</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sustainability Promise */}
-              <div className="bg-green-100 rounded-lg p-4 border border-green-200">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Leaf className="h-4 w-4 text-green-700" />
-                  </div>
-                  <div>
-                    <h5 className="font-semibold text-green-900 mb-1">Δέσμευση Βιωσιμότητας</h5>
-                    <p className="text-green-800 text-sm">
-                      Χρησιμοποιούμε 100% ανανεώσιμη ενέργεια, βιοδιασπώμενες συσκευασίες 
-                      και στηρίζουμε την τοπική κοινότητα.
-                    </p>
-                  </div>
+                
+                <div className="flex justify-between items-center text-sm">
+                  <Link
+                    href={`/producers/${typedProduct.producerSlug || typedProduct.producerId}`}
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Δείτε όλα τα προϊόντα →
+                  </Link>
+                  <Link
+                    href={`/producers/${typedProduct.producerSlug || typedProduct.producerId}`}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    Η ιστορία μας
+                  </Link>
                 </div>
               </div>
 
-              {/* Call to Action */}
-              <div className="mt-4 flex items-center justify-between">
-                <Link
-                  href={`/producers/${typedProduct.producerSlug || typedProduct.producerId}`}
-                  className="inline-flex items-center text-sm text-green-600 hover:text-green-700 font-medium transition-colors"
-                >
-                  <Users className="mr-1 h-4 w-4" />
-                  Δείτε όλα τα προϊόντα του παραγωγού
-                </Link>
-                <div className="text-xs text-gray-500">
-                  Προμήθεια: {typedProduct.commissionRate || 12}%
-                </div>
-              </div>
             </div>
           )}
 
@@ -754,26 +828,39 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Detailed Transparent Pricing */}
-      <div className="mt-12 mb-16">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-            <InformationCircleIcon className="w-5 h-5 mr-2 text-green-600" />
-            Αναλυτική Τιμολόγηση
-          </h2>
-          <TransparentPricing
-            product={{
-              id: parseInt(idToString(typedProduct.id)),
-              name: typedProduct.name,
-              producer_price: typedProduct.producerPrice || calculateProducerPriceFromFinal(productData.currentPrice).producerPrice,
-              producer: {
-                business_name: typedProduct.producerName || 'Παραγωγός',
-                commission_rate: typedProduct.commissionRate || 12
-              }
-            }}
-            variant="full"
-            showProducerInfo={true}
-          />
+      {/* Compact Collapsible Transparent Pricing */}
+      <div className="mt-8 mb-8">
+        <div className="bg-white rounded-lg border border-gray-200">
+          <button 
+            onClick={() => setShowDetailedPricing(!showDetailedPricing)}
+            className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+              <InformationCircleIcon className="w-5 h-5 mr-2 text-green-600" />
+              Αναλυτική Τιμολόγηση
+            </h2>
+            <ChevronDownIcon className={`w-5 h-5 text-gray-500 transition-transform ${
+              showDetailedPricing ? 'rotate-180' : ''
+            }`} />
+          </button>
+          
+          {showDetailedPricing && (
+            <div className="px-4 pb-4 border-t border-gray-100">
+              <TransparentPricing
+                product={{
+                  id: parseInt(idToString(typedProduct.id)),
+                  name: typedProduct.name,
+                  producer_price: typedProduct.producerPrice || calculateProducerPriceFromFinal(productData.currentPrice).producerPrice,
+                  producer: {
+                    business_name: typedProduct.producerName || 'Παραγωγός',
+                    commission_rate: typedProduct.commissionRate || 12
+                  }
+                }}
+                variant="full"
+                showProducerInfo={true}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -783,9 +870,8 @@ export default function ProductDetailPage() {
           <nav className="flex space-x-8">
             {[
               { key: 'description', label: 'Περιγραφή' },
-              { key: 'specifications', label: 'Χαρακτηριστικά' },
-              { key: 'reviews', label: 'Αξιολογήσεις' },
-              { key: 'pricing', label: 'Τιμολόγηση' }
+              { key: 'specs', label: 'Τεχνικές Λεπτομέρειες' },
+              { key: 'nutrition', label: 'Διατροφικές Πληροφορίες' }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -805,73 +891,195 @@ export default function ProductDetailPage() {
         <div className="py-8">
           {activeTab === 'description' && (
             <div className="prose max-w-none">
-              <p className="text-gray-700 leading-relaxed">
-                {typedProduct.description || 'Δεν υπάρχει διαθέσιμη περιγραφή για αυτό το προϊόν.'}
+              <p className="text-gray-700 leading-relaxed mb-6">
+                {typedProduct.description || 'Εξαιρετικό προϊόν υψηλής ποιότητας από Ελληνικούς παραγωγούς. Φρέσκο και νόστιμο.'}
               </p>
-            </div>
-          )}
+              
+              {/* Product Story */}
+              <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+                <h4 className="font-semibold text-green-900 mb-2">Ιστορία του Προϊόντος</h4>
+                <p className="text-green-800 text-sm">
+                  Καλλιεργείται με παραδοσιακές μεθόδους στους αγρούς της Θεσσαλίας, 
+                  χρησιμοποιώντας φυσικές τεχνικές που διατηρούν τη γευστικότητα και 
+                  τα θρεπτικά συστατικά του προϊόντος.
+                </p>
+              </div>
 
-          {activeTab === 'specifications' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* How to Use */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Βασικά Χαρακτηριστικά</h3>
-                <dl className="space-y-3">
-                  {typedProduct.weight && (
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Βάρος:</dt>
-                      <dd className="font-medium">{typedProduct.weight}g</dd>
-                    </div>
-                  )}
-                  {typedProduct.unit && (
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Μονάδα:</dt>
-                      <dd className="font-medium">{typedProduct.unit}</dd>
-                    </div>
-                  )}
-                  {typedProduct.sku && (
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Κωδικός:</dt>
-                      <dd className="font-medium">{typedProduct.sku}</dd>
-                    </div>
-                  )}
-                  {typedProduct.origin && (
-                    <div className="flex justify-between">
-                      <dt className="text-gray-600">Προέλευση:</dt>
-                      <dd className="font-medium">{typedProduct.origin}</dd>
-                    </div>
-                  )}
-                </dl>
+                <h4 className="font-semibold text-gray-900 mb-3">Τρόπος Χρήσης & Συντήρηση</h4>
+                <ul className="list-disc list-inside space-y-2 text-gray-700">
+                  <li>Συντηρείται σε δροσερό και ξηρό μέρος</li>
+                  <li>Καταναλώνεται εντός 5-7 ημερών από το άνοιγμα</li>
+                  <li>Ιδανικό για φρέσκια κατανάλωση ή μαγείρεμα</li>
+                  <li>Πλύσιμο με κρύο νερό πριν την κατανάλωση</li>
+                </ul>
               </div>
             </div>
           )}
 
-          {activeTab === 'reviews' && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">Δεν υπάρχουν ακόμα αξιολογήσεις για αυτό το προϊόν.</p>
-              <button 
-                onClick={handleWriteReview}
-                className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors duration-200"
-              >
-                Γράψτε την πρώτη αξιολόγηση
-              </button>
+          {activeTab === 'specs' && (
+            <div className="space-y-6">
+              {/* Advanced Technical Specifications */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Καλλιεργητικές Πρακτικές</h3>
+                  <dl className="space-y-3">
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Μέθοδος καλλιέργειας:</dt>
+                      <dd className="font-medium">Βιολογική/Παραδοσιακή</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Τύπος εδάφους:</dt>
+                      <dd className="font-medium">Αργιλώδες, πλούσιο σε οργανική ύλη</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Άρδευση:</dt>
+                      <dd className="font-medium">Σταγόνα-σταγόνα, εξοικονόμηση νερού</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Λίπανση:</dt>
+                      <dd className="font-medium">Οργανική κομπόστα, χωρίς χημικά</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Φυτοπροστασία:</dt>
+                      <dd className="font-medium">Φυσικοί μέθοδοι, συνοδά φυτά</dd>
+                    </div>
+                  </dl>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Λεπτομέρειες Συσκευασίας</h3>
+                  <dl className="space-y-3">
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Τύπος συσκευασίας:</dt>
+                      <dd className="font-medium">Βιοδιασπώμενη</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Υλικό:</dt>
+                      <dd className="font-medium">Ανακυκλώσιμο χαρτί/πλαστικό</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Ατμόσφαιρα:</dt>
+                      <dd className="font-medium">Τροποποιημένη για φρεσκάδα</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Βάρος συσκευασίας:</dt>
+                      <dd className="font-medium">Minimal, eco-friendly</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Ανακύκλωση:</dt>
+                      <dd className="font-medium">100% ανακυκλώσιμη</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Πιστοποιήσεις & Ποιότητα</h3>
+                <div className="space-y-3">
+                  {typedProduct.isOrganic && (
+                    <div className="flex items-center space-x-3">
+                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                        🌿 Βιολογικό
+                      </span>
+                      <span className="text-sm text-gray-600">Πιστοποίηση ΔΗΩ</span>
+                    </div>
+                  )}
+                  {typedProduct.isLocal && (
+                    <div className="flex items-center space-x-3">
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        🏛️ Ελληνικό
+                      </span>
+                      <span className="text-sm text-gray-600">100% Ελληνικής προέλευσης</span>
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-3">
+                    <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                      ✅ Ελεγμένο
+                    </span>
+                    <span className="text-sm text-gray-600">Εργαστηριακός έλεγχος ποιότητας</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">Περιβαλλοντική Δέσμευση</h4>
+                  <p className="text-sm text-gray-600">
+                    Βιοδιασπώμενη συσκευασία, μηδενικά φυτοφάρμακα, 
+                    υπεύθυνη διαχείριση νερού.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
-          
-          {activeTab === 'pricing' && (
-            <div className="py-8">
-              <TransparentPricing
-                product={{
-                  id: parseInt(idToString(typedProduct.id)),
-                  name: typedProduct.name,
-                  producer_price: typedProduct.producerPrice || calculateProducerPriceFromFinal(productData.currentPrice).producerPrice,
-                  producer: {
-                    business_name: typedProduct.producerName || 'Παραγωγός',
-                    commission_rate: typedProduct.commissionRate || 12
-                  }
-                }}
-                variant="full"
-                showProducerInfo={true}
-              />
+
+          {activeTab === 'nutrition' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Διατροφική Αξία (ανά 100g)</h3>
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <dl className="space-y-2">
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                      <dt className="font-medium">Ενέργεια</dt>
+                      <dd className="font-bold">52 kcal</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Υδατάνθρακες</dt>
+                      <dd>14g</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">- εκ των οποίων σάκχαρα</dt>
+                      <dd>10g</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Πρωτεΐνες</dt>
+                      <dd>0.3g</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Λίπη</dt>
+                      <dd>0.2g</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Φυτικές ίνες</dt>
+                      <dd>2.4g</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-gray-600">Νάτριο</dt>
+                      <dd>1mg</dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Βιταμίνες & Μέταλλα</h3>
+                <div className="space-y-4">
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <h4 className="font-medium text-orange-900 mb-2">Βιταμίνη C</h4>
+                    <p className="text-sm text-orange-800">58.8mg (65% της ημερήσιας ανάγκης)</p>
+                  </div>
+                  
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <h4 className="font-medium text-red-900 mb-2">Αντιοξειδωτικά</h4>
+                    <p className="text-sm text-red-800">Ανθοκυανίνες, κερσετίνη, καροτενοειδή</p>
+                  </div>
+                  
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <h4 className="font-medium text-green-900 mb-2">Κάλιο</h4>
+                    <p className="text-sm text-green-800">107mg - υποστηρίζει την καρδιακή υγεία</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">Οφέλη για την Υγεία</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• Ενίσχυση του ανοσοποιητικού συστήματος</li>
+                    <li>• Αντιοξειδωτική προστασία</li>
+                    <li>• Υποστήριξη της πέψης</li>
+                    <li>• Χαμηλό γλυκαιμικό φορτίο</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -978,6 +1186,16 @@ export default function ProductDetailPage() {
         </div>
       </div>
       </div>
+      
+      {/* Lightbox for full-screen image viewing */}
+      <Lightbox
+        images={productData.galleryImages}
+        currentIndex={selectedImageIndex}
+        isOpen={showLightbox}
+        onClose={() => setShowLightbox(false)}
+        onIndexChange={setSelectedImageIndex}
+        alt={typedProduct.name}
+      />
     </div>
   );
 }
