@@ -26,23 +26,10 @@ export default function ModernCartIcon({
   const { toggle } = useCartDrawer()
 
   const handleClick = () => {
-    console.log('🛒 Cart button clicked!', { 
-      onClick: !!onClick, 
-      toggle: !!toggle,
-      toggleType: typeof toggle,
-      hasToggleFunction: typeof toggle === 'function'
-    })
-    
-    try {
-      if (onClick) {
-        onClick()
-      } else if (toggle && typeof toggle === 'function') {
-        toggle()
-      } else {
-        console.error('❌ Cart toggle function is not available:', { toggle })
-      }
-    } catch (error) {
-      console.error('❌ Error in cart button click:', error)
+    if (onClick) {
+      onClick()
+    } else {
+      toggle()
     }
   }
 

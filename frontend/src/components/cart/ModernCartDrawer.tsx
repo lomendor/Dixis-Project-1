@@ -36,45 +36,6 @@ export default function ModernCartDrawer() {
   const { itemCount, subtotal, total, currency } = useCartSummary()
   const { updateQuantity, removeFromCart, clearCart } = useCartActions()
 
-  // Debug cart drawer state
-  useEffect(() => {
-    console.log('🛒 ModernCartDrawer state:', {
-      isOpen,
-      itemCount,
-      total,
-      hasCart: !!cart,
-      cartItems: cart?.items?.length || 0
-    })
-  }, [isOpen, itemCount, total, cart])
-
-  // Add global debug function for testing
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as any).debugCartDrawer = {
-        isOpen,
-        openDrawer: () => {
-          console.log('🧪 Manual cart drawer open test')
-          if (cartStore.openDrawer) {
-            cartStore.openDrawer()
-          } else {
-            console.error('❌ openDrawer function not found in cartStore')
-          }
-        },
-        closeDrawer: () => {
-          console.log('🧪 Manual cart drawer close test')
-          if (cartStore.closeDrawer) {
-            cartStore.closeDrawer()
-          }
-        },
-        toggleDrawer: () => {
-          console.log('🧪 Manual cart drawer toggle test')
-          if (cartStore.toggleDrawer) {
-            cartStore.toggleDrawer()
-          }
-        }
-      }
-    }
-  }, [cartStore, isOpen])
 
   // Mobile-specific state
   const [isMobile, setIsMobile] = useState(false)

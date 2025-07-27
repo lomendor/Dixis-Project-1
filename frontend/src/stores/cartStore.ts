@@ -1050,17 +1050,6 @@ export const useCartError = () => {
 export const useCartDrawer = () => {
   const store = useCartStore()
   
-  // Debug logging for cart drawer
-  React.useEffect(() => {
-    console.log('🛒 useCartDrawer initialized:', {
-      store: !!store,
-      openDrawer: !!store?.openDrawer,
-      closeDrawer: !!store?.closeDrawer,
-      toggleDrawer: !!store?.toggleDrawer,
-      isDrawerOpen: store?.isDrawerOpen
-    })
-  }, [store])
-  
   return {
     isOpen: store?.isDrawerOpen || false,
     open: store?.openDrawer || (() => {

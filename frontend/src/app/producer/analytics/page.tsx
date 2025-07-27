@@ -9,8 +9,8 @@ import {
   ChartBarIcon,
   CurrencyEuroIcon,
   ShoppingCartIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   UserGroupIcon,
   EyeIcon,
   CalendarIcon,
@@ -302,9 +302,9 @@ export default function ProducerAnalyticsPage() {
                 </div>
                 <div className="flex items-center text-xs text-gray-600 mt-1">
                   {revenueChange >= 0 ? (
-                    <TrendingUpIcon className="h-3 w-3 text-green-500 mr-1" />
+                    <ArrowTrendingUpIcon className="h-3 w-3 text-green-500 mr-1" />
                   ) : (
-                    <TrendingDownIcon className="h-3 w-3 text-red-500 mr-1" />
+                    <ArrowTrendingDownIcon className="h-3 w-3 text-red-500 mr-1" />
                   )}
                   <span className={revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}>
                     {Math.abs(revenueChange)}%
@@ -329,9 +329,9 @@ export default function ProducerAnalyticsPage() {
                 <div className="text-2xl font-bold">{analytics.overview.totalOrders}</div>
                 <div className="flex items-center text-xs text-gray-600 mt-1">
                   {ordersChange >= 0 ? (
-                    <TrendingUpIcon className="h-3 w-3 text-green-500 mr-1" />
+                    <ArrowTrendingUpIcon className="h-3 w-3 text-green-500 mr-1" />
                   ) : (
-                    <TrendingDownIcon className="h-3 w-3 text-red-500 mr-1" />
+                    <ArrowTrendingDownIcon className="h-3 w-3 text-red-500 mr-1" />
                   )}
                   <span className={ordersChange >= 0 ? 'text-green-500' : 'text-red-500'}>
                     {Math.abs(ordersChange)}%
