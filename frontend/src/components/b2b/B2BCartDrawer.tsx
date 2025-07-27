@@ -14,7 +14,7 @@ import {
   TruckIcon,
   CalendarDaysIcon
 } from '@heroicons/react/24/outline'
-import { useCartStore, useCartDrawer, useCartSummary, useCartActions } from '@/stores/cartStore'
+import { useCartStore, useCartSummary, useCartActions } from '@/stores/cartStore'
 import { Cart, isB2BCart } from '@/lib/api/models/cart/types'
 import { idToString } from '@/lib/api/client/apiTypes'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
@@ -23,13 +23,16 @@ import Image from 'next/image'
 import { logger } from '@/lib/logging/productionLogger'
 import { errorToContext, toError } from '@/lib/utils/errorUtils'
 
-export default function B2BCartDrawer() {
+interface B2BCartDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function B2BCartDrawer({ isOpen, onClose }: B2BCartDrawerProps) {
   const cartStore = useCartStore()
   const cart: Cart | null = cartStore.cart
   const isLoading = cartStore.isLoading
   const lastAddedItem = cartStore.lastAddedItem
-
-  const { isOpen, close } = useCartDrawer()
   const { itemCount, subtotal, total, currency } = useCartSummary()
   const { updateQuantity, removeFromCart, clearCart } = useCartActions()
 
@@ -57,13 +60,13 @@ export default function B2BCartDrawer() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Handle swipe to close on mobile
+  // Handle swipe to onClose on mobile
   const handleDragEnd = (event: any, info: PanInfo) => {
     setIsDragging(false)
     setDragOffset(0)
 
     if (info.offset.x > 100 || info.velocity.x > 500) {
-      close()
+      onClose()
     }
   }
 
@@ -165,7 +168,7 @@ export default function B2BCartDrawer() {
       `}</style>
 
       <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={close}>
+        <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-500"
@@ -230,7 +233,7 @@ export default function B2BCartDrawer() {
                             className={`relative text-gray-400 hover:text-gray-500 touch-manipulation ${
                               isMobile ? '-m-1 p-3' : '-m-2 p-2'
                             }`}
-                            onClick={close}
+                            onClick={onClose}
                           >
                             <span className="absolute -inset-0.5" />
                             <span className="sr-only">Κλείσιμο panel</span>
@@ -290,7 +293,7 @@ export default function B2BCartDrawer() {
                               <div className="mt-6">
                                 <Link
                                   href={isB2B ? "/b2b/products" : "/products"}
-                                  onClick={close}
+                                  onClick={onClose}
                                   className={`inline-flex items-center rounded-md bg-blue-600 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 touch-manipulation ${
                                     isMobile
                                       ? 'px-6 py-4 text-base font-semibold'
@@ -339,7 +342,7 @@ export default function B2BCartDrawer() {
                                           <h3 className="flex-1 pr-2">
                                             <Link
                                               href={`${isB2B ? '/b2b' : ''}/products/${item.slug}`}
-                                              onClick={close}
+                                              onClick={onClose}
                                               className="hover:text-blue-600 transition-colors touch-manipulation"
                                             >
                                               {item.productName}
@@ -505,7 +508,7 @@ export default function B2BCartDrawer() {
                         <div className={`${isMobile ? 'space-y-4' : 'space-y-3'}`}>
                           <Link
                             href={isB2B ? "/b2b/checkout" : "/checkout"}
-                            onClick={close}
+                            onClick={onClose}
                             className={`flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 text-white shadow-sm hover:bg-blue-700 transition-colors touch-manipulation ${
                               isMobile
                                 ? 'px-6 py-4 text-lg font-semibold'
@@ -520,7 +523,7 @@ export default function B2BCartDrawer() {
                             <div className={`grid ${isMobile ? 'grid-cols-1 space-y-3' : 'grid-cols-2 gap-3'}`}>
                               <Link
                                 href="/b2b/quote-request"
-                                onClick={close}
+                                onClick={onClose}
                                 className={`flex items-center justify-center rounded-md border border-blue-300 bg-blue-50 text-blue-700 shadow-sm hover:bg-blue-100 transition-colors touch-manipulation ${
                                   isMobile
                                     ? 'px-6 py-3 text-base font-medium'
@@ -532,7 +535,7 @@ export default function B2BCartDrawer() {
                               </Link>
                               <Link
                                 href="/b2b/bulk-upload"
-                                onClick={close}
+                                onClick={onClose}
                                 className={`flex items-center justify-center rounded-md border border-green-300 bg-green-50 text-green-700 shadow-sm hover:bg-green-100 transition-colors touch-manipulation ${
                                   isMobile
                                     ? 'px-6 py-3 text-base font-medium'
@@ -548,7 +551,7 @@ export default function B2BCartDrawer() {
                           <div className={`flex ${isMobile ? 'flex-col space-y-3' : 'space-x-3'}`}>
                             <Link
                               href={isB2B ? "/b2b/cart" : "/cart"}
-                              onClick={close}
+                              onClick={onClose}
                               className={`flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 transition-colors touch-manipulation ${
                                 isMobile
                                   ? 'w-full px-6 py-3 text-base font-medium'
@@ -559,7 +562,7 @@ export default function B2BCartDrawer() {
                             </Link>
                             <button
                               type="button"
-                              onClick={close}
+                              onClick={onClose}
                               className={`flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 transition-colors touch-manipulation ${
                                 isMobile
                                   ? 'w-full px-6 py-3 text-base font-medium'

@@ -48,6 +48,12 @@ export default function ModernCartButton({
 }: ModernCartButtonProps) {
   const [isAdding, setIsAdding] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Hydration safety
+  React.useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   // Zustand store hooks with safety checks
   const store = useCartStore()
@@ -171,6 +177,21 @@ export default function ModernCartButton({
     )
   }
 
+  // Show loading state during hydration
+  if (!isHydrated) {
+    return (
+      <button
+        disabled={true}
+        className={`${baseClasses} opacity-75 cursor-not-allowed`}
+      >
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span>Φόρτωση...</span>
+        </div>
+      </button>
+    )
+  }
+
   // Regular add to cart button
   return (
     <motion.button
@@ -188,7 +209,7 @@ export default function ModernCartButton({
         scale: { duration: 0.3, ease: "easeInOut" }
       } : { duration: 0.2 }}
       onClick={handleAddToCart}
-      disabled={disabled || isLoading || isAdding}
+      disabled={disabled || isLoading || isAdding || !addToCart}
       className={baseClasses}
     >
       <AnimatePresence mode="wait">

@@ -146,7 +146,6 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         itemCount: updatedCart.itemCount,
         subtotal: updatedCart.subtotal,
         total: updatedCart.total,
-        isDrawerOpen: true,
         isLoading: false
       });
       
@@ -226,7 +225,6 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
           itemCount: localCart.itemCount,
           subtotal: localCart.subtotal,
           total: localCart.total,
-          isDrawerOpen: true,
           isLoading: false,
           error: null
         });
@@ -310,7 +308,6 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         itemCount: updatedCart.itemCount,
         subtotal: updatedCart.subtotal,
         total: updatedCart.total,
-        isDrawerOpen: true,
         isLoading: false
       });
       
@@ -678,7 +675,6 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         itemCount: updatedCart.itemCount,
         subtotal: updatedCart.subtotal,
         total: updatedCart.total,
-        isDrawerOpen: true,
         isLoading: false
       });
       

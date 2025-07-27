@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 // import { InlineCurrencySelector } from '@/components/ui/CurrencySelector'; // Temporarily disabled
 import ModernCartDrawer from '@/components/cart/ModernCartDrawer';
-import { useCartSummary, useCartDrawer } from '@/stores/cartStore';
+import { useCartSummary } from '@/stores/cartStore';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import Navbar from '@/components/Navbar';
@@ -14,10 +14,10 @@ import MobileCartIndicator from '@/components/MobileCartIndicator';
 // Client-only cart component
 function CartButton() {
   const [mounted, setMounted] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   
   // These are now safe thanks to our null checks
   const { itemCount } = useCartSummary();
-  const { open } = useCartDrawer();
 
   useEffect(() => {
     setMounted(true);
@@ -32,17 +32,23 @@ function CartButton() {
   }
 
   return (
-    <button
-      onClick={open}
-      className="relative p-2 text-gray-600 hover:text-green-600 transition-colors"
-    >
-      <ShoppingCartIcon className="h-6 w-6" />
-      {itemCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-          {itemCount}
-        </span>
-      )}
-    </button>
+    <>
+      <button
+        onClick={() => setIsCartOpen(true)}
+        className="relative p-2 text-gray-600 hover:text-green-600 transition-colors"
+      >
+        <ShoppingCartIcon className="h-6 w-6" />
+        {itemCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+            {itemCount}
+          </span>
+        )}
+      </button>
+      <ModernCartDrawer 
+        isOpen={isCartOpen} 
+        onClose={() => setIsCartOpen(false)} 
+      />
+    </>
   );
 }
 

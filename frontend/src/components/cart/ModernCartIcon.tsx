@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { ShoppingCartIcon, ShoppingBagIcon } from '@heroicons/react/24/outline'
-import { useCartSummary, useCartDrawer } from '@/stores/cartStore'
+import { useCartSummary } from '@/stores/cartStore'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface ModernCartIconProps {

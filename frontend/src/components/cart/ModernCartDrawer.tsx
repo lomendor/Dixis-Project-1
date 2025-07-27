@@ -17,7 +17,7 @@ import {
   UserGroupIcon,
   CheckBadgeIcon
 } from '@heroicons/react/24/outline'
-import { useCartStore, useCartDrawer, useCartSummary, useCartActions } from '@/stores/cartStore'
+import { useCartStore, useCartSummary, useCartActions } from '@/stores/cartStore'
 import { Cart } from '@/lib/api/models/cart/types'
 import { idToString } from '@/lib/api/client/apiTypes'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'

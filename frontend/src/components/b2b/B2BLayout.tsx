@@ -17,7 +17,7 @@ import {
   ShoppingCartIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
-import { useCartSummary, useCartDrawer } from '@/stores/cartStore';
+import { useCartSummary } from '@/stores/cartStore';
 import B2BCartDrawer from './B2BCartDrawer';
 
 interface B2BLayoutProps {
@@ -35,10 +35,10 @@ const navigation = [
 
 export default function B2BLayout({ children }: B2BLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { itemCount } = useCartSummary();
-  const { open: openCart } = useCartDrawer();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -134,7 +134,7 @@ export default function B2BLayout({ children }: B2BLayoutProps) {
           {/* Cart section */}
           <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
             <button
-              onClick={openCart}
+              onClick={() => setIsCartOpen(true)}
               className="flex items-center w-full px-2 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md group"
             >
               <div className="flex items-center w-full">
@@ -195,7 +195,7 @@ export default function B2BLayout({ children }: B2BLayoutProps) {
             <div className="flex items-center space-x-2">
               {/* B2B Cart button */}
               <button
-                onClick={openCart}
+                onClick={() => setIsCartOpen(true)}
                 className="relative text-gray-400 hover:text-gray-500"
                 title="Καλάθι B2B"
               >
@@ -225,7 +225,10 @@ export default function B2BLayout({ children }: B2BLayoutProps) {
       </div>
 
       {/* B2B Cart Drawer */}
-      <B2BCartDrawer />
+      <B2BCartDrawer 
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </div>
   );
 }
