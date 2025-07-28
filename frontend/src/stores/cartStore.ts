@@ -104,16 +104,20 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
   
   // Cart operations
   addToCart: async (productId: ID, quantity = 1, attributes?: CartItemAttributes) => {
+    console.log('🏪 CartStore: addToCart called', { productId, quantity, attributes })
     const state = get()
+    console.log('🏪 CartStore: Current state', { hasCart: !!state.cart, cartId: state.cart?.id })
     set({ isLoading: true, error: null })
     
     try {
       // Validation
       if (!productId) {
+        console.error('🏪 CartStore: Product ID is required')
         throw new Error('Product ID is required')
       }
       
       if (quantity <= 0) {
+        console.error('🏪 CartStore: Quantity must be greater than 0')
         throw new Error('Quantity must be greater than 0')
       }
       
@@ -121,13 +125,17 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
       let currentCart = state.cart;
       
       if (!currentCart) {
+        console.log('🏪 CartStore: Creating guest cart...')
         // Create a guest cart first
         currentCart = await cartApi.createGuestCart();
+        console.log('🏪 CartStore: Guest cart created:', currentCart)
         set({ cart: currentCart });
       }
       
+      console.log('🏪 CartStore: Adding item to cart via API...', { cartId: currentCart.id, productId, quantity, attributes })
       // Add item to cart via API
       const addedItem = await cartApi.addItem(idToString(currentCart.id), productId, quantity, attributes);
+      console.log('🏪 CartStore: Item added:', addedItem)
       
       // Refresh cart to get updated totals
       const updatedCart = await cartApi.getCart(idToString(currentCart.id));
@@ -140,6 +148,8 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         });
       }
 
+      console.log('🏪 CartStore: API success - updating state', { updatedCart, addedItem })
+      
       set({
         cart: updatedCart,
         lastAddedItem: addedItem,
@@ -151,17 +161,21 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
       
       // Save to localStorage for persistence
       if (typeof window !== 'undefined') {
+        console.log('🏪 CartStore: Saving to localStorage...')
         localStorage.setItem('dixis-cart-storage', JSON.stringify({
           state: { cart: updatedCart, lastAddedItem: addedItem },
           version: 0
         }));
+        console.log('🏪 CartStore: Saved to localStorage successfully')
       }
       
     } catch (error) {
+      console.log('🏪 CartStore: API failed, using fallback', error)
       logger.error('Error adding to cart via API, trying local fallback:', toError(error));
 
       // Fallback to local storage cart when API is not available
       try {
+        console.log('🏪 CartStore: Starting fallback implementation...')
         const state = get();
         const localCart: Cart = state.cart || {
           id: 'local-cart',
@@ -231,10 +245,12 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
 
         // Save to localStorage
         if (typeof window !== 'undefined') {
+          console.log('🏪 CartStore: Fallback - saving to localStorage...')
           localStorage.setItem('dixis-cart-storage', JSON.stringify({
             state: { cart: localCart, lastAddedItem: localItem },
             version: 0
           }));
+          console.log('🏪 CartStore: Fallback - saved to localStorage successfully')
         }
 
       } catch (fallbackError) {
@@ -953,7 +969,6 @@ let hydrationCompleted = false; // Guard to prevent multiple hydrations
 
 export const useCartStore = () => {
   const store = useCartStoreBase()
-  const [isHydrated, setIsHydrated] = useState(false)
   
   // Expose store to window for debugging in development
   useEffect(() => {
@@ -964,59 +979,19 @@ export const useCartStore = () => {
   }, [])
   
   useEffect(() => {
-    // Only hydrate once on mount with additional guard
-    if (typeof window !== 'undefined' && !isHydrated && !hydrationCompleted) {
-      hydrationCompleted = true; // Set guard immediately
+    // Hydrate on mount - simplified approach
+    if (typeof window !== 'undefined') {
+      console.log('🛒 Starting cart store hydration...')
       try {
         store.hydrate()
         console.log('🛒 Cart store hydrated successfully')
       } catch (error) {
         console.warn('Failed to hydrate cart store:', error)
-        hydrationCompleted = false; // Reset on error for retry
-      } finally {
-        setIsHydrated(true)
       }
     }
-  }, [isHydrated]) // Removed 'store' to prevent infinite loop
+  }, []) // Only run once on mount
   
-  // During SSR and initial client render, return safe defaults
-  if (!isHydrated) {
-    return {
-      ...defaultCartState,
-      // Safe function placeholders during hydration
-      addToCart: async () => {},
-      removeFromCart: async () => {},
-      updateQuantity: async () => {},
-      clearCart: () => {},
-      refreshCart: async () => {},
-      getItemQuantity: () => 0,
-      isInCart: () => false,
-      // All other methods with safe defaults
-      addAdoptionToCart: async () => {},
-      updateBulkQuantity: async () => {},
-      addBulkItems: async () => {},
-      getProductQuantity: () => 0,
-      getAdoptionQuantity: () => 0,
-      isProductInCart: () => false,
-      isAdoptionInCart: () => false,
-      getProductItems: () => [],
-      getAdoptionItems: () => [],
-      getTotalProductValue: () => 0,
-      getTotalAdoptionValue: () => 0,
-      getVolumeDiscountSavings: () => 0,
-      getTotalBulkDiscount: () => 0,
-      getCartSummaryWithDiscounts: () => ({ itemCount: 0, subtotal: 0, total: 0, volumeDiscount: 0, bulkSavings: 0 }),
-      checkMinimumOrderRequirements: () => ({ meets: true, missing: 0 }),
-      calculateNextDiscountThreshold: () => null,
-      migrateGuestCartToBusinessUser: async () => {},
-      setCart: () => {},
-      setLoading: () => {},
-      setError: () => {},
-      setLastAddedItem: () => {},
-      hydrate: () => {}
-    }
-  }
-  
+  // Always return the store - no hydration blocking
   return store
 }
 

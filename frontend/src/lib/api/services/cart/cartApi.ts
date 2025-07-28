@@ -192,6 +192,7 @@ export class CartApiService {
     quantity: number = 1,
     attributes?: CartItemAttributes
   ): Promise<CartItem> {
+    console.log('🌐 CartAPI: addItem called', { cartId, productId, quantity, attributes })
     return this.tryApiCall(
       async () => {
         // Use unified configuration
@@ -214,36 +215,48 @@ export class CartApiService {
         return await response.json();
       },
       () => {
+        console.log('🔄 CartAPI: Using local storage fallback for addItem')
         // Mock implementation
         if (!mockCart) {
+          console.log('🔄 CartAPI: Creating new mock cart')
           mockCart = createMockCart();
           mockCart.id = cartId;
         }
+
+        console.log('🔄 CartAPI: Current mock cart:', mockCart)
 
         // Check if item already exists
         const existingItemIndex = mockCart.items.findIndex(
           item => item.productId === productId.toString()
         );
 
+        console.log('🔄 CartAPI: Checking existing item:', { existingItemIndex, productId: productId.toString() })
+
         let addedItem: CartItem;
 
         if (existingItemIndex >= 0) {
+          console.log('🔄 CartAPI: Updating existing item')
           // Update existing item
           const existingItem = mockCart.items[existingItemIndex];
           existingItem.quantity += quantity;
           existingItem.subtotal = existingItem.price * existingItem.quantity;
           existingItem.updatedAt = new Date().toISOString();
           addedItem = existingItem;
+          console.log('🔄 CartAPI: Updated existing item:', addedItem)
         } else {
+          console.log('🔄 CartAPI: Adding new item')
           // Add new item
           addedItem = createMockCartItem(productId, quantity, attributes);
           mockCart.items.push(addedItem);
+          console.log('🔄 CartAPI: Added new item:', addedItem)
         }
 
         // Update cart totals
         mockCart = updateMockCartTotals(mockCart);
+        console.log('🔄 CartAPI: Updated cart totals:', mockCart)
 
         logger.info('🛒 Added item to mock cart:', { addedItem, cart: mockCart });
+        console.log('✅ CartAPI: Returning addedItem:', addedItem)
         return addedItem;
       }
     );

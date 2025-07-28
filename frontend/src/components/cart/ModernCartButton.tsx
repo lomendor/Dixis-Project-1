@@ -86,6 +86,7 @@ export default function ModernCartButton({
 
     try {
       await addToCart(productId, 1, attributes)
+      console.log('✅ Cart: Item added successfully!')
 
       // Show success animation
       setShowSuccess(true)
@@ -93,6 +94,7 @@ export default function ModernCartButton({
 
       onAddSuccess?.()
     } catch (error) {
+      console.error('❌ Cart: Error adding item:', error)
       logger.error('Error adding to cart', toError(error), errorToContext(error))
       onAddError?.(error instanceof Error ? error : new Error('Failed to add to cart'))
     } finally {
