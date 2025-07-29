@@ -482,34 +482,41 @@ class ProductController extends Controller
         $categoryId = $request->query('category_id');
         $perPage = $request->query('per_page', 15);
 
+        // Prepare case variations for Greek text search
+        $searchTermUpper = mb_strtoupper($searchTerm, 'UTF-8');
+        $searchTermLower = mb_strtolower($searchTerm, 'UTF-8');
+
         // Initialize query for active products only
         $query = Product::where('is_active', true);
 
-        // Search by term
-        $query->where(function ($q) use ($searchTerm) {
-            $q->where('name', 'like', '%' . $searchTerm . '%')
-              ->orWhere('description', 'like', '%' . $searchTerm . '%')
-              ->orWhere('short_description', 'like', '%' . $searchTerm . '%')
-              ->orWhereHas('producer', function ($q2) use ($searchTerm) {
-                  $q2->where('business_name', 'like', '%' . $searchTerm . '%');
-              })
-              ->orWhereHas('categories', function ($q2) use ($searchTerm) {
-                  $q2->where('name', 'like', '%' . $searchTerm . '%');
-              });
+        // Search by term (GREEK-SMART-CASE - Handle Greek capitalization patterns)
+        // Create Greek-aware search variations:
+        // 1. Original term, 2. First letter uppercase, 3. All uppercase, 4. All lowercase
+        $searchTermFirstCap = mb_strtoupper(mb_substr($searchTerm, 0, 1, 'UTF-8'), 'UTF-8') . 
+                              mb_strtolower(mb_substr($searchTerm, 1, null, 'UTF-8'), 'UTF-8');
+        
+        $searchVariations = array_unique([
+            $searchTerm,
+            $searchTermUpper,
+            $searchTermLower, 
+            $searchTermFirstCap
+        ]);
+        
+        $query->where(function ($q) use ($searchVariations) {
+            foreach ($searchVariations as $variation) {
+                $q->orWhere('name', 'ILIKE', '%' . $variation . '%')
+                  ->orWhere('description', 'ILIKE', '%' . $variation . '%')
+                  ->orWhere('short_description', 'ILIKE', '%' . $variation . '%');
+            }
         });
 
-        // Filter by category if provided
+        // Filter by category if provided (SIMPLIFIED - Use direct category_id)
         if ($categoryId) {
-            $query->whereHas('categories', function ($q) use ($categoryId) {
-                $q->where('id', $categoryId);
-            });
+            $query->where('category_id', $categoryId);
         }
 
-        // Eager load relationships
-        $query->with([
-            'producer:id,business_name',
-            'categories:id,name,slug',
-        ]);
+        // Eager load relationships (SIMPLIFIED)
+        $query->with('producer:id,business_name');
 
         // Order by relevance (products with name match first, then description, etc.)
         $query->orderByRaw("

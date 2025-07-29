@@ -174,17 +174,20 @@ export default function ProducerOrdersPage() {
 
   const filteredOrders = orders.filter(order => {
     if (filter === 'all') return true;
+    if (filter === 'needsAction') return ['pending', 'confirmed'].includes(order.status);
+    if (filter === 'inProgress') return ['processing', 'shipped'].includes(order.status);
+    if (filter === 'completed') return order.status === 'delivered';
+    if (filter === 'issues') return order.status === 'cancelled';
     return order.status === filter;
   });
 
-  const getStatusCounts = () => {
+  const getSmartGroupCounts = () => {
     return {
       all: orders.length,
-      pending: orders.filter(o => o.status === 'pending').length,
-      confirmed: orders.filter(o => o.status === 'confirmed').length,
-      processing: orders.filter(o => o.status === 'processing').length,
-      shipped: orders.filter(o => o.status === 'shipped').length,
-      delivered: orders.filter(o => o.status === 'delivered').length,
+      needsAction: orders.filter(o => ['pending', 'confirmed'].includes(o.status)).length,
+      inProgress: orders.filter(o => ['processing', 'shipped'].includes(o.status)).length,
+      completed: orders.filter(o => o.status === 'delivered').length,
+      issues: orders.filter(o => o.status === 'cancelled').length,
     };
   };
 
@@ -207,7 +210,7 @@ export default function ProducerOrdersPage() {
     );
   }
 
-  const statusCounts = getStatusCounts();
+  const smartCounts = getSmartGroupCounts();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -217,10 +220,10 @@ export default function ProducerOrdersPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Διαχείριση Παραγγελιών
+                🚀 Έξυπνη Διαχείριση Παραγγελιών
               </h1>
               <p className="text-gray-600 mt-1">
-                Παρακολουθήστε και διαχειριστείτε όλες τις παραγγελίες σας
+                Ομαδοποιημένες με βάση την δράση που χρειάζεται
               </p>
             </div>
             
@@ -228,83 +231,80 @@ export default function ProducerOrdersPage() {
               href="/producer/dashboard"
               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
             >
-              Πίσω στο Dashboard
+              Dashboard
             </Link>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+        {/* Smart Groups - Reduced to 4 actionable categories */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <button
+            onClick={() => setFilter('needsAction')}
+            className={`p-6 rounded-lg border-2 transition-all ${
+              filter === 'needsAction' 
+                ? 'border-red-500 bg-red-50 shadow-md' 
+                : 'border-gray-200 bg-white hover:border-red-300 hover:shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
+              {smartCounts.needsAction > 0 && (
+                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                  ΕΠΕΙΓΟΝ
+                </span>
+              )}
+            </div>
+            <div className="text-2xl font-bold text-red-600">{smartCounts.needsAction}</div>
+            <div className="text-sm text-red-700 font-medium">Χρειάζονται Δράση</div>
+            <div className="text-xs text-gray-500 mt-1">Αναμονή + Επιβεβαιωμένες</div>
+          </button>
+          
+          <button
+            onClick={() => setFilter('inProgress')}
+            className={`p-6 rounded-lg border-2 transition-all ${
+              filter === 'inProgress' 
+                ? 'border-blue-500 bg-blue-50 shadow-md' 
+                : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <ArrowPathIcon className="h-6 w-6 text-blue-500" />
+            </div>
+            <div className="text-2xl font-bold text-blue-600">{smartCounts.inProgress}</div>
+            <div className="text-sm text-blue-700 font-medium">Σε Εξέλιξη</div>
+            <div className="text-xs text-gray-500 mt-1">Επεξεργασία + Αποστολή</div>
+          </button>
+          
+          <button
+            onClick={() => setFilter('completed')}
+            className={`p-6 rounded-lg border-2 transition-all ${
+              filter === 'completed' 
+                ? 'border-green-500 bg-green-50 shadow-md' 
+                : 'border-gray-200 bg-white hover:border-green-300 hover:shadow-sm'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <CheckCircleIcon className="h-6 w-6 text-green-500" />
+            </div>
+            <div className="text-2xl font-bold text-green-600">{smartCounts.completed}</div>
+            <div className="text-sm text-green-700 font-medium">Ολοκληρωμένες</div>
+            <div className="text-xs text-gray-500 mt-1">Παραδόθηκαν</div>
+          </button>
+          
           <button
             onClick={() => setFilter('all')}
-            className={`p-4 rounded-lg border-2 transition-colors ${
+            className={`p-6 rounded-lg border-2 transition-all ${
               filter === 'all' 
-                ? 'border-green-500 bg-green-50' 
-                : 'border-gray-200 bg-white hover:border-gray-300'
+                ? 'border-purple-500 bg-purple-50 shadow-md' 
+                : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-sm'
             }`}
           >
-            <div className="text-2xl font-bold text-gray-900">{statusCounts.all}</div>
-            <div className="text-sm text-gray-600">Όλες</div>
-          </button>
-          
-          <button
-            onClick={() => setFilter('pending')}
-            className={`p-4 rounded-lg border-2 transition-colors ${
-              filter === 'pending' 
-                ? 'border-yellow-500 bg-yellow-50' 
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
-          >
-            <div className="text-2xl font-bold text-yellow-600">{statusCounts.pending}</div>
-            <div className="text-sm text-gray-600">Αναμονή</div>
-          </button>
-          
-          <button
-            onClick={() => setFilter('confirmed')}
-            className={`p-4 rounded-lg border-2 transition-colors ${
-              filter === 'confirmed' 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
-          >
-            <div className="text-2xl font-bold text-blue-600">{statusCounts.confirmed}</div>
-            <div className="text-sm text-gray-600">Επιβεβαιωμένες</div>
-          </button>
-          
-          <button
-            onClick={() => setFilter('processing')}
-            className={`p-4 rounded-lg border-2 transition-colors ${
-              filter === 'processing' 
-                ? 'border-orange-500 bg-orange-50' 
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
-          >
-            <div className="text-2xl font-bold text-orange-600">{statusCounts.processing}</div>
-            <div className="text-sm text-gray-600">Επεξεργασία</div>
-          </button>
-          
-          <button
-            onClick={() => setFilter('shipped')}
-            className={`p-4 rounded-lg border-2 transition-colors ${
-              filter === 'shipped' 
-                ? 'border-purple-500 bg-purple-50' 
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
-          >
-            <div className="text-2xl font-bold text-purple-600">{statusCounts.shipped}</div>
-            <div className="text-sm text-gray-600">Αποστολή</div>
-          </button>
-          
-          <button
-            onClick={() => setFilter('delivered')}
-            className={`p-4 rounded-lg border-2 transition-colors ${
-              filter === 'delivered' 
-                ? 'border-green-500 bg-green-50' 
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
-          >
-            <div className="text-2xl font-bold text-green-600">{statusCounts.delivered}</div>
-            <div className="text-sm text-gray-600">Παραδόθηκαν</div>
+            <div className="flex items-center justify-between mb-2">
+              <ShoppingCartIcon className="h-6 w-6 text-purple-500" />
+            </div>
+            <div className="text-2xl font-bold text-purple-600">{smartCounts.all}</div>
+            <div className="text-sm text-purple-700 font-medium">Όλες</div>
+            <div className="text-xs text-gray-500 mt-1">Συνολικές παραγγελίες</div>
           </button>
         </div>
 
@@ -312,8 +312,17 @@ export default function ProducerOrdersPage() {
         <div className="bg-white rounded-lg shadow-sm">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              {filter === 'all' ? 'Όλες οι Παραγγελίες' : `Παραγγελίες - ${statusConfig[filter as keyof typeof statusConfig]?.label}`}
+              {filter === 'all' ? '📋 Όλες οι Παραγγελίες' : 
+               filter === 'needsAction' ? '⚡ Χρειάζονται Άμεση Δράση' :
+               filter === 'inProgress' ? '🔄 Παραγγελίες σε Εξέλιξη' :
+               filter === 'completed' ? '✅ Ολοκληρωμένες Παραγγελίες' :
+               `Παραγγελίες - ${statusConfig[filter as keyof typeof statusConfig]?.label}`}
             </h2>
+            {filter === 'needsAction' && smartCounts.needsAction > 0 && (
+              <p className="text-sm text-red-600 mt-1">
+                💡 Προτεραιότητα: Απαντήστε γρήγορα για καλύτερες αξιολογήσεις!
+              </p>
+            )}
           </div>
           
           <div className="overflow-x-auto">

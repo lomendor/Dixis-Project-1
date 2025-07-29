@@ -486,7 +486,7 @@ export default function ProductDetailPage() {
               )}
               {typedProduct.isLocal && (
                 <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
-                  🏛️ Ελληνικό
+                  🏆 Premium
                 </span>
               )}
               {typedProduct.isVegan && (
@@ -996,9 +996,9 @@ export default function ProductDetailPage() {
                   {typedProduct.isLocal && (
                     <div className="flex items-center space-x-3">
                       <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                        🏛️ Ελληνικό
+                        🏆 Premium
                       </span>
-                      <span className="text-sm text-gray-600">100% Ελληνικής προέλευσης</span>
+                      <span className="text-sm text-gray-600">100% Artisan Quality</span>
                     </div>
                   )}
                   <div className="flex items-center space-x-3">

@@ -42,8 +42,20 @@ export default function ProductStats() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
+        const result = await response.json();
+        // Backend returns {status: 'success', data: {...stats...}}
+        if (result.status === 'success' && result.data) {
+          setStats(result.data);
+        } else {
+          console.warn('Product stats API returned unexpected format:', result);
+          logger.error('Product stats API returned unexpected format', toError(new Error('Unexpected API response')), { result });
+        }
+      } else {
+        console.warn('Product stats API request failed:', response.status, response.statusText);
+        logger.error('Product stats API request failed', toError(new Error(`HTTP ${response.status}`)), { 
+          status: response.status, 
+          statusText: response.statusText 
+        });
       }
     } catch (error) {
       logger.error('Error fetching product stats:', toError(error), errorToContext(error));
@@ -65,7 +77,24 @@ export default function ProductStats() {
     );
   }
 
-  if (!stats) return null;
+  if (!stats) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+        <div className="text-gray-400 mb-2">
+          <CubeIcon className="h-12 w-12 mx-auto" />
+        </div>
+        <p className="text-gray-500 text-sm">
+          Δεν μπορέσαμε να φορτώσουμε τα στατιστικά προϊόντων
+        </p>
+        <button 
+          onClick={fetchStats}
+          className="mt-3 text-green-600 hover:text-green-800 text-sm font-medium"
+        >
+          Προσπάθεια ξανά
+        </button>
+      </div>
+    );
+  }
 
   const statItems = [
     {

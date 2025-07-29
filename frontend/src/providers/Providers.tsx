@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import { SimpleQueryProvider } from './SimpleQueryProvider';
 import { CartProvider } from '@/components/cart/CartProvider';
+import { ToastProvider } from '@/contexts/ToastContext';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -13,7 +14,9 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <SimpleQueryProvider>
       <CartProvider>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </CartProvider>
     </SimpleQueryProvider>
   );

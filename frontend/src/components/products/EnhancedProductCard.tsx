@@ -1,58 +1,113 @@
 'use client';
 
 import { toError, errorToContext } from '@/lib/utils/errorUtils';
-
 import { logger } from '@/lib/logging/productionLogger';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   HeartIcon, 
   ShoppingCartIcon, 
   EyeIcon,
   StarIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  MapPinIcon,
+  UserIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartActions } from '@/hooks/useCartWithNotifications';
+
+import CertificationBadges, { ProductCardBadges } from '@/components/ui/CertificationBadges';
+import SustainabilityCard, { CompactSustainabilityCard } from '@/components/ui/SustainabilityCard';
+import TraceabilityTimeline, { CompactTraceabilityTimeline } from '@/components/ui/TraceabilityTimeline';
+
+interface Producer {
+  id?: number;
+  business_name: string;
+  slug: string;
+  location?: string;
+  avatar_url?: string;
+  rating?: number;
+  verified?: boolean;
+}
 
 interface Product {
   id: number;
   name: string;
   slug: string;
   price: number;
+  producer_price?: number;
   discount_price?: number;
   main_image: string;
   short_description: string;
-  description?: string; // Optional for compatibility
+  description?: string;
   stock: number;
-  producer: {
-    business_name: string;
-    slug: string;
-  };
+  producer: Producer;
   rating?: number;
   reviews_count?: number;
+  category?: string;
+  unit?: string;
+  
+  // Certification fields
+  pdo_certification?: string;
+  pgi_certification?: string;
+  tsg_certification?: string;
+  is_organic?: boolean;
+  organic_certification_body?: string;
+  quality_grade?: string;
+  
+  // Traceability fields
+  batch_number?: string;
+  harvest_date?: string;
+  processing_method?: string;
+  production_facility?: string;
+  expiry_date?: string;
+  
+  // Sustainability fields
+  carbon_footprint?: number;
+  water_usage?: number;
+  pesticide_free_days?: number;
+  soil_health_score?: number;
+  renewable_energy_percentage?: number;
+  
+  // Additional data
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface EnhancedProductCardProps {
   product: Product;
   onQuickView?: (product: Product) => void;
+  onToggleWishlist?: (product: Product) => void;
+  isInWishlist?: boolean;
+  showProducerInfo?: boolean;
+  showEnhancedFeatures?: boolean;
+  compact?: boolean;
   className?: string;
 }
 
 export default function EnhancedProductCard({ 
   product, 
-  onQuickView, 
+  onQuickView,
+  onToggleWishlist,
+  isInWishlist = false,
+  showProducerInfo = true,
+  showEnhancedFeatures = true,
+  compact = false,
   className = '' 
 }: EnhancedProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   
-  const { addToCart } = useCartStore();
+  const { addToCart } = useCartActions();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -69,10 +124,8 @@ export default function EnhancedProductCard({
         image: product.main_image && product.main_image.trim() !== '' ? product.main_image : '/images/placeholder-product.svg',
         producer: product.producer.business_name
       });
-      
-      // Success feedback (could add toast notification here)
-      logger.info('Product added to cart successfully');
     } catch (error) {
+      // Error handling is done in the useCartActions hook
       logger.error('Failed to add product to cart:', toError(error), errorToContext(error));
     } finally {
       setIsLoading(false);
@@ -82,7 +135,15 @@ export default function EnhancedProductCard({
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);    // Wishlist feature planned for future release
+    if (onToggleWishlist) {
+      onToggleWishlist(product);
+    }
+  };
+
+  const toggleDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDetails(!showDetails);
   };
 
   const handleQuickView = (e: React.MouseEvent) => {
@@ -107,9 +168,37 @@ export default function EnhancedProductCard({
   const discountPercentage = hasDiscount 
     ? Math.round(((product.price - product.discount_price!) / product.price) * 100)
     : 0;
+    
+  // HONEST CHECK: Only show enhanced features if real data exists from backend
+  const hasEnhancedData = showEnhancedFeatures && (
+    product.pdo_certification ||
+    product.pgi_certification ||
+    product.tsg_certification ||
+    product.organic_certification_body ||
+    product.batch_number ||
+    product.harvest_date ||
+    product.carbon_footprint ||
+    product.water_usage ||
+    product.pesticide_free_days
+  );
+  
+  // Use real backend fields that exist
+  const hasBasicEnhancements = showEnhancedFeatures && (
+    product.is_organic ||
+    (product.producer?.verified) ||
+    (product.producer?.rating && typeof product.producer.rating === 'string' && parseFloat(product.producer.rating) > 4.0)
+  );
+  
+  const producerEarnings = product.producer_price || (product.price * 0.75);
+  const platformFee = product.price - producerEarnings;
 
   return (
-    <div className={`group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-green-200 ${className}`}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-green-200 ${compact ? 'max-w-sm' : 'max-w-md'} ${className}`}
+    >
       {/* Discount Badge */}
       {hasDiscount && (
         <div className="absolute top-3 left-3 z-10 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
@@ -128,7 +217,7 @@ export default function EnhancedProductCard({
         onClick={handleWishlistToggle}
         className="absolute top-12 right-3 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all duration-200 opacity-0 group-hover:opacity-100"
       >
-        {isWishlisted ? (
+        {isInWishlist ? (
           <HeartIconSolid className="w-5 h-5 text-red-500" />
         ) : (
           <HeartIcon className="w-5 h-5 text-gray-600 hover:text-red-500" />
@@ -158,6 +247,23 @@ export default function EnhancedProductCard({
             </div>
           )}
 
+          {/* Real certification badges - only show if data exists */}
+          {(hasEnhancedData || hasBasicEnhancements) && (
+            <div className="absolute bottom-3 left-3 right-3">
+              <ProductCardBadges
+                pdoCertification={product.pdo_certification}
+                pgiCertification={product.pgi_certification}
+                tsgCertification={product.tsg_certification}
+                isOrganic={product.is_organic}
+                organicCertificationBody={product.organic_certification_body}
+                qualityGrade={product.quality_grade}
+                carbonFootprint={product.carbon_footprint}
+                pesticideFreeDays={product.pesticide_free_days}
+                renewableEnergyPercentage={product.renewable_energy_percentage}
+              />
+            </div>
+          )}
+
           {/* Quick View Button */}
           {onQuickView && (
             <button
@@ -173,20 +279,50 @@ export default function EnhancedProductCard({
 
         {/* Product Info */}
         <div className="p-4">
-          {/* Producer */}
-          <p className="text-sm text-gray-500 mb-1 truncate">
-            από {product.producer.business_name}
-          </p>
+          {/* Producer info */}
+          {showProducerInfo && (
+            <div className="flex items-center space-x-2 mb-3">
+              {product.producer.avatar_url ? (
+                <Image
+                  src={product.producer.avatar_url}
+                  alt={product.producer.business_name}
+                  width={24}
+                  height={24}
+                  className="rounded-full"
+                />
+              ) : (
+                <UserIcon className="w-5 h-5 text-gray-400" />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {product.producer.business_name}
+                </p>
+                {product.producer.location && (
+                  <div className="flex items-center space-x-1 text-xs text-gray-500">
+                    <MapPinIcon className="w-3 h-3" />
+                    <span>{product.producer.location}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-          {/* Product Name */}
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
-            {product.name}
-          </h3>
+          {/* Product Name and Category */}
+          <div className="mb-2">
+            <h3 className={`font-semibold text-gray-900 line-clamp-2 group-hover:text-green-600 transition-colors ${compact ? 'text-sm' : 'text-base'}`}>
+              {product.name}
+            </h3>
+            {product.category && (
+              <p className="text-xs text-gray-500 mt-1">{typeof product.category === 'string' ? product.category : product.category.name}</p>
+            )}
+          </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {product.short_description}
-          </p>
+          {!compact && (
+            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+              {product.short_description}
+            </p>
+          )}
 
           {/* Rating */}
           {product.rating && (
@@ -209,16 +345,50 @@ export default function EnhancedProductCard({
             </div>
           )}
 
-          {/* Price */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl font-bold text-green-600">
-              €{finalPrice.toFixed(2)}
-            </span>
-            {hasDiscount && (
-              <span className="text-sm text-gray-400 line-through">
-                €{product.price.toFixed(2)}
-              </span>
-            )}
+          {/* Price and earnings breakdown */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className={`font-bold text-green-600 ${compact ? 'text-lg' : 'text-xl'}`}>
+                  €{finalPrice.toFixed(2)}
+                </span>
+                {hasDiscount && (
+                  <span className="text-sm text-gray-400 line-through">
+                    €{product.price.toFixed(2)}
+                  </span>
+                )}
+                {product.unit && (
+                  <span className="text-sm text-gray-500">/ {product.unit}</span>
+                )}
+              </div>
+              
+              {(hasEnhancedData || hasBasicEnhancements) && (
+                <button
+                  onClick={toggleDetails}
+                  className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800"
+                >
+                  <InformationCircleIcon className="w-4 h-4" />
+                  <span>Λεπτομέρειες</span>
+                  {showDetails ? (
+                    <ChevronUpIcon className="w-3 h-3" />
+                  ) : (
+                    <ChevronDownIcon className="w-3 h-3" />
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* Producer earnings transparency */}
+            <div className="text-xs text-gray-500 mt-1 space-y-1">
+              <div className="flex justify-between">
+                <span>Στον παραγωγό:</span>
+                <span className="font-semibold text-green-600">€{producerEarnings.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Πλατφόρμα & μεταφορά:</span>
+                <span>€{platformFee.toFixed(2)}</span>
+              </div>
+            </div>
           </div>
         </div>
       </Link>
@@ -270,6 +440,96 @@ export default function EnhancedProductCard({
           )}
         </button>
       </div>
-    </div>
+
+      {/* Honest Details Expandable Section - Only real data */}
+      <AnimatePresence>
+        {showDetails && (hasEnhancedData || hasBasicEnhancements) && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="border-t border-gray-100 bg-gray-50 overflow-hidden"
+          >
+            <div className="p-4 space-y-4">
+              {/* Sustainability metrics - Only if real data exists */}
+              {(product.carbon_footprint || product.water_usage || product.pesticide_free_days) && (
+                <CompactSustainabilityCard
+                  carbonFootprint={product.carbon_footprint}
+                  waterUsage={product.water_usage}
+                  pesticideFreeDays={product.pesticide_free_days}
+                  soilHealthScore={product.soil_health_score}
+                  renewableEnergyPercentage={product.renewable_energy_percentage}
+                  showComparisons={false}
+                  showTrends={false}
+                />
+              )}
+
+              {/* Traceability info - Only if real data exists */}
+              {(product.batch_number || product.harvest_date) && (
+                <CompactTraceabilityTimeline
+                  batchNumber={product.batch_number}
+                  harvestDate={product.harvest_date}
+                  processingMethod={product.processing_method}
+                  productionFacility={product.production_facility}
+                  expiryDate={product.expiry_date}
+                  producerName={product.producer?.business_name}
+                  farmLocation={product.producer?.location}
+                />
+              )}
+
+              {/* Real producer information that exists in backend */}
+              <div className="grid grid-cols-1 gap-3 text-xs">
+                {product.is_organic && (
+                  <div className="bg-green-50 p-3 rounded-lg text-green-800">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-green-600">🌱</span>
+                      <span className="font-medium">Βιολογικό Προϊόν</span>
+                    </div>
+                    <p className="text-xs text-green-700 mt-1">Πιστοποιημένη βιολογική καλλιέργεια</p>
+                  </div>
+                )}
+                
+                {product.producer?.verified && (
+                  <div className="bg-blue-50 p-3 rounded-lg text-blue-800">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-600">✓</span>
+                      <span className="font-medium">Επιβεβαιωμένος Παραγωγός</span>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-1">Ελεγμένος και πιστοποιημένος από τη Dixis</p>
+                  </div>
+                )}
+
+                {product.producer?.rating && typeof product.producer.rating === 'string' && parseFloat(product.producer.rating) > 4.0 && (
+                  <div className="bg-yellow-50 p-3 rounded-lg text-yellow-800">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-yellow-600">⭐</span>
+                      <span className="font-medium">Υψηλή Αξιολόγηση: {product.producer.rating}/5</span>
+                    </div>
+                    <p className="text-xs text-yellow-700 mt-1">Εξαιρετικές κριτικές από πελάτες</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
+
+// Specialized variants
+export function CompactProductCard(props: Omit<EnhancedProductCardProps, 'compact'>) {
+  return <EnhancedProductCard {...props} compact={true} />;
+}
+
+export function SimpleProductCard(props: Omit<EnhancedProductCardProps, 'showEnhancedFeatures'>) {
+  return <EnhancedProductCard {...props} showEnhancedFeatures={false} />;
+}
+
+export function ProducerProductCard(props: Omit<EnhancedProductCardProps, 'showProducerInfo'>) {
+  return <EnhancedProductCard {...props} showProducerInfo={false} />;
+}
+
+// Type exports
+export type { EnhancedProductCardProps, Product, Producer };

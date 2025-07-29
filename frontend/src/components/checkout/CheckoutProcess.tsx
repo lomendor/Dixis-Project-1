@@ -48,7 +48,7 @@ export default function CheckoutProcess({ className = '' }: CheckoutProcessProps
   const [billingAddress, setBillingAddress] = useState<Partial<BillingAddress>>({});
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>(ShippingMethod.STANDARD);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CREDIT_CARD);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('VIVA_WALLET' as PaymentMethod);
   const [paymentData, setPaymentData] = useState<any>({});
   const [orderId, setOrderId] = useState<number | null>(null);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
@@ -213,6 +213,8 @@ export default function CheckoutProcess({ className = '' }: CheckoutProcessProps
       case 2:
         if (paymentMethod === PaymentMethod.CASH_ON_DELIVERY) {
           return true;
+        } else if (paymentMethod === 'VIVA_WALLET') {
+          return paymentData.isValid && (paymentCompleted || paymentData.isCompleted);
         } else if (paymentMethod === PaymentMethod.CREDIT_CARD) {
           return paymentData.isValid && (paymentCompleted || paymentData.isCompleted);
         } else if (paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT) {
@@ -279,6 +281,7 @@ export default function CheckoutProcess({ className = '' }: CheckoutProcessProps
       setOrderId(parseInt(idToString(order.id)));
 
       // For credit card and SEPA, payment will be handled by Stripe
+      // For Viva Wallet, payment is handled by Viva Wallet service
       // For cash on delivery, complete the order immediately
       if (paymentMethod === PaymentMethod.CASH_ON_DELIVERY) {
         // Generate and send invoice automatically
@@ -460,6 +463,7 @@ export default function CheckoutProcess({ className = '' }: CheckoutProcessProps
                 <div className="border border-gray-200 rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Τρόπος Πληρωμής</h4>
                   <p className="text-sm text-gray-600">
+                    {paymentMethod === 'VIVA_WALLET' && 'Viva Wallet (Ελληνικές Κάρτες)'}
                     {paymentMethod === PaymentMethod.CREDIT_CARD && 'Πιστωτική Κάρτα'}
                     {paymentMethod === PaymentMethod.DEBIT_CARD && 'Χρεωστική Κάρτα'}
                     {paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT && 'Τραπεζικό Έμβασμα SEPA'}
@@ -488,22 +492,22 @@ export default function CheckoutProcess({ className = '' }: CheckoutProcessProps
 
               {currentStep < steps.length ? (
                 <button
-                  onClick={currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT) && !orderId ? handlePlaceOrder : handleNextStep}
-                  disabled={!validateStep(currentStep) || (currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT) && isProcessing)}
+                  onClick={currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT || paymentMethod === 'VIVA_WALLET') && !orderId ? handlePlaceOrder : handleNextStep}
+                  disabled={!validateStep(currentStep) || (currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT || paymentMethod === 'VIVA_WALLET') && isProcessing)}
                   className={`
                     px-6 py-2 border border-transparent rounded-md text-sm font-medium text-white
-                    ${validateStep(currentStep) && !(currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT) && isProcessing)
+                    ${validateStep(currentStep) && !(currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT || paymentMethod === 'VIVA_WALLET') && isProcessing)
                       ? 'bg-green-600 hover:bg-green-700'
                       : 'bg-gray-400 cursor-not-allowed'
                     }
                   `}
                 >
-                  {currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT) && isProcessing ? (
+                  {currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT || paymentMethod === 'VIVA_WALLET') && isProcessing ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block" />
                       Δημιουργία παραγγελίας...
                     </>
-                  ) : currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT) && !orderId ? (
+                  ) : currentStep === 2 && (paymentMethod === PaymentMethod.CREDIT_CARD || paymentMethod === PaymentMethod.SEPA_DIRECT_DEBIT || paymentMethod === 'VIVA_WALLET') && !orderId ? (
                     'Συνέχεια στην πληρωμή'
                   ) : paymentCompleted ? (
                     'Επόμενο'

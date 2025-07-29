@@ -12,6 +12,7 @@ import { logger } from '@/lib/logging/productionLogger';
 import { errorToContext, toError } from '@/lib/utils/errorUtils';
 import { PaymentMethod } from '@/lib/api/models/order/types';
 import SepaDirectDebitForm from './SepaDirectDebitForm';
+import VivaWalletPayment from './VivaWalletPayment';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -226,9 +227,16 @@ export default function PaymentForm({
 }: PaymentFormProps) {
   const paymentMethods = [
     {
+      id: 'VIVA_WALLET' as PaymentMethod,
+      name: 'Viva Wallet',
+      description: 'Ελληνικές κάρτες με δόσεις - Προτεινόμενο',
+      icon: '🏛️',
+      recommended: true,
+    },
+    {
       id: PaymentMethod.CREDIT_CARD,
       name: 'Πιστωτική Κάρτα',
-      description: 'Visa, Mastercard, American Express',
+      description: 'Visa, Mastercard, American Express (Διεθνείς)',
       icon: '💳',
     },
     {
@@ -305,14 +313,21 @@ export default function PaymentForm({
           <div
             key={method.id}
             className={`
-              border-2 rounded-lg p-4 cursor-pointer transition-colors
+              border-2 rounded-lg p-4 cursor-pointer transition-colors relative
               ${paymentMethod === method.id
-                ? 'border-green-500 bg-green-50'
+                ? method.recommended
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-green-500 bg-green-50'
                 : 'border-gray-200 hover:border-gray-300'
               }
             `}
             onClick={() => onPaymentMethodChange(method.id)}
           >
+            {method.recommended && (
+              <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+                Προτεινόμενο
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="text-2xl">{method.icon}</div>
@@ -345,6 +360,19 @@ export default function PaymentForm({
       </div>
 
       {/* Payment Form */}
+      {paymentMethod === 'VIVA_WALLET' && (
+        <div className="mt-6">
+          <h4 className="font-medium text-gray-900 mb-4">Πληρωμή μέσω Viva Wallet</h4>
+          <VivaWalletPayment
+            orderId={orderId}
+            total={total}
+            onPaymentSuccess={onPaymentSuccess}
+            onPaymentError={onPaymentError}
+            onPaymentDataChange={onPaymentDataChange}
+          />
+        </div>
+      )}
+
       {paymentMethod === PaymentMethod.CREDIT_CARD && (
         <div className="mt-6">
           <h4 className="font-medium text-gray-900 mb-4">Στοιχεία Κάρτας</h4>

@@ -66,6 +66,8 @@ export default function ProducerProductsPage() {
     pending: 0,
     inactive: 0
   });
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   useEffect(() => {
     if (!user || user.role !== 'producer') {
@@ -135,6 +137,84 @@ export default function ProducerProductsPage() {
       }
     } catch (error) {
       logger.error('Error deleting product:', toError(error), errorToContext(error));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(filteredProducts.map(p => p.id));
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const handleSelectProduct = (productId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(prev => [...prev, productId]);
+    } else {
+      setSelectedProducts(prev => prev.filter(id => id !== productId));
+    }
+  };
+
+  const handleBulkAction = async (action: string) => {
+    if (selectedProducts.length === 0) {
+      alert('Παρακαλώ επιλέξτε προϊόντα για bulk action');
+      return;
+    }
+
+    const confirmMessage = 
+      action === 'active' ? `Ενεργοποίηση ${selectedProducts.length} προϊόντων;` :
+      action === 'inactive' ? `Απενεργοποίηση ${selectedProducts.length} προϊόντων;` :
+      action === 'featured' ? `Ορισμός ${selectedProducts.length} προϊόντων ως προτεινόμενα;` :
+      action === 'delete' ? `Διαγραφή ${selectedProducts.length} προϊόντων; ΠΡΟΣΟΧΗ: Η ενέργεια δεν αναιρείται!` :
+      `Εφαρμογή bulk action σε ${selectedProducts.length} προϊόντα;`;
+
+    if (!confirm(confirmMessage)) return;
+
+    setBulkActionLoading(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      if (action === 'delete') {
+        // Handle bulk delete
+        for (const productId of selectedProducts) {
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/producer/products/${productId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json',
+            },
+          });
+        }
+      } else {
+        // Handle bulk status update (would need backend endpoint)
+        const updateData = action === 'featured' 
+          ? { is_featured: true }
+          : { status: action };
+
+        // This would typically be a single bulk API call
+        // For now, simulate individual updates
+        for (const productId of selectedProducts) {
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/producer/products/${productId}`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData),
+          });
+        }
+      }
+
+      setSelectedProducts([]);
+      fetchProducts();
+      alert(`✅ Bulk action "${action}" εφαρμόστηκε επιτυχώς!`);
+    } catch (error) {
+      logger.error('Error in bulk action:', toError(error), errorToContext(error));
+      alert('❌ Σφάλμα κατά το bulk action');
+    } finally {
+      setBulkActionLoading(false);
     }
   };
 
@@ -244,6 +324,48 @@ export default function ProducerProductsPage() {
           </div>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {selectedProducts.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-blue-800 font-medium">
+                  {selectedProducts.length} προϊόντα επιλεγμένα
+                </span>
+                <button
+                  onClick={() => setSelectedProducts([])}
+                  className="text-blue-600 hover:text-blue-800 text-sm"
+                >
+                  Καθαρισμός επιλογής
+                </button>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <select
+                  className="border border-blue-300 rounded px-3 py-1 text-sm bg-white"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleBulkAction(e.target.value);
+                      e.target.value = ''; // Reset selection
+                    }
+                  }}
+                  disabled={bulkActionLoading}
+                >
+                  <option value="">Επιλέξτε ενέργεια...</option>
+                  <option value="active">✅ Ενεργοποίηση</option>
+                  <option value="inactive">⏸️ Απενεργοποίηση</option>
+                  <option value="featured">⭐ Προτεινόμενα</option>
+                  <option value="delete" style={{color: 'red'}}>🗑️ Διαγραφή</option>
+                </select>
+                
+                {bulkActionLoading && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
@@ -291,6 +413,14 @@ export default function ProducerProductsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Προϊόν
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -313,6 +443,14 @@ export default function ProducerProductsPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredProducts.map((product) => (
                     <tr key={product.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={(e) => handleSelectProduct(product.id, e.target.checked)}
+                          className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">

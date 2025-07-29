@@ -1,6 +1,7 @@
 'use client';
 
 import { toError, errorToContext } from '@/lib/utils/errorUtils';
+import { UNIFIED_API_CONFIG } from '@/lib/api/config/unified';
 
 import { useQuery } from '@tanstack/react-query';
 import { Product } from '@/lib/api/models/product/types';
@@ -274,8 +275,10 @@ const performGlobalSearch = async (filters: SearchFilters): Promise<SearchResult
       searchParams.set('sort_by', filters.sortBy);
     }
 
-    // Call the search API proxy
-    const response = await fetch(`/api/products/search?${searchParams.toString()}`);
+    // Call the Laravel search API directly
+    const searchUrl = `${UNIFIED_API_CONFIG.BASE_URL}/api/v1/products/search?${searchParams.toString()}`;
+    
+    const response = await fetch(searchUrl);
 
     if (!response.ok) {
       throw new Error(`Search API error: ${response.status}`);
@@ -303,26 +306,8 @@ const performGlobalSearch = async (filters: SearchFilters): Promise<SearchResult
       createdAt: item.created_at
     }));
 
-    // Search producers if we have location or producer-related query
+    // Search producers (DISABLED for now - focus on products)
     let producers: Producer[] = [];
-    try {
-      const producersResponse = await fetch(`/api/producers/search?q=${encodeURIComponent(filters.query)}&per_page=5`);
-      if (producersResponse.ok) {
-        const producersData = await producersResponse.json();
-        producers = (producersData.data || []).map((item: any) => ({
-          id: item.id,
-          business_name: item.business_name,
-          slug: item.slug,
-          bio: item.bio,
-          location: item.location,
-          profile_image: item.profile_image,
-          cover_image: item.cover_image,
-          specialties: item.specialties || []
-        }));
-      }
-    } catch (error) {
-      logger.warn('Producer search failed:', error);
-    }
 
     // Use API suggestions if available, otherwise generate
     const suggestions = apiData.suggestions || generateSearchSuggestions(filters?.query || '');
@@ -339,7 +324,6 @@ const performGlobalSearch = async (filters: SearchFilters): Promise<SearchResult
       facets
     };
 
-    logger.info('Search results:', results);
     return results;
 
   } catch (error) {

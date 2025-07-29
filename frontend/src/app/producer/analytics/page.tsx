@@ -14,7 +14,8 @@ import {
   UserGroupIcon,
   EyeIcon,
   CalendarIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -109,9 +110,9 @@ export default function ProducerAnalyticsPage() {
     if (!refreshing) setLoading(true);
     
     try {
-      const token = localStorage.getItem('auth-token');
+      const token = localStorage.getItem('access_token');
       
-      const response = await fetch(buildApiUrl(`test/analytics?days=${timeRange}`), {
+      const response = await fetch(buildApiUrl(`producer/analytics?days=${timeRange}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -119,10 +120,17 @@ export default function ProducerAnalyticsPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setAnalytics(data.data || generateMockAnalytics());
+        const result = await response.json();
+        // Backend returns {status: 'success', data: {...analytics...}}
+        if (result.status === 'success' && result.data) {
+          setAnalytics(result.data);
+        } else {
+          console.warn('Analytics API returned unexpected format:', result);
+          setAnalytics(generateMockAnalytics());
+        }
       } else {
-        // Use mock data if API not implemented yet
+        console.warn('Analytics API request failed:', response.status, response.statusText);
+        // Use mock data if API not available yet
         setAnalytics(generateMockAnalytics());
       }
     } catch (error) {
@@ -253,11 +261,11 @@ export default function ProducerAnalyticsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Στατιστικά & Αναλυτικά</h1>
+            <h1 className="text-3xl font-bold text-gray-900">📊 Έξυπνα Αναλυτικά</h1>
             <p className="text-gray-600 mt-1">
-              Παρακολουθήστε την απόδοση των προϊόντων σας
+              Ανακαλύψτε patterns και βελτιώστε τις πωλήσεις σας
             </p>
           </div>
           
@@ -282,6 +290,66 @@ export default function ProducerAnalyticsPage() {
               Ανανέωση
             </Button>
           </div>
+        </div>
+
+        {/* Quick Insights Pills */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-4 text-white"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">🔥 Top Μήνας</p>
+                <p className="text-xl font-bold">
+                  {formatCurrency(Math.max(...analytics.revenueChart.map(d => d.revenue)))}
+                </p>
+              </div>
+              <CurrencyEuroIcon className="h-8 w-8 opacity-80" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">⭐ Best Seller</p>
+                <p className="text-lg font-bold truncate">
+                  {analytics.overview.topProduct.length > 20 
+                    ? analytics.overview.topProduct.substring(0, 20) + "..." 
+                    : analytics.overview.topProduct}
+                </p>
+              </div>
+              <StarIcon className="h-8 w-8 opacity-80" />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-4 text-white"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90">📈 Αύξηση</p>
+                <p className="text-xl font-bold">
+                  {revenueChange >= 0 ? '+' : ''}{revenueChange}%
+                </p>
+              </div>
+              {revenueChange >= 0 ? (
+                <ArrowTrendingUpIcon className="h-8 w-8 opacity-80" />
+              ) : (
+                <ArrowTrendingDownIcon className="h-8 w-8 opacity-80" />
+              )}
+            </div>
+          </motion.div>
         </div>
 
         {/* Overview Cards */}

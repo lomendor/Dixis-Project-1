@@ -8,7 +8,11 @@ import { useState, useEffect } from 'react';
 import { ImageUpload } from './ImageUpload';
 import { 
   InformationCircleIcon,
-  CalendarIcon
+  CalendarIcon,
+  ShieldCheckIcon,
+  GlobeAltIcon,
+  BeakerIcon,
+  SunIcon
 } from '@heroicons/react/24/outline';
 
 interface Category {
@@ -51,7 +55,29 @@ export default function ProductForm({ product, onSubmit, loading = false }: Prod
     is_gluten_free: product?.is_gluten_free || false,
     is_featured: product?.is_featured || false,
     is_seasonal: product?.is_seasonal || false,
-    seasonality: product?.seasonality || []
+    seasonality: product?.seasonality || [],
+    
+    // Certification fields
+    pdo_certification: product?.pdo_certification || '',
+    pgi_certification: product?.pgi_certification || '',
+    tsg_certification: product?.tsg_certification || '',
+    organic_certification_body: product?.organic_certification_body || '',
+    organic_certification_number: product?.organic_certification_number || '',
+    
+    // Traceability fields
+    batch_number: product?.batch_number || '',
+    harvest_date: product?.harvest_date || '',
+    processing_method: product?.processing_method || '',
+    expiry_date: product?.expiry_date || '',
+    production_facility: product?.production_facility || '',
+    quality_grade: product?.quality_grade || '',
+    
+    // Sustainability metrics
+    carbon_footprint: product?.carbon_footprint || '',
+    water_usage: product?.water_usage || '',
+    pesticide_free_days: product?.pesticide_free_days || '',
+    soil_health_score: product?.soil_health_score || '',
+    renewable_energy_percentage: product?.renewable_energy_percentage || ''
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -170,12 +196,36 @@ export default function ProductForm({ product, onSubmit, loading = false }: Prod
   const validateForm = () => {
     const newErrors: any = {};
 
+    // Basic validations
     if (!formData.name) newErrors.name = 'Το όνομα είναι υποχρεωτικό';
     if (!formData.description) newErrors.description = 'Η περιγραφή είναι υποχρεωτική';
     if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Η τιμή πρέπει να είναι μεγαλύτερη από 0';
     if (!formData.category_id) newErrors.category_id = 'Η κατηγορία είναι υποχρεωτική';
     if (!formData.stock_quantity || parseInt(formData.stock_quantity) < 0) newErrors.stock_quantity = 'Το απόθεμα δεν μπορεί να είναι αρνητικό';
     if (!formData.weight || parseFloat(formData.weight) <= 0) newErrors.weight = 'Το βάρος πρέπει να είναι μεγαλύτερο από 0';
+    
+    // Certification validations
+    if (formData.is_organic && !formData.organic_certification_body) {
+      newErrors.organic_certification_body = 'Επιλέξτε φορέα πιστοποίησης για βιολογικό προϊόν';
+    }
+    
+    // Date validations
+    if (formData.harvest_date && formData.expiry_date) {
+      const harvestDate = new Date(formData.harvest_date);
+      const expiryDate = new Date(formData.expiry_date);
+      if (harvestDate >= expiryDate) {
+        newErrors.expiry_date = 'Η ημερομηνία λήξης πρέπει να είναι μετά τη συγκομιδή';
+      }
+    }
+    
+    // Sustainability metrics validations
+    if (formData.soil_health_score && (parseInt(formData.soil_health_score) < 1 || parseInt(formData.soil_health_score) > 10)) {
+      newErrors.soil_health_score = 'Ο δείκτης υγείας εδάφους πρέπει να είναι μεταξύ 1-10';
+    }
+    
+    if (formData.renewable_energy_percentage && (parseInt(formData.renewable_energy_percentage) < 0 || parseInt(formData.renewable_energy_percentage) > 100)) {
+      newErrors.renewable_energy_percentage = 'Το ποσοστό ανανεώσιμης ενέργειας πρέπει να είναι μεταξύ 0-100%';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -468,6 +518,319 @@ export default function ProductForm({ product, onSubmit, loading = false }: Prod
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Certifications */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <ShieldCheckIcon className="h-5 w-5 mr-2 text-blue-600" />
+          Πιστοποιήσεις & Ποιότητα
+        </h3>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="pdo_certification" className="block text-sm font-medium text-gray-700">
+                ΠΟΠ Πιστοποίηση (Protected Designation of Origin)
+              </label>
+              <input
+                type="text"
+                id="pdo_certification"
+                name="pdo_certification"
+                value={formData.pdo_certification}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. Καλαματιανές Ελιές ΠΟΠ"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="pgi_certification" className="block text-sm font-medium text-gray-700">
+                ΠΓΕ Πιστοποίηση (Protected Geographical Indication)
+              </label>
+              <input
+                type="text"
+                id="pgi_certification"
+                name="pgi_certification"
+                value={formData.pgi_certification}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. Κρητικό Ελαιόλαδο ΠΓΕ"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="tsg_certification" className="block text-sm font-medium text-gray-700">
+                ΕΠΙΠ Πιστοποίηση (Traditional Speciality Guaranteed)
+              </label>
+              <input
+                type="text"
+                id="tsg_certification"
+                name="tsg_certification"
+                value={formData.tsg_certification}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. Παραδοσιακό Τσουρέκι ΕΠΙΠ"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="quality_grade" className="block text-sm font-medium text-gray-700">
+                Βαθμός Ποιότητας
+              </label>
+              <select
+                id="quality_grade"
+                name="quality_grade"
+                value={formData.quality_grade}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+              >
+                <option value="">Επιλέξτε βαθμό</option>
+                <option value="Extra">Extra</option>
+                <option value="Α'">Α' Ποιότητας</option>
+                <option value="Β'">Β' Ποιότητας</option>
+                <option value="Premium">Premium</option>
+                <option value="Artisanal">Τεχνοτροπικό</option>
+              </select>
+            </div>
+          </div>
+          
+          {formData.is_organic && (
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="text-sm font-medium text-green-900 mb-3">Στοιχεία Βιολογικής Πιστοποίησης</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="organic_certification_body" className="block text-sm font-medium text-green-700">
+                    Φορέας Πιστοποίησης
+                  </label>
+                  <select
+                    id="organic_certification_body"
+                    name="organic_certification_body"
+                    value={formData.organic_certification_body}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-green-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">Επιλέξτε φορέα</option>
+                    <option value="DIO">DIO (GR-BIO-01)</option>
+                    <option value="BIOHELLAS">BIOHELLAS (GR-BIO-02)</option>
+                    <option value="GMCERT">GMCERT (GR-BIO-07)</option>
+                    <option value="AGROCERT">AGROCERT (GR-BIO-03)</option>
+                    <option value="OTHER">Άλλος</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="organic_certification_number" className="block text-sm font-medium text-green-700">
+                    Αριθμός Πιστοποίησης
+                  </label>
+                  <input
+                    type="text"
+                    id="organic_certification_number"
+                    name="organic_certification_number"
+                    value={formData.organic_certification_number}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-green-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                    placeholder="π.χ. GR-BIO-01-12345"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Traceability & Production Info */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <GlobeAltIcon className="h-5 w-5 mr-2 text-purple-600" />
+          Ιχνηλασιμότητα & Πληροφορίες Παραγωγής
+        </h3>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label htmlFor="batch_number" className="block text-sm font-medium text-gray-700">
+                Αριθμός Παρτίδας/Lot
+              </label>
+              <input
+                type="text"
+                id="batch_number"
+                name="batch_number"
+                value={formData.batch_number}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. LOT2025-001"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="harvest_date" className="block text-sm font-medium text-gray-700">
+                Ημερομηνία Συγκομιδής
+              </label>
+              <input
+                type="date"
+                id="harvest_date"
+                name="harvest_date"
+                value={formData.harvest_date}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="expiry_date" className="block text-sm font-medium text-gray-700">
+                Ημερομηνία Λήξης
+              </label>
+              <input
+                type="date"
+                id="expiry_date"
+                name="expiry_date"
+                value={formData.expiry_date}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="processing_method" className="block text-sm font-medium text-gray-700">
+                Μέθοδος Επεξεργασίας
+              </label>
+              <select
+                id="processing_method"
+                name="processing_method"
+                value={formData.processing_method}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+              >
+                <option value="">Επιλέξτε μέθοδο</option>
+                <option value="Fresh">Φρέσκο (χωρίς επεξεργασία)</option>
+                <option value="Traditional">Παραδοσιακή μέθοδος</option>
+                <option value="Cold_pressed">Ψυχρή έκθλιψη</option>
+                <option value="Sun_dried">Ηλιοξήρανση</option>
+                <option value="Fermented">Ζύμωση</option>
+                <option value="Smoked">Κάπνισμα</option>
+                <option value="Aged">Ωρίμανση</option>
+                <option value="Pasteurized">Παστεριωμένο</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="production_facility" className="block text-sm font-medium text-gray-700">
+                Εγκατάσταση Παραγωγής
+              </label>
+              <input
+                type="text"
+                id="production_facility"
+                name="production_facility"
+                value={formData.production_facility}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. Κρητικό Ελαιοτριβείο Α.Ε."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Sustainability Metrics */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <SunIcon className="h-5 w-5 mr-2 text-green-600" />
+          Περιβαλλοντικό Αποτύπωμα & Αειφορία
+        </h3>
+        
+        <div className="bg-green-50 p-4 rounded-lg space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="carbon_footprint" className="block text-sm font-medium text-green-700">
+                Ανθρακικό Αποτύπωμα (kg CO₂)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                id="carbon_footprint"
+                name="carbon_footprint"
+                value={formData.carbon_footprint}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-green-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. 1.25"
+              />
+              <p className="mt-1 text-xs text-green-600">Kg CO₂ ανά μονάδα προϊόντος</p>
+            </div>
+            
+            <div>
+              <label htmlFor="water_usage" className="block text-sm font-medium text-green-700">
+                Κατανάλωση Νερού (λίτρα)
+              </label>
+              <input
+                type="number"
+                id="water_usage"
+                name="water_usage"
+                value={formData.water_usage}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-green-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. 150"
+              />
+              <p className="mt-1 text-xs text-green-600">Λίτρα νερού ανά μονάδα προϊόντος</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label htmlFor="pesticide_free_days" className="block text-sm font-medium text-green-700">
+                Ημέρες Χωρίς Φυτοφάρμακα
+              </label>
+              <input
+                type="number"
+                id="pesticide_free_days"
+                name="pesticide_free_days"
+                value={formData.pesticide_free_days}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-green-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. 365"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="soil_health_score" className="block text-sm font-medium text-green-700">
+                Δείκτης Υγείας Εδάφους (1-10)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                id="soil_health_score"
+                name="soil_health_score"
+                value={formData.soil_health_score}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-green-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. 8"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="renewable_energy_percentage" className="block text-sm font-medium text-green-700">
+                Ανανεώσιμη Ενέργεια (%)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                id="renewable_energy_percentage"
+                name="renewable_energy_percentage"
+                value={formData.renewable_energy_percentage}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-green-300 shadow-sm focus:ring-green-500 focus:border-green-500"
+                placeholder="π.χ. 75"
+              />
+              <p className="mt-1 text-xs text-green-600">% χρήσης ανανεώσιμων πηγών</p>
+            </div>
           </div>
         </div>
       </div>

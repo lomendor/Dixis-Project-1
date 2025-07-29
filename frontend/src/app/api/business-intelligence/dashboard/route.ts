@@ -377,7 +377,7 @@ function generateTopProducts() {
   const greekProducts = [
     { name: 'Οργανικές Ντομάτες Κρήτης', price: 4.50 },
     { name: 'Φρέσκο Μαρούλι Θεσσαλονίκης', price: 2.80 },
-    { name: 'Ελληνικό Ελαιόλαδο Extra Virgin', price: 15.90 },
+    { name: 'Premium Ελαιόλαδο Extra Virgin', price: 15.90 },
     { name: 'Φέτα ΠΟΠ', price: 8.50 },
     { name: 'Μαϊντανός Φρέσκος', price: 1.20 },
     { name: 'Καρότα Βιολογικά', price: 3.20 },

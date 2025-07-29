@@ -1,26 +1,58 @@
-// Working server-side products page
+// Enhanced server-side products page with EnhancedProductCard integration
 import Link from 'next/link';
-import ServerProductCartButton from '@/components/products/ServerProductCartButton';
+import ClientProductGrid from '@/components/products/ClientProductGrid';
 import { UNIFIED_ENDPOINTS } from '@/lib/api/config/unified';
+
+interface Producer {
+  id?: number;
+  business_name: string;
+  slug?: string;
+  city?: string;
+  location?: string;
+  avatar_url?: string;
+  rating?: number;
+  verified?: boolean;
+}
 
 interface Product {
   id: number;
   name: string;
+  slug: string;
   price: number;
+  producer_price?: number;
   discount_price?: number;
   main_image?: string;
-  stock: number;
-  producer?: {
-    business_name: string;
-    city?: string;
-  };
-  slug: string;
   short_description?: string;
-  is_featured?: boolean;
-  is_organic?: boolean;
+  description?: string;
+  stock: number;
+  producer?: Producer;
+  rating?: number;
+  reviews_count?: number;
   category?: {
     name: string;
   };
+  unit?: string;
+  is_featured?: boolean;
+  is_organic?: boolean;
+  
+  // Enhanced fields (may not be present in current data)
+  pdo_certification?: string;
+  pgi_certification?: string;
+  tsg_certification?: string;
+  organic_certification_body?: string;
+  quality_grade?: string;
+  batch_number?: string;
+  harvest_date?: string;
+  processing_method?: string;
+  production_facility?: string;
+  expiry_date?: string;
+  carbon_footprint?: number;
+  water_usage?: number;
+  pesticide_free_days?: number;
+  soil_health_score?: number;
+  renewable_energy_percentage?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export default async function ServerProductsPage() {
@@ -50,26 +82,70 @@ export default async function ServerProductsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white">
-        <div className="container mx-auto px-4 py-12">
+      {/* Enhanced Hero Section */}
+      <div className="bg-gradient-to-r from-green-600 via-green-700 to-emerald-600 text-white relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M30,15 Q35,20 30,25 Q25,20 30,15 M20,30 Q25,35 20,40 Q15,35 20,30 M40,30 Q45,35 40,40 Q35,35 40,30'/%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '60px 60px'
+          }}></div>
+        </div>
+
+        <div className="container mx-auto px-4 py-16 relative z-10">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Αυθεντικά Ελληνικά Προϊόντα
+            {/* Heritage Badge */}
+            <div className="inline-flex items-center bg-white/20 backdrop-blur-sm text-green-100 px-6 py-3 rounded-full text-sm font-bold mb-6">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full mr-3 animate-pulse"></div>
+              Πιστοποιημένη Ελληνική Ποιότητα
+            </div>
+            
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              Αυθεντικά Ελληνικά <br className="hidden md:block" />
+              <span className="bg-gradient-to-r from-emerald-300 to-green-200 bg-clip-text text-transparent">
+                Προϊόντα
+              </span>
             </h1>
-            <p className="text-xl text-green-100 mb-6 max-w-2xl mx-auto">
-              Ανακαλύψτε τα καλύτερα προϊόντα από επιλεγμένους παραγωγούς σε όλη την Ελλάδα
+            
+            <p className="text-xl md:text-2xl text-green-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Ανακαλύψτε τα καλύτερα προϊόντα με πιστοποιήσεις ΠΟΠ, ΠΓΕ και βιολογικές καλλιέργειες 
+              από επιλεγμένους παραγωγούς σε όλη την Ελλάδα
             </p>
-            <div className="bg-white/20 backdrop-blur-md rounded-lg p-4 inline-block">
-              <p className="text-lg">
-                <span className="font-bold">{products.length}</span> προϊόντα διαθέσιμα
-              </p>
+            
+            {/* Enhanced Stats */}
+            <div className="flex flex-wrap justify-center gap-6 mb-8">
+              <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 min-w-[140px]">
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1">{products.length}</div>
+                <div className="text-green-100 text-sm">Προϊόντα</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 min-w-[140px]">
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1">
+                  {products.filter(p => p.is_organic).length}
+                </div>
+                <div className="text-green-100 text-sm">Βιολογικά</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 min-w-[140px]">
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1">
+                  {new Set(products.map(p => p.producer?.business_name).filter(Boolean)).size}
+                </div>
+                <div className="text-green-100 text-sm">Παραγωγοί</div>
+              </div>
+            </div>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="#products" className="bg-white text-green-700 px-8 py-4 rounded-xl font-semibold hover:bg-green-50 transition-all duration-300 shadow-lg hover:shadow-xl">
+                Δείτε τα Προϊόντα
+              </a>
+              <Link href="/producers" className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                Γνωρίστε τους Παραγωγούς
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8" id="products">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
             <p><strong>Σφάλμα:</strong> {error}</p>
@@ -79,124 +155,50 @@ export default async function ServerProductsPage() {
 
         {products.length > 0 ? (
           <>
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">{products.length}</div>
-                <div className="text-gray-600">Συνολικά Προϊόντα</div>
+            {/* Enhanced Stats with Certifications */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 text-center">
+                <div className="text-2xl md:text-3xl font-bold text-green-600 mb-2">{products.length}</div>
+                <div className="text-gray-600 text-sm md:text-base">Συνολικά Προϊόντα</div>
               </div>
-              <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 text-center">
+                <div className="text-2xl md:text-3xl font-bold text-emerald-600 mb-2">
                   {products.filter(p => p.is_organic).length}
                 </div>
-                <div className="text-gray-600">Βιολογικά</div>
+                <div className="text-gray-600 text-sm md:text-base">Βιολογικά</div>
               </div>
-              <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                <div className="text-3xl font-bold text-orange-600 mb-2">
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 text-center">
+                <div className="text-2xl md:text-3xl font-bold text-orange-600 mb-2">
                   {products.filter(p => p.is_featured).length}
                 </div>
-                <div className="text-gray-600">Επιλεγμένα</div>
+                <div className="text-gray-600 text-sm md:text-base">Επιλεγμένα</div>
               </div>
-              <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 text-center">
+                <div className="text-2xl md:text-3xl font-bold text-purple-600 mb-2">
                   {new Set(products.map(p => p.producer?.business_name).filter(Boolean)).size}
                 </div>
-                <div className="text-gray-600">Παραγωγοί</div>
+                <div className="text-gray-600 text-sm md:text-base">Παραγωγοί</div>
+              </div>
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 text-center">
+                <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
+                  {products.filter(p => p.producer?.verified).length}
+                </div>
+                <div className="text-gray-600 text-sm md:text-base">Επιβεβαιωμένοι</div>
+              </div>
+              <div className="bg-white rounded-lg shadow-md p-4 md:p-6 text-center">
+                <div className="text-2xl md:text-3xl font-bold text-teal-600 mb-2">
+                  {products.filter(p => 
+                    p.producer?.rating && 
+                    typeof p.producer.rating === 'string' && 
+                    parseFloat(p.producer.rating) > 4.0
+                  ).length}
+                </div>
+                <div className="text-gray-600 text-sm md:text-base">Υψηλή Αξιολόγηση</div>
               </div>
             </div>
 
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                  {/* Product Image */}
-                  <div className="h-48 bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
-                    {product.main_image ? (
-                      <img 
-                        src={product.main_image} 
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-6xl">
-                        {product.category?.name?.includes('Ελαιόλαδο') ? '🫒' :
-                         product.category?.name?.includes('Μέλι') ? '🍯' :
-                         product.category?.name?.includes('Τυρί') ? '🧀' :
-                         product.category?.name?.includes('Φρούτα') ? '🍊' : '🥬'}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-lg text-gray-900 line-clamp-2 flex-1">
-                        {product.name}
-                      </h3>
-                      {product.is_organic && (
-                        <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex-shrink-0">
-                          BIO
-                        </span>
-                      )}
-                    </div>
-
-                    {product.producer && (
-                      <p className="text-sm text-gray-600 mb-2">
-                        {product.producer.business_name}
-                        {product.producer.city && ` • ${product.producer.city}`}
-                      </p>
-                    )}
-
-                    {product.short_description && (
-                      <p className="text-sm text-gray-500 mb-3 line-clamp-2">
-                        {product.short_description}
-                      </p>
-                    )}
-
-                    {/* Price */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        {product.discount_price ? (
-                          <div>
-                            <span className="text-xl font-bold text-green-600">
-                              €{Number(product.discount_price).toFixed(2)}
-                            </span>
-                            <span className="text-sm text-gray-500 line-through ml-2">
-                              €{Number(product.price).toFixed(2)}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-xl font-bold text-green-600">
-                            €{Number(product.price).toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                      <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {product.stock > 0 ? 'Διαθέσιμο' : 'Εξαντλημένο'}
-                      </span>
-                    </div>
-
-                    {/* Action Button */}
-                    <div className="space-y-2">
-                      <Link 
-                        href={`/products/${product.slug}`}
-                        className="w-full bg-gray-100 text-gray-900 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-center block"
-                      >
-                        Προβολή Προϊόντος
-                      </Link>
-                      {product.stock > 0 && (
-                        <ServerProductCartButton
-                          productId={product.id}
-                          productName={product.name}
-                          price={product.discount_price || product.price}
-                          maxQuantity={product.stock}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Enhanced Products Grid */}
+            <ClientProductGrid products={products} />
 
             {/* Call to Action */}
             <div className="text-center mt-12">

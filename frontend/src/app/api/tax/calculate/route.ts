@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         },
         {
           id: '2',
-          name: 'Ελληνικό Ελαιόλαδο Extra Virgin',
+          name: 'Premium Ελαιόλαδο Extra Virgin',
           price: 15.90,
           quantity: 1,
           category: 'Έλαια και Λάδια',

@@ -3,7 +3,8 @@
 import React, { useState } from 'react'
 import { logger } from '@/lib/logging/productionLogger'
 import { errorToContext, toError } from '@/lib/utils/errorUtils'
-import { useCartStore, useCartActions } from '@/stores/cartStore'
+import { useCartStore } from '@/stores/cartStore'
+import { useCartActions } from '@/hooks/useCartWithNotifications'
 import { ID } from '@/lib/api/client/apiTypes'
 import { CartItemAttributes, isProductCartItem } from '@/lib/api/models/cart/types'
 import {

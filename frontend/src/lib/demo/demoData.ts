@@ -122,7 +122,7 @@ export const demoProducts: DemoProduct[] = [
     bulk_discount_percentage: 10,
     stock: 95,
     origin: 'Πάρνηθα, Αττική',
-    certifications: ['BIO', 'Ελληνικό Προϊόν'],
+    certifications: ['BIO', 'Premium Artisan'],
     harvest_date: 'Αύγουστος 2023',
     shelf_life: '36 μήνες'
   },

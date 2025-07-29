@@ -45,56 +45,33 @@ export default function NotificationCenter({ producerId, className = '' }: Notif
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      // In production, this would fetch from a real API
-      // For now, we'll simulate with mock data
-      const mockNotifications: Notification[] = [
-        {
-          id: 'notif_1',
-          type: 'new_order',
-          title: 'Νέα Παραγγελία!',
-          message: 'Νέα παραγγελία ORD-2024-003 - €67.30',
-          data: {
-            orderId: 'ORD-2024-003',
-            orderNumber: 'ORD-2024-003',
-            customerName: 'Ελένη Γεωργίου',
-            totalAmount: 67.30,
-            itemCount: 5,
-          },
-          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
-          read: false,
-          urgent: true,
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/producer/notifications`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         },
-        {
-          id: 'notif_2',
-          type: 'order_update',
-          title: 'Ενημέρωση Παραγγελίας',
-          message: 'Η παραγγελία ORD-2024-002 παραδόθηκε επιτυχώς',
-          data: {
-            orderId: 'ORD-2024-002',
-            status: 'delivered',
-          },
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          read: false,
-          urgent: false,
-        },
-        {
-          id: 'notif_3',
-          type: 'payment',
-          title: 'Πληρωμή Ολοκληρώθηκε',
-          message: 'Λάβατε €45.20 από την εβδομαδιαία πληρωμή',
-          data: {
-            amount: 45.20,
-            period: 'weekly',
-          },
-          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Yesterday
-          read: true,
-          urgent: false,
-        }
-      ];
+      });
 
-      setNotifications(mockNotifications);
+      if (response.ok) {
+        const result = await response.json();
+        // Backend returns {status: 'success', data: [...notifications...]}
+        if (result.status === 'success' && result.data) {
+          setNotifications(result.data);
+        } else {
+          console.warn('Notifications API returned unexpected format:', result);
+          // Fall back to empty array instead of mock data
+          setNotifications([]);
+        }
+      } else {
+        console.warn('Notifications API request failed:', response.status, response.statusText);
+        // Fall back to empty array
+        setNotifications([]);
+      }
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
+      // Fall back to empty array
+      setNotifications([]);
     } finally {
       setLoading(false);
     }

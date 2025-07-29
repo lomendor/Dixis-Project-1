@@ -92,6 +92,9 @@ Route::prefix('v1')->group(function () {
         }
     });
     
+    // Products Search Endpoint (CRITICAL - Must come BEFORE {id} route)
+    Route::get('/products/search', [ProductController::class, 'search']);
+    
     Route::get('/products/{id}', function ($id) {
         try {
             $product = \App\Models\Product::findOrFail($id);
@@ -766,17 +769,179 @@ Route::prefix('v1')->group(function () {
     // Producer Analytics API (MVP)
     Route::get('/producer/analytics', [ProducerAnalyticsController::class, 'analytics']);
     
+    // Producer Product Stats API
+    Route::get('/producer/products/stats', function (Request $request) {
+        try {
+            // For MVP, use hardcoded producer ID (1)
+            // In production, this would be authenticated
+            $producerId = 1;
+            
+            // Get all products for this producer
+            $totalProducts = \App\Models\Product::where('producer_id', $producerId)->count();
+            $activeProducts = \App\Models\Product::where('producer_id', $producerId)->where('is_active', true)->count();
+            $pendingProducts = \App\Models\Product::where('producer_id', $producerId)->where('status', 'pending')->count();
+            $inactiveProducts = \App\Models\Product::where('producer_id', $producerId)->where('is_active', false)->count();
+            $outOfStock = \App\Models\Product::where('producer_id', $producerId)->where('stock_quantity', 0)->count();
+            $lowStock = \App\Models\Product::where('producer_id', $producerId)->where('stock_quantity', '>', 0)->where('stock_quantity', '<=', 10)->count();
+            
+            $stats = [
+                'total_products' => $totalProducts,
+                'active_products' => $activeProducts,
+                'pending_products' => $pendingProducts,
+                'inactive_products' => $inactiveProducts,
+                'out_of_stock' => $outOfStock,
+                'low_stock' => $lowStock
+            ];
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Product stats retrieved successfully',
+                'data' => $stats
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve product stats: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
+    // Producer Notifications API
+    Route::get('/producer/notifications', function (Request $request) {
+        try {
+            // For MVP, use hardcoded producer ID (1)
+            // In production, this would be authenticated
+            $producerId = 1;
+            
+            // Generate notifications based on recent activity
+            $notifications = [];
+            
+            // Check for recent orders
+            $recentOrders = \App\Models\Order::whereHas('items', function($query) use ($producerId) {
+                $query->where('producer_id', $producerId);
+            })
+            ->where('created_at', '>=', now()->subDays(7))
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get();
+            
+            foreach ($recentOrders as $index => $order) {
+                $isUrgent = $index === 0; // First order is urgent
+                $notifications[] = [
+                    'id' => 'order_' . $order->id,
+                    'type' => 'new_order',
+                    'title' => 'Νέα Παραγγελία!',
+                    'message' => "Νέα παραγγελία #{$order->id} - €" . number_format($order->total_amount, 2),
+                    'data' => [
+                        'orderId' => $order->id,
+                        'orderNumber' => $order->order_number ?? "ORD-{$order->id}",
+                        'customerName' => $order->customer_name ?? 'Πελάτης',
+                        'totalAmount' => (float) $order->total_amount,
+                        'itemCount' => $order->items()->count() ?? 1,
+                    ],
+                    'createdAt' => $order->created_at->toISOString(),
+                    'read' => false,
+                    'urgent' => $isUrgent
+                ];
+            }
+            
+            // Add payment notifications
+            $recentPayments = collect([
+                [
+                    'id' => 'payment_weekly',
+                    'type' => 'payment',
+                    'title' => 'Πληρωμή Ολοκληρώθηκε',
+                    'message' => 'Λάβατε €234.50 από την εβδομαδιαία πληρωμή',
+                    'data' => [
+                        'amount' => 234.50,
+                        'period' => 'weekly',
+                    ],
+                    'createdAt' => now()->subDays(1)->toISOString(),
+                    'read' => true,
+                    'urgent' => false
+                ]
+            ]);
+            
+            $notifications = array_merge($notifications, $recentPayments->toArray());
+            
+            // Add product approval notifications
+            $pendingProducts = \App\Models\Product::where('producer_id', $producerId)
+                ->where('status', 'pending')
+                ->count();
+                
+            if ($pendingProducts > 0) {
+                $notifications[] = [
+                    'id' => 'products_pending',
+                    'type' => 'system',
+                    'title' => 'Προϊόντα Υπό Έγκριση',
+                    'message' => "{$pendingProducts} προϊόντα περιμένουν έγκριση",
+                    'data' => [
+                        'pendingCount' => $pendingProducts,
+                    ],
+                    'createdAt' => now()->subHours(2)->toISOString(),
+                    'read' => false,
+                    'urgent' => false
+                ];
+            }
+            
+            // Add low stock warnings
+            $lowStockProducts = \App\Models\Product::where('producer_id', $producerId)
+                ->where('stock_quantity', '>', 0)
+                ->where('stock_quantity', '<=', 5)
+                ->count();
+                
+            if ($lowStockProducts > 0) {
+                $notifications[] = [
+                    'id' => 'low_stock_warning',
+                    'type' => 'urgent',
+                    'title' => 'Προειδοποίηση Αποθέματος',
+                    'message' => "{$lowStockProducts} προϊόντα με χαμηλό απόθεμα",
+                    'data' => [
+                        'lowStockCount' => $lowStockProducts,
+                    ],
+                    'createdAt' => now()->subHours(3)->toISOString(),
+                    'read' => false,
+                    'urgent' => true
+                ];
+            }
+            
+            // Sort notifications by creation date (newest first)
+            usort($notifications, function($a, $b) {
+                return strtotime($b['createdAt']) - strtotime($a['createdAt']);
+            });
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Notifications retrieved successfully',
+                'data' => $notifications,
+                'count' => count($notifications)
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to retrieve notifications: ' . $e->getMessage()
+            ], 500);
+        }
+    });
+    
     // Greek Market Payment Integration (Viva Wallet)
     Route::prefix('payments/greek')->group(function () {
         // Get available payment methods for Greek market
-        Route::get('/methods', [App\Http\Controllers\Api\PaymentController::class, 'getGreekPaymentMethods']);
+        Route::get('/methods', [App\Http\Controllers\Api\GreekPaymentController::class, 'getGreekPaymentMethods']);
         
         // Create Viva Wallet payment
-        Route::post('/viva-wallet/create', [App\Http\Controllers\Api\PaymentController::class, 'createVivaWalletPayment']);
+        Route::post('/viva-wallet/create', [App\Http\Controllers\Api\GreekPaymentController::class, 'createVivaWalletPayment']);
         
         // Handle Viva Wallet payment completion callback
-        Route::get('/viva-wallet/callback', [App\Http\Controllers\Api\PaymentController::class, 'vivaWalletCallback']);
-        Route::post('/viva-wallet/callback', [App\Http\Controllers\Api\PaymentController::class, 'vivaWalletCallback']);
+        Route::post('/viva-wallet/callback', [App\Http\Controllers\Api\GreekPaymentController::class, 'handleVivaWalletCallback']);
+        
+        // Verify Viva Wallet payment status
+        Route::get('/viva-wallet/verify/{orderCode}', [App\Http\Controllers\Api\GreekPaymentController::class, 'verifyVivaWalletPayment']);
+        
+        // Refund Viva Wallet payment
+        Route::post('/viva-wallet/refund/{paymentId}', [App\Http\Controllers\Api\GreekPaymentController::class, 'refundVivaWalletPayment']);
     });
     
     // Greek Market Shipping Integration (AfterSalesPro)
