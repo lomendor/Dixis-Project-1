@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { ShoppingCartIcon, ShoppingBagIcon } from '@heroicons/react/24/outline'
-import { useCartSummary } from '@/stores/cartStore'
+import { useCartSummary, useCartStore } from '@/stores/cartStore'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface ModernCartIconProps {
@@ -130,6 +130,42 @@ export function HeaderCartIcon({
   ...props
 }: ModernCartIconProps) {
   const { itemCount } = useCartSummary()
+  const cartStore = useCartStore()
+  const cart = cartStore?.cart
+
+  // 🔍 DEBUG: Add logging to track synchronization issues
+  React.useEffect(() => {
+    console.log('🛒 HeaderCartIcon state changed:', {
+      itemCount,
+      cartItems: cart?.items?.length || 0,
+      storeItemCount: cartStore?.itemCount || 0,
+      cartObjectItemCount: cart?.itemCount || 0,
+      timestamp: new Date().toISOString()
+    })
+    
+    // 🚨 CRITICAL: Detect synchronization issues
+    const cartItemsLength = cart?.items?.length || 0
+    const storeItemCount = cartStore?.itemCount || 0
+    const cartObjectItemCount = cart?.itemCount || 0
+    
+    // 🔧 UNDERSTANDING: itemCount should be total quantity, not unique products count
+    if (itemCount !== storeItemCount || itemCount !== cartObjectItemCount) {
+      console.error('🚨 CART SYNC ISSUE DETECTED in HeaderCartIcon:', {
+        'useCartSummary itemCount (TOTAL QUANTITY)': itemCount,
+        'cart.items.length (UNIQUE PRODUCTS)': cartItemsLength,
+        'store.itemCount (TOTAL QUANTITY)': storeItemCount,
+        'cart.itemCount (TOTAL QUANTITY)': cartObjectItemCount,
+        'MISMATCH': 'Total quantity values are not synchronized!',
+        'NOTE': 'items.length ≠ itemCount is normal (unique products vs total quantity)'
+      })
+    } else if (cartItemsLength > 0) {
+      console.log('✅ HeaderCartIcon synchronization OK:', {
+        'Total quantity (itemCount)': itemCount,
+        'Unique products (items.length)': cartItemsLength,
+        'Expected difference': itemCount >= cartItemsLength ? 'Normal' : 'Issue'
+      })
+    }
+  }, [itemCount, cart, cartStore])
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>

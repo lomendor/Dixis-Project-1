@@ -237,20 +237,60 @@ export default function CartPage() {
     );
   }
 
-  // Group items by producer for marketplace organization
+  // 🏪 Smart producer extraction with multiple fallback sources
+  const getProducerFromItem = React.useCallback((item: any) => {
+    // Try multiple sources for producer information
+    const producerSources = [
+      item.producer,
+      item.producerName,
+      item.business_name,
+      item.attributes?.producer,
+      item.attributes?.producerName,
+      item.attributes?.business_name,
+      item.product?.producer?.business_name,
+      item.product?.producer_name,
+      item.product?.business_name
+    ];
+    
+    for (const source of producerSources) {
+      if (source && typeof source === 'string' && source.trim().length > 0) {
+        const cleaned = source.trim();
+        // Avoid generic fallback values
+        if (cleaned !== 'Unknown Producer' && cleaned !== 'Άγνωστος Παραγωγός') {
+          return cleaned;
+        }
+      }
+    }
+    
+    return 'Άγνωστος Παραγωγός';
+  }, []);
+
+  // Group items by producer for marketplace organization with enhanced logic
   const groupedItems = React.useMemo(() => {
     const groups: { [key: string]: typeof cart.items } = {};
     
     cart.items.forEach(item => {
-      const producerName = (item as any).producer || 'Άγνωστος Παραγωγός';
+      const producerName = getProducerFromItem(item);
       if (!groups[producerName]) {
         groups[producerName] = [];
       }
       groups[producerName].push(item);
     });
     
-    return groups;
-  }, [cart.items]);
+    // Sort groups so "Unknown Producer" appears last
+    const sortedGroups: { [key: string]: typeof cart.items } = {};
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      if (a === 'Άγνωστος Παραγωγός') return 1;
+      if (b === 'Άγνωστος Παραγωγός') return -1;
+      return a.localeCompare(b, 'el');
+    });
+    
+    sortedKeys.forEach(key => {
+      sortedGroups[key] = groups[key];
+    });
+    
+    return sortedGroups;
+  }, [cart.items, getProducerFromItem]);
 
   const producerNames = Object.keys(groupedItems);
   const totalProducers = producerNames.length;

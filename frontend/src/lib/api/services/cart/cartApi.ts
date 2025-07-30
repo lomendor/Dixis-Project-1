@@ -35,15 +35,23 @@ function createMockCartItem(productId: ID, quantity: number, attributes?: CartIt
 
   return {
     id: 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+    cartId: 'local-cart',
+    type: 'product',
     productId: productId.toString(),
     productName: attributes?.productName || `Mock Product ${productId}`,
     price,
+    unitPrice: price, // Required for ProductCartItem
     quantity,
     subtotal,
+    // 🏪 CRITICAL FIX: Include producer data from attributes with smart fallbacks
+    producer: attributes?.producer || 
+              attributes?.producerName || 
+              (attributes as any)?.business_name || 
+              'Unknown Producer',
     attributes: attributes || {},
     image: attributes?.image || '/images/placeholder-product.svg',
     slug: attributes?.slug || `mock-product-${productId}`,
-    createdAt: new Date().toISOString(),
+    addedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 }
@@ -52,6 +60,18 @@ function updateMockCartTotals(cart: Cart): Cart {
   const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
   const total = subtotal; // No taxes/shipping for now
+  
+  // 🔧 SYNC DEBUG: Log the calculation
+  console.log('🔧 updateMockCartTotals calculation:', {
+    'items.length': cart.items.length,
+    'calculated itemCount (sum of quantities)': itemCount,
+    'items breakdown': cart.items.map(item => ({
+      id: item.id.substring(0, 8) + '...',
+      productId: item.productId,
+      quantity: item.quantity,
+      productName: item.productName?.substring(0, 20) + '...'
+    }))
+  });
 
   return {
     ...cart,
@@ -177,6 +197,21 @@ export class CartApiService {
           mockCart = createMockCart();
           mockCart.id = cartId;
         }
+        
+        // 🔧 SYNC DEBUG: Add detailed logging for getCart
+        console.log('🔧 SYNC DEBUG - getCart returning:', {
+          'cart.id': mockCart.id,
+          'cart.itemCount': mockCart.itemCount,
+          'cart.items.length': mockCart.items.length,
+          'calculated total quantity': mockCart.items.reduce((sum, item) => sum + item.quantity, 0),
+          'items': mockCart.items.map(item => ({
+            id: item.id,
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity
+          }))
+        })
+        
         logger.info('🛒 Retrieved mock cart:', mockCart);
         return mockCart;
       }
@@ -254,6 +289,20 @@ export class CartApiService {
         // Update cart totals
         mockCart = updateMockCartTotals(mockCart);
         console.log('🔄 CartAPI: Updated cart totals:', mockCart)
+        
+        // 🔧 SYNC DEBUG: Add detailed logging for the sync issue
+        console.log('🔧 SYNC DEBUG - Cart after adding item:', {
+          'cart.id': mockCart.id,
+          'cart.itemCount': mockCart.itemCount,
+          'cart.items.length': mockCart.items.length,
+          'calculated total quantity': mockCart.items.reduce((sum, item) => sum + item.quantity, 0),
+          'items': mockCart.items.map(item => ({
+            id: item.id,
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity
+          }))
+        })
 
         logger.info('🛒 Added item to mock cart:', { addedItem, cart: mockCart });
         console.log('✅ CartAPI: Returning addedItem:', addedItem)
@@ -487,7 +536,14 @@ export class CartApiService {
       subtotal: parseFloat(backendItem.subtotal || '0'),
       image: backendItem.image || backendItem?.product?.main_image,
       slug: backendItem.slug || backendItem?.product?.slug,
-      producer: backendItem.producer || backendItem?.product?.producer?.business_name,
+      // 🏪 ENHANCED PRODUCER EXTRACTION: Multiple fallback sources for backend data
+      producer: backendItem.producer || 
+                backendItem?.product?.producer?.business_name ||
+                backendItem?.producer_name ||
+                backendItem?.product?.producer_name ||
+                backendItem?.business_name ||
+                backendItem?.product?.business_name ||
+                'Unknown Producer',
       attributes: {
         ...backendItem.attributes,
         bulkDiscount: parseFloat(backendItem.bulk_discount || '0'),

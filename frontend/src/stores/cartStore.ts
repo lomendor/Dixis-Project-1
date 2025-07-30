@@ -150,12 +150,11 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
 
       console.log('🏪 CartStore: API success - updating state', { updatedCart, addedItem })
       
+      // 🔧 SYNC FIX: Use setCart for atomic updates
+      const actions = get()
+      actions.setCart(updatedCart)
       set({
-        cart: updatedCart,
         lastAddedItem: addedItem,
-        itemCount: updatedCart.itemCount,
-        subtotal: updatedCart.subtotal,
-        total: updatedCart.total,
         isLoading: false
       });
       
@@ -233,12 +232,11 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
           cart: localCart
         });
 
+        // 🔧 SYNC FIX: Use setCart for atomic updates in fallback too
+        const actions = get()
+        actions.setCart(localCart)
         set({
-          cart: localCart,
           lastAddedItem: localItem,
-          itemCount: localCart.itemCount,
-          subtotal: localCart.subtotal,
-          total: localCart.total,
           isLoading: false,
           error: null
         });
@@ -374,11 +372,10 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         cart: updatedCart
       });
 
+      // 🔧 SYNC FIX: Use setCart for atomic updates
+      const actions = get()
+      actions.setCart(updatedCart)
       set({
-        cart: updatedCart,
-        itemCount: updatedCart.itemCount,
-        subtotal: updatedCart.subtotal,
-        total: updatedCart.total,
         isLoading: false
       });
 
@@ -442,11 +439,10 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         cart: updatedCart
       });
       
+      // 🔧 SYNC FIX: Use setCart for atomic updates
+      const actions = get()
+      actions.setCart(updatedCart)
       set({ 
-        cart: updatedCart,
-        itemCount: updatedCart.itemCount,
-        subtotal: updatedCart.subtotal,
-        total: updatedCart.total,
         isLoading: false 
       });
       
@@ -626,11 +622,10 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         volumeDiscounts: updatedCart.appliedVolumeDiscounts
       });
       
+      // 🔧 SYNC FIX: Use setCart for atomic updates
+      const actions = get()
+      actions.setCart(updatedCart)
       set({ 
-        cart: updatedCart,
-        itemCount: updatedCart.itemCount,
-        subtotal: updatedCart.subtotal,
-        total: updatedCart.total,
         isLoading: false 
       });
       
@@ -686,11 +681,10 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         totalVolumeSavings: updatedCart.totalBulkSavings
       });
       
+      // 🔧 SYNC FIX: Use setCart for atomic updates
+      const actions = get()
+      actions.setCart(updatedCart)
       set({
-        cart: updatedCart,
-        itemCount: updatedCart.itemCount,
-        subtotal: updatedCart.subtotal,
-        total: updatedCart.total,
         isLoading: false
       });
       
@@ -867,11 +861,10 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
         
         logger.info('🛒 Cart refreshed via API:', updatedCart);
         
+        // 🔧 SYNC FIX: Use setCart for atomic updates
+        const actions = get()
+        actions.setCart(updatedCart)
         set({
-          cart: updatedCart,
-          itemCount: updatedCart.itemCount,
-          subtotal: updatedCart.subtotal,
-          total: updatedCart.total,
           isLoading: false
         });
         
@@ -907,12 +900,49 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
     }
   },
   
-  // Internal state setters
+  // Internal state setters with synchronization fix
   setCart: (cart: Cart | null) => {
-    const itemCount = cart?.itemCount || 0
+    // 🔧 SYNC FIX: Ensure consistent item count calculation
+    let itemCount = 0
+    if (cart?.items) {
+      // Always calculate from items array for consistency
+      itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0)
+      // Update cart object to match calculated value
+      cart.itemCount = itemCount
+      
+      // 🚨 CRITICAL FIX: If cart.items array is inconsistent, log detailed debug info
+      const itemsLength = cart.items.length
+      const totalQuantity = itemCount
+      
+      if (itemsLength > 0 && totalQuantity !== cart.itemCount) {
+        console.error('🚨 CART ITEMS ARRAY INCONSISTENCY DETECTED:', {
+          'items array length': itemsLength,
+          'calculated total quantity': totalQuantity,
+          'cart.itemCount': cart.itemCount,
+          'individual items': cart.items.map(item => ({
+            id: item.id,
+            productName: item.productName,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        })
+      }
+    }
+    
     const subtotal = cart?.subtotal || 0
     const total = cart?.total || 0
     const currency = cart?.currency || 'EUR'
+    
+    console.log('🔧 setCart called with synchronization fix:', {
+      calculatedItemCount: itemCount,
+      cartObjectItemCount: cart?.itemCount || 0,
+      itemsLength: cart?.items?.length || 0,
+      itemsDetailed: cart?.items?.map(item => ({ 
+        id: item.id, 
+        productName: item.productName?.substring(0, 20) + '...', 
+        quantity: item.quantity 
+      })) || []
+    })
     
     set({ cart, itemCount, subtotal, total, currency })
   },
@@ -942,12 +972,10 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
             items: cart.items?.length || 0
           })
           
+          // 🔧 SYNC FIX: Use setCart for atomic updates during hydration
+          const storeActions = useCartStoreBase.getState()
+          storeActions.setCart(cart)
           set({
-            cart,
-            itemCount: cart.itemCount || 0,
-            subtotal: cart.subtotal || 0,
-            total: cart.total || 0,
-            currency: cart.currency || 'EUR',
             lastAddedItem: state.lastAddedItem || null
           })
         }
@@ -964,7 +992,7 @@ export const useCartStoreBase = create<CartStore>((set, get) => ({
   }
 }))
 
-// Simplified SSR-safe hooks
+// Simplified SSR-safe hooks with proper hydration guard
 let hydrationCompleted = false; // Guard to prevent multiple hydrations
 
 export const useCartStore = () => {
@@ -979,23 +1007,26 @@ export const useCartStore = () => {
   }, [])
   
   useEffect(() => {
-    // Hydrate on mount - simplified approach
-    if (typeof window !== 'undefined') {
-      console.log('🛒 Starting cart store hydration...')
+    // CRITICAL FIX: Only hydrate once for the entire application
+    if (typeof window !== 'undefined' && !hydrationCompleted) {
+      console.log('🛒 Starting cart store hydration (SINGLE INSTANCE)...')
+      hydrationCompleted = true; // Set flag immediately to prevent race conditions
+      
       try {
         store.hydrate()
-        console.log('🛒 Cart store hydrated successfully')
+        console.log('🛒 Cart store hydrated successfully ✅')
       } catch (error) {
         console.warn('Failed to hydrate cart store:', error)
+        hydrationCompleted = false; // Reset on error to allow retry
       }
     }
-  }, []) // Only run once on mount
+  }, []) // Only run once on mount, but guard ensures single execution
   
   // Always return the store - no hydration blocking
   return store
 }
 
-// Individual hooks for better performance
+// Individual hooks with proper memoization to prevent infinite loops
 export const useCartData = () => {
   const store = useCartStore()
   return store.cart
@@ -1011,22 +1042,21 @@ export const useCartError = () => {
   return store?.error || null
 }
 
-
 export const useCartSummary = () => {
   const store = useCartStore()
-  return {
+  // Return stable object reference to prevent infinite re-renders
+  return React.useMemo(() => ({
     itemCount: store?.itemCount || 0,
     subtotal: store?.subtotal || 0,
     total: store?.total || 0,
     currency: store?.currency || 'EUR',
-  }
+  }), [store?.itemCount, store?.subtotal, store?.total, store?.currency])
 }
 
 export const useCartActions = () => {
   const store = useCartStore()
-  // useCartStore already handles hydration state and returns safe defaults
-  // when not hydrated, so we can safely destructure
-  return {
+  // Return stable actions object to prevent infinite re-renders
+  return React.useMemo(() => ({
     addToCart: store.addToCart,
     removeFromCart: store.removeFromCart,
     updateQuantity: store.updateQuantity,
@@ -1034,5 +1064,5 @@ export const useCartActions = () => {
     getItemQuantity: store.getItemQuantity,
     isInCart: store.isInCart,
     refreshCart: store.refreshCart,
-  }
+  }), [store.addToCart, store.removeFromCart, store.updateQuantity, store.clearCart, store.getItemQuantity, store.isInCart, store.refreshCart])
 }
