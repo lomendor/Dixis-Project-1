@@ -43,8 +43,8 @@
 
 ```env
 # Replace these dummy values with your actual keys
-STRIPE_KEY=pk_test_51ABC...your_publishable_key
-STRIPE_SECRET=sk_test_51ABC...your_secret_key
+STRIPE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
+STRIPE_SECRET=sk_test_YOUR_SECRET_KEY_HERE
 STRIPE_WEBHOOK_SECRET=whsec_ABC...your_webhook_secret
 ```
 
@@ -142,9 +142,9 @@ MAIL_MAILER=log
 ### Option 2: Use Stripe Test Keys
 
 ```env
-# These are public test keys from Stripe docs
-STRIPE_KEY=pk_test_51KLJKmSHYGolHJHejqSPoShLjM4GYm3GwalOJkYB7kVvPxrlCC0DCa9CyV9rjMNRTFRdLcZCiVCvWYxLPh2ua8WS00G7Y3e7pF
-STRIPE_SECRET=sk_test_51KLJKmSHYGolHJHejKGxO3RqEiNXqKnzGsNuPZQ5vtJDqugVjdpEuQ8VibtSRXwoNG3o5rCzGkB5vhguC5u1Xq4b00SU5vsnaG
+# Replace with your own Stripe test keys
+STRIPE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
+STRIPE_SECRET=sk_test_YOUR_SECRET_KEY_HERE
 ```
 
 **⚠️ WARNING**: Replace with your own keys before going to production!
