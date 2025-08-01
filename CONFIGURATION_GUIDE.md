@@ -44,7 +44,7 @@
 ```env
 # Replace these dummy values with your actual keys
 STRIPE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
-STRIPE_SECRET=sk_test_YOUR_SECRET_KEY_HERE
+STRIPE_SECRET=sk_test_REPLACE_WITH_YOUR_SECRET_KEY
 STRIPE_WEBHOOK_SECRET=whsec_ABC...your_webhook_secret
 ```
 
@@ -144,7 +144,7 @@ MAIL_MAILER=log
 ```env
 # Replace with your own Stripe test keys
 STRIPE_KEY=pk_test_YOUR_PUBLISHABLE_KEY_HERE
-STRIPE_SECRET=sk_test_YOUR_SECRET_KEY_HERE
+STRIPE_SECRET=sk_test_REPLACE_WITH_YOUR_SECRET_KEY
 ```
 
 **⚠️ WARNING**: Replace with your own keys before going to production!
