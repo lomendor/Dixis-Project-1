@@ -230,7 +230,7 @@ export const useTenantStore = create<TenantState>()(
           return `https://${currentTenant.domain}`;
         }
         
-        return `https://${currentTenant.subdomain}.dixis.gr`;
+        return `https://${currentTenant.subdomain}.dixis.io`;
       },
 
       getTenantPlanFeatures: () => {

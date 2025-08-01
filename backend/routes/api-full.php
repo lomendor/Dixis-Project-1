@@ -45,6 +45,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     Route::post('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
     Route::post('/resend-verification-email', [AuthController::class, 'resendVerificationEmail'])->middleware(['auth:sanctum']);
+    
+    // Google OAuth Routes
+    Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
+    Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
     // Product Routes
     Route::get('/products', [ProductController::class, 'index']); // List products

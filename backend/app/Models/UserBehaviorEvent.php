@@ -6,6 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * DIXIS PLATFORM - Enhanced User Behavior Event Model
+ * AI-powered analytics for Greek marketplace with ML training data collection
+ * 
+ * Features:
+ * - Greek market context tracking
+ * - AI/ML training data storage
+ * - Real-time personalization data
+ * - GDPR-compliant privacy protection
+ * - Advanced event categorization
+ */
 class UserBehaviorEvent extends Model
 {
     use HasFactory;
@@ -30,13 +41,22 @@ class UserBehaviorEvent extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        // User identification
         'user_id',
         'session_id',
+        
+        // Event classification
         'event_type',
+        'event_category',
+        'event_data',
+        
+        // Legacy compatibility
         'product_id',
         'category_id',
         'producer_id',
         'search_query',
+        
+        // Context information
         'page_url',
         'referrer',
         'user_agent',
@@ -45,6 +65,12 @@ class UserBehaviorEvent extends Model
         'browser',
         'os',
         'metadata',
+        
+        // Greek market & AI features
+        'greek_context',
+        'ai_training_data',
+        
+        // Timestamps
         'created_at',
     ];
 
@@ -55,6 +81,9 @@ class UserBehaviorEvent extends Model
      */
     protected $casts = [
         'metadata' => 'array',
+        'event_data' => 'array',
+        'greek_context' => 'array',
+        'ai_training_data' => 'array',
         'created_at' => 'datetime',
     ];
 
@@ -128,5 +157,104 @@ class UserBehaviorEvent extends Model
     public function scopeWithinDateRange($query, $startDate, $endDate)
     {
         return $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    /**
+     * Scope for Greek market specific events
+     */
+    public function scopeGreekMarketEvents($query)
+    {
+        return $query->whereIn('event_type', [
+            'viva_wallet_payment',
+            'greek_shipping_select', 
+            'island_delivery_select',
+            'traditional_product_interest',
+            'seasonal_search',
+            'orthodox_calendar_view'
+        ]);
+    }
+
+    /**
+     * Scope for AI training data events
+     */
+    public function scopeForAITraining($query)
+    {
+        return $query->whereNotNull('ai_training_data')
+                    ->whereNotNull('greek_context');
+    }
+
+    /**
+     * Scope for events by region
+     */
+    public function scopeByRegion($query, string $region)
+    {
+        return $query->whereJsonContains('greek_context->user_region', $region);
+    }
+
+    /**
+     * Scope for tourism season events
+     */
+    public function scopeTourismSeason($query)
+    {
+        return $query->whereJsonContains('greek_context->is_tourism_season', true);
+    }
+
+    /**
+     * Scope for conversion events (high-value actions)
+     */
+    public function scopeConversionEvents($query)
+    {
+        return $query->whereIn('event_type', [
+            'cart_add',
+            'checkout_start', 
+            'checkout_complete',
+            'viva_wallet_payment',
+            'producer_contact'
+        ]);
+    }
+
+    /**
+     * Scope for personalization events
+     */
+    public function scopePersonalizationEvents($query)
+    {
+        return $query->whereIn('event_type', [
+            'recommendation_view',
+            'recommendation_click',
+            'personalization_interaction'
+        ]);
+    }
+
+    /**
+     * Get events for ML feature extraction
+     */
+    public function scopeForMLFeatures($query, int $days = 30)
+    {
+        return $query->where('created_at', '>=', now()->subDays($days))
+                    ->whereNotNull('ai_training_data')
+                    ->select([
+                        'id',
+                        'user_id',
+                        'session_id',
+                        'event_type',
+                        'event_category',
+                        'greek_context',
+                        'ai_training_data',
+                        'created_at'
+                    ]);
+    }
+
+    /**
+     * Get Greek market analytics data
+     */
+    public function scopeGreekAnalytics($query, int $days = 7)
+    {
+        return $query->where('created_at', '>=', now()->subDays($days))
+                    ->whereNotNull('greek_context')
+                    ->select([
+                        'event_type',
+                        'greek_context',
+                        'created_at'
+                    ]);
     }
 }

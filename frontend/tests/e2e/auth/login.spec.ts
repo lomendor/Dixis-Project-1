@@ -66,7 +66,7 @@ test.describe('Authentication - Login', () => {
 
   test('should successfully login with valid credentials', async ({ page }) => {
     // Use test credentials
-    const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.gr';
+    const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.io';
     const testPassword = process.env.TEST_USER_PASSWORD || 'testpassword123';
     
     // Fill valid credentials
@@ -89,7 +89,7 @@ test.describe('Authentication - Login', () => {
 
   test('should remember login state after page refresh', async ({ page }) => {
     // Login first
-    const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.gr';
+    const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.io';
     const testPassword = process.env.TEST_USER_PASSWORD || 'testpassword123';
     
     await page.fill('input[type="email"], input[name="email"]', testEmail);
@@ -115,7 +115,7 @@ test.describe('Authentication - Login', () => {
     await expect(page).toHaveURL(/.*login.*/);
     
     // Login
-    const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.gr';
+    const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.io';
     const testPassword = process.env.TEST_USER_PASSWORD || 'testpassword123';
     
     await page.fill('input[type="email"], input[name="email"]', testEmail);

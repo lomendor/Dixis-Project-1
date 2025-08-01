@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         const mockUser = {
           id: 1,
           name: 'Test User',
-          email: 'test@dixis.gr',
+          email: 'test@dixis.io',
           role: 'customer',
           emailVerified: true,
           createdAt: new Date().toISOString(),

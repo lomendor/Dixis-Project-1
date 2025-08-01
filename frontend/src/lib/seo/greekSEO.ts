@@ -32,7 +32,7 @@ export function generateGreekMetadata({
   brand,
   category
 }: GreekSEOProps): Metadata {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.gr';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.io';
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
   
   // Default Greek keywords for marketplace
@@ -150,7 +150,7 @@ export function generateProductStructuredData(product: any): object {
     },
     offers: {
       '@type': 'Offer',
-      url: `https://dixis.gr/products/${product.slug}`,
+      url: `https://dixis.io/products/${product.slug}`,
       priceCurrency: 'EUR',
       price: product.price,
       priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -189,7 +189,7 @@ export function generateLocalBusinessStructuredData(producer: any): object {
       latitude: producer.latitude,
       longitude: producer.longitude,
     } : undefined,
-    url: `https://dixis.gr/producers/${producer.slug}`,
+    url: `https://dixis.io/producers/${producer.slug}`,
     telephone: producer.phone,
     priceRange: '€€',
     servesCuisine: 'Greek',
@@ -212,7 +212,7 @@ export function generateBreadcrumbStructuredData(items: Array<{ name: string; ur
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `https://dixis.gr${item.url}`,
+      item: `https://dixis.io${item.url}`,
     })),
   };
 }

@@ -1,0 +1,152 @@
+# Dixis Platform - MySQL Production Configuration
+# Greek Marketplace Database Optimizations
+
+[mysql]
+default-character-set = utf8mb4
+
+[mysqld]
+# Basic Settings
+user = mysql
+bind-address = 0.0.0.0
+port = 3306
+socket = /var/run/mysqld/mysqld.sock
+pid-file = /var/run/mysqld/mysqld.pid
+datadir = /var/lib/mysql
+tmpdir = /tmp
+
+# Character Set & Collation (Greek Support)
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+init-connect = 'SET NAMES utf8mb4'
+
+# Timezone (Greece)
+default-time-zone = '+02:00'
+log_timestamps = SYSTEM
+
+# Connection Settings
+max_connections = 200
+max_connect_errors = 1000000
+max_user_connections = 0
+thread_cache_size = 50
+thread_stack = 262144
+
+# Buffer Settings (Production Optimized)
+innodb_buffer_pool_size = 1G
+innodb_buffer_pool_instances = 4
+innodb_log_file_size = 256M
+innodb_log_buffer_size = 16M
+innodb_flush_log_at_trx_commit = 1
+innodb_flush_method = O_DIRECT
+
+# Query Cache (Disabled for MySQL 8.0+)
+query_cache_type = 0
+query_cache_size = 0
+
+# MyISAM Settings
+key_buffer_size = 128M
+table_open_cache = 4000
+table_definition_cache = 2000
+myisam_sort_buffer_size = 8M
+
+# Memory Tables
+max_heap_table_size = 128M
+tmp_table_size = 128M
+
+# Networking
+back_log = 100
+max_allowed_packet = 50M
+interactive_timeout = 3600
+wait_timeout = 3600
+net_read_timeout = 120
+net_write_timeout = 120
+
+# Logging
+log-error = /var/log/mysql/error.log
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/slow.log
+long_query_time = 2
+log_queries_not_using_indexes = 0
+log_slow_admin_statements = 1
+log_slow_slave_statements = 1
+
+# Binary Logging (Replication)
+server-id = 1
+log-bin = mysql-bin
+binlog_format = ROW
+expire_logs_days = 7
+max_binlog_size = 100M
+sync_binlog = 1
+
+# InnoDB Settings (Production)
+innodb_file_per_table = 1
+innodb_open_files = 400
+innodb_io_capacity = 400
+innodb_io_capacity_max = 2000
+innodb_read_io_threads = 4
+innodb_write_io_threads = 4
+innodb_thread_concurrency = 0
+innodb_lock_wait_timeout = 120
+innodb_deadlock_detect = 1
+
+# Security Settings
+sql_mode = STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+local_infile = 0
+
+# Performance Schema
+performance_schema = ON
+performance_schema_max_table_instances = 12500
+performance_schema_max_table_handles = 4000
+
+# Greek Market Specific Optimizations
+# Optimized for:
+# - Greek product names with UTF-8 characters
+# - Producer information in Greek
+# - Address data with Greek characters
+# - Greek postal codes and regions
+# - User behavior analytics
+# - Order processing with Greek VAT
+
+# Sort Buffer (Greek text sorting)
+sort_buffer_size = 2M
+read_buffer_size = 128K
+read_rnd_buffer_size = 256K
+join_buffer_size = 128K
+
+# Connection Pool Settings
+thread_pool_size = 4
+thread_pool_stall_limit = 500
+thread_pool_max_threads = 1000
+
+# SSL Configuration (if enabled)
+# ssl-ca = /etc/mysql/ssl/ca-cert.pem
+# ssl-cert = /etc/mysql/ssl/server-cert.pem
+# ssl-key = /etc/mysql/ssl/server-key.pem
+
+[mysqldump]
+quick
+quote-names
+max_allowed_packet = 50M
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
+
+[client]
+default-character-set = utf8mb4
+port = 3306
+socket = /var/run/mysqld/mysqld.sock
+
+[isamchk]
+key_buffer_size = 128M
+sort_buffer_size = 128M
+read_buffer = 2M
+write_buffer = 2M
+
+[myisamchk]
+key_buffer_size = 128M
+sort_buffer_size = 128M
+read_buffer = 2M
+write_buffer = 2M
+
+[mysqlhotcopy]
+interactive-timeout

@@ -6,7 +6,7 @@ test.describe('B2B Product Browsing and Quote Requests', () => {
   const loginAsB2BUser = async (page: any) => {
     await page.goto('/b2b/login');
     
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);

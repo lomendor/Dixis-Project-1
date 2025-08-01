@@ -270,7 +270,7 @@ export function generateInvoiceHTML(data: InvoiceData): string {
 
     <div class="footer">
         <p>Αυτό το τιμολόγιο δημιουργήθηκε αυτόματα από το σύστημα Dixis Fresh.</p>
-        <p>Για οποιαδήποτε απορία, επικοινωνήστε μαζί μας στο support@dixis.gr</p>
+        <p>Για οποιαδήποτε απορία, επικοινωνήστε μαζί μας στο support@dixis.io</p>
     </div>
 </body>
 </html>`;
@@ -313,7 +313,7 @@ export function generateInvoiceFromOrder(order: any): InvoiceData {
       country: 'Ελλάδα',
       vatNumber: '123456789',
       phone: '+30 210 123 4567',
-      email: 'info@dixis.gr'
+      email: 'info@dixis.io'
     },
     items: order?.items?.map((item: any) => ({
       id: item.id,

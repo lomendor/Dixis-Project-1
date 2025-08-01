@@ -504,7 +504,7 @@ APP_NAME="Dixis Fresh"
 APP_ENV=production
 APP_KEY=base64:YOUR_PRODUCTION_KEY_HERE
 APP_DEBUG=false
-APP_URL=https://dixis.gr
+APP_URL=https://dixis.io
 
 LOG_CHANNEL=stack
 LOG_DEPRECATIONS_CHANNEL=null
@@ -537,10 +537,10 @@ REDIS_PORT=6379
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.example.com
 MAIL_PORT=587
-MAIL_USERNAME=noreply@dixis.gr
+MAIL_USERNAME=noreply@dixis.io
 MAIL_PASSWORD=your-email-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@dixis.gr
+MAIL_FROM_ADDRESS=noreply@dixis.io
 MAIL_FROM_NAME="Dixis Fresh"
 
 # Stripe Payment Processing
@@ -574,7 +574,7 @@ COURIER_ENVIRONMENT=production
 # Security
 SECURE_SSL_REDIRECT=true
 SESSION_SECURE_COOKIE=true
-SANCTUM_STATEFUL_DOMAINS=dixis.gr,www.dixis.gr
+SANCTUM_STATEFUL_DOMAINS=dixis.io,www.dixis.io
 
 # Performance Monitoring
 TELESCOPE_ENABLED=false
@@ -582,7 +582,7 @@ DEBUGBAR_ENABLED=false
 
 # Backup Configuration
 BACKUP_ENABLED=true
-BACKUP_NOTIFICATION_EMAIL=admin@dixis.gr
+BACKUP_NOTIFICATION_EMAIL=admin@dixis.io
 
 # Error Tracking (Sentry recommended)
 SENTRY_LARAVEL_DSN=your-sentry-dsn

@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
             access_token: 'mock_token_' + Date.now(),
             refresh_token: 'mock_refresh_' + Date.now(),
             expires_in: 3600,
-            message: 'Εγγραφή επιτυχής! (Development mode - χρησιμοποιήστε test@dixis.gr για login)'
+            message: 'Εγγραφή επιτυχής! (Development mode - χρησιμοποιήστε test@dixis.io για login)'
           };
 
           const response = NextResponse.json(createApiResponse(mockUser));
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
           access_token: 'mock_token_' + Date.now(),
           refresh_token: 'mock_refresh_' + Date.now(),
           expires_in: 3600,
-          message: 'Εγγραφή επιτυχής! (Development mode - χρησιμοποιήστε test@dixis.gr για login)'
+          message: 'Εγγραφή επιτυχής! (Development mode - χρησιμοποιήστε test@dixis.io για login)'
         };
 
         const response = NextResponse.json(createApiResponse(mockUser));

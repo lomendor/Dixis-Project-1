@@ -19,7 +19,7 @@ export interface SEOConfig {
 
 const defaultConfig = {
   siteName: 'Dixis - Αυθεντικά Ελληνικά Προϊόντα',
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr',
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io',
   defaultTitle: 'Dixis - Αυθεντικά Ελληνικά Προϊόντα',
   defaultDescription: 'Ανακαλύψτε αυθεντικά ελληνικά προϊόντα απευθείας από τον παραγωγό. Βιολογικά τρόφιμα, παραδοσιακές γεύσεις και τοπικές λιχουδιές με την εγγύηση της ποιότητας.',
   defaultImage: '/og-image.jpg',
@@ -239,8 +239,8 @@ export function generateOrganizationStructuredData() {
       availableLanguage: ['Greek', 'English'],
     },
     sameAs: [
-      'https://www.facebook.com/dixis.gr',
-      'https://www.instagram.com/dixis.gr',
+      'https://www.facebook.com/dixis.io',
+      'https://www.instagram.com/dixis.io',
       'https://twitter.com/dixis_gr',
     ],
   };

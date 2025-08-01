@@ -58,6 +58,6 @@
 ---
 
 **Χρειάζεστε βοήθεια;**  
-Επικοινωνήστε μαζί μας στο [support@dixis.gr](mailto:support@dixis.gr) ή στο 210 123 4567.
+Επικοινωνήστε μαζί μας στο [support@dixis.io](mailto:support@dixis.io) ή στο 210 123 4567.
 
 @endcomponent

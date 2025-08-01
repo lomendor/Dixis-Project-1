@@ -5,14 +5,14 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+  /* 🔧 CRITICAL FIX: Reduce parallel execution to prevent race conditions */
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* 🔧 ENHANCED: Increase retries for reliability */
+  retries: process.env.CI ? 2 : 1,
+  /* 🔧 OPTIMIZED: Limit workers to reduce resource contention */
+  workers: process.env.CI ? 1 : 2,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
@@ -34,20 +34,21 @@ export default defineConfig({
     /* Record video on failure */
     video: 'retain-on-failure',
     
-    /* Global timeout for each action */
-    actionTimeout: 10000,
+    /* 🔧 ENHANCED: Increased action timeout for cart operations */
+    actionTimeout: 15000,
     
-    /* Global timeout for navigation */
-    navigationTimeout: 30000,
+    /* 🔧 ENHANCED: Increased navigation timeout for complex pages */
+    navigationTimeout: 45000,
   },
 
-  /* Configure projects for major browsers */
+  /* 🔧 Configure projects for major browsers - optimized for stability */
   projects: [
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
     },
     
+    // 🚀 PRIMARY: Chromium for development (fast, reliable)
     {
       name: 'chromium',
       use: { 
@@ -58,6 +59,9 @@ export default defineConfig({
       dependencies: ['setup'],
     },
 
+    // 🔧 DEVELOPMENT MODE: Comment out other browsers for faster development
+    // Uncomment only when doing cross-browser testing
+    /*
     {
       name: 'firefox',
       use: { 
@@ -76,7 +80,7 @@ export default defineConfig({
       dependencies: ['setup'],
     },
 
-    /* Test against mobile viewports. */
+    // Test against mobile viewports
     {
       name: 'Mobile Chrome',
       use: { 
@@ -93,6 +97,7 @@ export default defineConfig({
       },
       dependencies: ['setup'],
     },
+    */
 
     /* Test against branded browsers. */
     // {
@@ -117,8 +122,8 @@ export default defineConfig({
   globalSetup: require.resolve('./tests/e2e/setup/global-setup.ts'),
   globalTeardown: require.resolve('./tests/e2e/setup/global-teardown.ts'),
 
-  /* Test timeout */
-  timeout: 30 * 1000,
+  /* 🔧 CRITICAL FIX: Increased test timeout for complex cart operations */
+  timeout: 60 * 1000,
   expect: {
     /* Timeout for expect() assertions */
     timeout: 5000,

@@ -83,19 +83,28 @@ class VivaWalletService
                 $paymentData['vatInfo'] = $vatInfo;
             }
 
-            // Create payment order
-            $response = Http::withToken($accessToken)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json'
-                ])
-                ->post("{$this->baseUrl}/api/orders", $paymentData);
+            // 🧪 Demo mode: Create mock response for development
+            if ($this->isDemoMode()) {
+                Log::info('Viva Wallet demo mode - creating mock payment order');
+                $result = [
+                    'orderCode' => 'DEMO-' . strtoupper(Str::random(8)),
+                    'orderId' => rand(100000, 999999)
+                ];
+            } else {
+                // Create payment order
+                $response = Http::withToken($accessToken)
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json'
+                    ])
+                    ->post("{$this->baseUrl}/api/orders", $paymentData);
 
-            if (!$response->successful()) {
-                throw new \Exception('Viva Wallet API Error: ' . $response->body());
+                if (!$response->successful()) {
+                    throw new \Exception('Viva Wallet API Error: ' . $response->body());
+                }
+
+                $result = $response->json();
             }
-
-            $result = $response->json();
             
             // Create payment record in database
             $payment = new Payment([
@@ -360,6 +369,12 @@ class VivaWalletService
     protected function getAccessToken(): string
     {
         try {
+            // 🧪 Demo mode: Return a mock token for development
+            if ($this->isDemoMode()) {
+                Log::info('Viva Wallet running in demo mode - using mock token');
+                return 'demo-access-token-' . time();
+            }
+
             $response = Http::asForm()
                 ->withBasicAuth($this->clientId, $this->clientSecret)
                 ->post("{$this->baseUrl}/connect/token", [
@@ -381,6 +396,17 @@ class VivaWalletService
 
             throw new \Exception('Failed to authenticate with Viva Wallet: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Check if running in demo mode (for development)
+     * 
+     * @return bool
+     */
+    protected function isDemoMode(): bool
+    {
+        return $this->isSandbox && 
+               (strpos($this->clientId, 'demo') !== false || strpos($this->clientId, 'dixis-dev') !== false);
     }
 
     /**

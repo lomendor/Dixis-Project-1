@@ -45,7 +45,7 @@ test.describe('B2B Authentication Flow', () => {
   });
 
   test('should handle B2B login with valid credentials', async ({ page }) => {
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     // Fill B2B credentials
@@ -69,7 +69,7 @@ test.describe('B2B Authentication Flow', () => {
   });
 
   test('should redirect to B2B dashboard after successful login', async ({ page }) => {
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);
@@ -113,7 +113,7 @@ test.describe('B2B Authentication Flow', () => {
       await rememberCheckbox.first().check();
       
       // Login
-      const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+      const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
       const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
       
       await page.fill('input[type="email"]', testB2BEmail);
@@ -210,7 +210,7 @@ test.describe('B2B Authentication Flow', () => {
   });
 
   test('should handle B2B session timeout and re-authentication', async ({ page }) => {
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     // Login first
@@ -245,7 +245,7 @@ test.describe('B2B Role-Based Access Control', () => {
   test('should verify B2B user role and permissions after login', async ({ page }) => {
     await page.goto('/b2b/login');
     
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);
@@ -273,7 +273,7 @@ test.describe('B2B Role-Based Access Control', () => {
     // Login as B2B user first
     await page.goto('/b2b/login');
     
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);

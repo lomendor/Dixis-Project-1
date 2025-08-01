@@ -1,0 +1,253 @@
+# Dixis Platform - Prometheus Alerting Rules
+# Greek Marketplace Production Monitoring
+
+groups:
+  - name: dixis-critical-alerts
+    rules:
+      # Application Down
+      - alert: DixisApplicationDown
+        expr: up{job="dixis-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: backend
+          market: greek
+        annotations:
+          summary: "🚨 Dixis Application is DOWN"
+          description: "The Dixis Greek marketplace backend has been down for more than 1 minute"
+          
+      - alert: DixisFrontendDown
+        expr: up{job="dixis-frontend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+          market: greek
+        annotations:
+          summary: "🚨 Dixis Frontend is DOWN"
+          description: "The Dixis Greek marketplace frontend has been down for more than 1 minute"
+
+      # Database Issues
+      - alert: DixisDatabaseDown
+        expr: up{job="mysql"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "🚨 MySQL Database is DOWN"
+          description: "The MySQL database has been down for more than 30 seconds"
+
+      - alert: DixisHighDatabaseConnections
+        expr: mysql_global_status_threads_connected / mysql_global_variables_max_connections > 0.8
+        for: 2m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "⚠️ High Database Connections"
+          description: "Database connections are above 80% ({{ $value }}%)"
+
+      # Payment System (Critical for Greek Market)
+      - alert: DixisVivaWalletDown
+        expr: increase(http_requests_total{job="dixis-backend",endpoint=~"/api/payments/viva-wallet.*",status=~"5.."}[5m]) > 3
+        for: 1m
+        labels:
+          severity: critical
+          service: payments
+          provider: viva-wallet
+          market: greek
+        annotations:
+          summary: "🚨 Viva Wallet Payment System Issues"
+          description: "Multiple payment failures detected in the last 5 minutes"
+
+      # Redis Cache
+      - alert: DixisRedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "🚨 Redis Cache is DOWN"
+          description: "Redis cache has been down for more than 1 minute"
+
+      - alert: DixisHighCacheMissRate
+        expr: rate(redis_keyspace_misses_total[5m]) / rate(redis_keyspace_hits_total[5m]) > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "⚠️ High Cache Miss Rate"
+          description: "Cache miss rate is above 30% ({{ $value }}%)"
+
+  - name: dixis-performance-alerts
+    rules:
+      # High Response Times
+      - alert: DixisHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="dixis-backend"}[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: backend
+          metric: response_time
+        annotations:
+          summary: "⚠️ High API Response Time"
+          description: "95th percentile response time is above 2 seconds ({{ $value }}s)"
+
+      - alert: DixisHighErrorRate
+        expr: rate(http_requests_total{job="dixis-backend",status=~"5.."}[5m]) / rate(http_requests_total{job="dixis-backend"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          service: backend
+          metric: error_rate
+        annotations:
+          summary: "⚠️ High Error Rate"
+          description: "Error rate is above 5% ({{ $value }}%)"
+
+      # Resource Usage
+      - alert: DixisHighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{name=~"dixis.*"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          resource: cpu
+        annotations:
+          summary: "⚠️ High CPU Usage"
+          description: "Container {{ $labels.name }} CPU usage is above 80% ({{ $value }}%)"
+
+      - alert: DixisHighMemoryUsage
+        expr: container_memory_usage_bytes{name=~"dixis.*"} / container_spec_memory_limit_bytes > 0.85
+        for: 3m
+        labels:
+          severity: warning
+          resource: memory
+        annotations:
+          summary: "⚠️ High Memory Usage"
+          description: "Container {{ $labels.name }} memory usage is above 85% ({{ $value }}%)"
+
+      - alert: DixisLowDiskSpace
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes > 0.9
+        for: 1m
+        labels:
+          severity: critical
+          resource: disk
+        annotations:
+          summary: "🚨 Low Disk Space"
+          description: "Disk usage is above 90% ({{ $value }}%)"
+
+  - name: dixis-business-alerts
+    rules:
+      # Greek Market Specific
+      - alert: DixisLowGreekUserActivity
+        expr: rate(http_requests_total{job="dixis-backend",endpoint=~"/api/.*",headers_accept_language=~".*el.*"}[1h]) < 10
+        for: 30m
+        labels:
+          severity: warning
+          business: engagement
+          market: greek
+        annotations:
+          summary: "⚠️ Low Greek User Activity"
+          description: "Greek user activity is below normal levels"
+
+      - alert: DixisHighCartAbandonmentRate
+        expr: rate(user_behavior_events_total{event_type="cart_add"}[1h]) / rate(user_behavior_events_total{event_type="checkout_complete"}[1h]) > 5
+        for: 15m
+        labels:
+          severity: warning
+          business: conversion
+        annotations:
+          summary: "⚠️ High Cart Abandonment Rate"
+          description: "Cart abandonment rate is unusually high"
+
+      # Queue Processing
+      - alert: DixisQueueBacklog
+        expr: laravel_queue_jobs_total{queue=~"greek-market|high-priority"} > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: queue
+          market: greek
+        annotations:
+          summary: "⚠️ Queue Backlog"
+          description: "{{ $labels.queue }} queue has more than 100 pending jobs"
+
+      - alert: DixisFailedJobs
+        expr: increase(laravel_queue_failed_jobs_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          service: queue
+        annotations:
+          summary: "⚠️ High Failed Job Rate"
+          description: "More than 5 jobs failed in the last 5 minutes"
+
+  - name: dixis-security-alerts
+    rules:
+      # Security Events
+      - alert: DixisHighAuthFailures
+        expr: rate(http_requests_total{job="dixis-backend",endpoint="/api/auth/login",status="401"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          security: authentication
+        annotations:
+          summary: "⚠️ High Authentication Failures"
+          description: "High rate of authentication failures detected"
+
+      - alert: DixisSuspiciousActivity
+        expr: rate(http_requests_total{job="dixis-backend",status="429"}[1m]) > 1
+        for: 1m
+        labels:
+          severity: warning
+          security: rate_limiting
+        annotations:
+          summary: "⚠️ Rate Limiting Triggered"
+          description: "Rate limiting is being triggered frequently"
+
+      # SSL Certificate
+      - alert: DixisSSLCertificateExpiring
+        expr: (ssl_certificate_expiry_seconds - time()) / 86400 < 7
+        for: 1h
+        labels:
+          severity: warning
+          security: ssl
+        annotations:
+          summary: "⚠️ SSL Certificate Expiring Soon"
+          description: "SSL certificate will expire in less than 7 days"
+
+  - name: dixis-availability-alerts
+    rules:
+      # Service Health
+      - alert: DixisHealthCheckFailing
+        expr: probe_success{job="blackbox"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: health_check
+        annotations:
+          summary: "🚨 Health Check Failing"
+          description: "Health check for {{ $labels.instance }} is failing"
+
+      # External Dependencies
+      - alert: DixisElasticsearchDown
+        expr: up{job="elasticsearch"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: search
+        annotations:
+          summary: "⚠️ Elasticsearch is DOWN"
+          description: "Product search functionality may be impacted"
+
+      - alert: DixisMinIODown
+        expr: up{job="minio"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: storage
+        annotations:
+          summary: "⚠️ MinIO Storage is DOWN"
+          description: "File upload/download functionality may be impacted"

@@ -22,7 +22,7 @@ export const isProduction = process.env.NODE_ENV === 'production';
 // API Configuration
 export const apiConfig = {
   baseUrl: process.env.NODE_ENV === 'production'
-    ? (process.env.NEXT_PUBLIC_API_URL || 'https://api.dixis.gr')
+    ? (process.env.NEXT_PUBLIC_API_URL || 'https://api.dixis.io')
     : '', // Use proxy in development
   timeout: 10000,
   retries: 3,

@@ -139,6 +139,7 @@ export default function SimpleB2BRegistrationForm() {
           id="password"
           name="password"
           type="password"
+          autoComplete="new-password"
           required
           value={formData.password}
           onChange={handleInputChange}
@@ -156,6 +157,7 @@ export default function SimpleB2BRegistrationForm() {
           id="confirmPassword"
           name="confirmPassword"
           type="password"
+          autoComplete="new-password"
           required
           value={formData.confirmPassword}
           onChange={handleInputChange}

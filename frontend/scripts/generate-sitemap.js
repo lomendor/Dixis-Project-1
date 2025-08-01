@@ -5,7 +5,7 @@ const path = require('path');
  * Generate XML sitemap for Greek SEO
  */
 async function generateSitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.gr';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://dixis.io';
   
   // Static pages with Greek content
   const staticPages = [
@@ -90,7 +90,7 @@ ${allPages.map(page => `  <url>
   
   // Generate robots.txt
   const robots = `# Dixis Fresh Robots.txt
-# https://dixis.gr
+# https://dixis.io
 
 User-agent: *
 Allow: /

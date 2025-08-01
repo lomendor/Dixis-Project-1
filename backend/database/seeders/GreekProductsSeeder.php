@@ -15,27 +15,27 @@ class GreekProductsSeeder extends Seeder
         $producers = [
             [
                 'name' => 'Κτήμα Παπαδόπουλου',
-                'email' => 'papadopoulos@dixis.gr',
+                'email' => 'papadopoulos@dixis.io',
                 'role' => 'producer'
             ],
             [
                 'name' => 'Μελισσοκομία Χατζή',
-                'email' => 'hatzi@dixis.gr', 
+                'email' => 'hatzi@dixis.io', 
                 'role' => 'producer'
             ],
             [
                 'name' => 'Ελαιώνες Κρήτης',
-                'email' => 'crete-olives@dixis.gr',
+                'email' => 'crete-olives@dixis.io',
                 'role' => 'producer'
             ],
             [
                 'name' => 'Οινοποιείο Νέμεα',
-                'email' => 'nemea-wines@dixis.gr',
+                'email' => 'nemea-wines@dixis.io',
                 'role' => 'producer'
             ],
             [
                 'name' => 'Τυροκομείο Μετσόβου',
-                'email' => 'metsovo@dixis.gr',
+                'email' => 'metsovo@dixis.io',
                 'role' => 'producer'
             ]
         ];

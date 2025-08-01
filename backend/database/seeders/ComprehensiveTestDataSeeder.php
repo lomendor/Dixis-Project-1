@@ -56,7 +56,7 @@ class ComprehensiveTestDataSeeder extends Seeder
         // Admin user
         User::create([
             'name' => 'Admin User',
-            'email' => 'admin@dixis.gr',
+            'email' => 'admin@dixis.io',
             'email_verified_at' => now(),
             'password' => Hash::make('admin123'),
             'role' => 'admin',
@@ -66,7 +66,7 @@ class ComprehensiveTestDataSeeder extends Seeder
         // Producer user
         User::create([
             'name' => 'Γιάννης Παπαδόπουλος',
-            'email' => 'producer@dixis.gr',
+            'email' => 'producer@dixis.io',
             'email_verified_at' => now(),
             'password' => Hash::make('producer123'),
             'role' => 'producer',
@@ -76,7 +76,7 @@ class ComprehensiveTestDataSeeder extends Seeder
         // B2B user
         User::create([
             'name' => 'Μαρία Γεωργίου',
-            'email' => 'b2b@dixis.gr',
+            'email' => 'b2b@dixis.io',
             'email_verified_at' => now(),
             'password' => Hash::make('b2b123'),
             'role' => 'b2b',
@@ -86,7 +86,7 @@ class ComprehensiveTestDataSeeder extends Seeder
         // Regular customer
         User::create([
             'name' => 'Κώστας Αντωνίου',
-            'email' => 'customer@dixis.gr',
+            'email' => 'customer@dixis.io',
             'email_verified_at' => now(),
             'password' => Hash::make('customer123'),
             'role' => 'customer',
@@ -96,7 +96,7 @@ class ComprehensiveTestDataSeeder extends Seeder
         // Test user for E2E testing
         User::create([
             'name' => 'Test User',
-            'email' => 'test@dixis.gr',
+            'email' => 'test@dixis.io',
             'email_verified_at' => now(),
             'password' => Hash::make('testpassword123'),
             'role' => 'customer',
@@ -387,10 +387,10 @@ class ComprehensiveTestDataSeeder extends Seeder
         $tenant1 = Tenant::create([
             'name' => 'Κρητικά Προϊόντα',
             'slug' => 'kritika-proionta',
-            'domain' => 'kritika.dixis.gr',
+            'domain' => 'kritika.dixis.io',
             'description' => 'Παραδοσιακά κρητικά προϊόντα απευθείας από τους παραγωγούς',
             'logo_url' => 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200',
-            'contact_email' => 'info@kritika.dixis.gr',
+            'contact_email' => 'info@kritika.dixis.io',
             'contact_phone' => '+30 2810 123456',
             'subscription_plan' => 'premium',
             'subscription_expires_at' => now()->addYear(),
@@ -418,10 +418,10 @@ class ComprehensiveTestDataSeeder extends Seeder
         $tenant2 = Tenant::create([
             'name' => 'Βιολογικά Προϊόντα Αττικής',
             'slug' => 'biologika-attikis',
-            'domain' => 'biologika.dixis.gr',
+            'domain' => 'biologika.dixis.io',
             'description' => 'Βιολογικά προϊόντα από τους κήπους της Αττικής',
             'logo_url' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200',
-            'contact_email' => 'info@biologika.dixis.gr',
+            'contact_email' => 'info@biologika.dixis.io',
             'contact_phone' => '+30 210 987654',
             'subscription_plan' => 'basic',
             'subscription_expires_at' => now()->addMonths(6),

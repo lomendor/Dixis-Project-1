@@ -1,0 +1,125 @@
+# Dixis Platform - Prometheus Configuration
+# Production monitoring for Greek marketplace
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'dixis-production'
+    environment: 'production'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "rules/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # System metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Frontend application metrics
+  - job_name: 'dixis-frontend'
+    static_configs:
+      - targets: ['frontend:3000']
+    metrics_path: /api/metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Backend API metrics
+  - job_name: 'dixis-backend'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: /api/v1/metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # MySQL database metrics
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysql:3306']
+    scrape_interval: 30s
+    params:
+      collect[]:
+        - info_schema.innodb_metrics
+        - info_schema.processlist
+        - perf_schema.events_statements_summary_by_digest
+
+  # Redis metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 15s
+
+  # Elasticsearch metrics
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+    metrics_path: /_prometheus/metrics
+    scrape_interval: 30s
+
+  # Nginx proxy metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-proxy:80']
+    metrics_path: /nginx_status
+    scrape_interval: 15s
+
+  # Queue worker metrics
+  - job_name: 'queue-workers'
+    static_configs:
+      - targets: 
+          - 'queue-high:9090'
+          - 'queue-greek:9090'
+          - 'queue-general:9090'
+    scrape_interval: 30s
+
+  # MinIO storage metrics
+  - job_name: 'minio'
+    static_configs:
+      - targets: ['minio:9000']
+    metrics_path: /minio/v2/metrics/cluster
+    scrape_interval: 60s
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Greek market specific monitoring
+- job_name: 'greek-market-health'
+  static_configs:
+    - targets: ['backend:8000']
+  metrics_path: /api/v1/greek/health
+  scrape_interval: 60s
+  params:
+    module: [greek_market_check]
+
+# Payment system monitoring (critical)
+- job_name: 'payment-health'
+  static_configs:
+    - targets: ['backend:8000']
+  metrics_path: /api/v1/payment/health
+  scrape_interval: 30s
+  params:
+    module: [payment_system_check]
+
+# Custom Greek marketplace metrics
+- job_name: 'dixis-business-metrics'
+  static_configs:
+    - targets: ['backend:8000']
+  metrics_path: /api/v1/metrics/business
+  scrape_interval: 300s  # 5 minutes for business metrics
+  params:
+    format: ['prometheus']

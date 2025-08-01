@@ -4,7 +4,7 @@ import { toError, errorToContext } from '@/lib/utils/errorUtils';
 import { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io';
   const currentDate = new Date();
   
   // Static pages with comprehensive coverage

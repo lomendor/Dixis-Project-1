@@ -29,7 +29,7 @@ if ($userCount === 0) {
     $user = User::create([
         'firstName' => 'Test',
         'lastName' => 'User',
-        'email' => 'test@dixis.gr',
+        'email' => 'test@dixis.io',
         'password' => bcrypt('password'),
         'role' => 'customer',
         'email_verified_at' => now(),

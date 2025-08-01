@@ -11,18 +11,18 @@ import Navbar from '@/components/Navbar';
 import { DixisLogoCustom } from '@/components/ui/DixisLogo';
 import MobileCartIndicator from '@/components/MobileCartIndicator';
 
-// Client-only cart component
+// Client-only cart component - Fixed hooks order
 function CartButton() {
+  // CRITICAL: All hooks must be called in the same order every render
   const [mounted, setMounted] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  
-  // These are now safe thanks to our null checks
-  const { itemCount } = useCartSummary();
+  const { itemCount } = useCartSummary(); // Always call this hook
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Early return AFTER all hooks are called
   if (!mounted) {
     return (
       <button className="relative p-2 text-gray-600 hover:text-green-600 transition-colors">

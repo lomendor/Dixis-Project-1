@@ -349,7 +349,7 @@ export function usePlanFeatures(plan: 'basic' | 'premium' | 'enterprise') {
         'Μέχρι 500 παραγγελίες/μήνα',
         'Βασικά αναλυτικά',
         'Email υποστήριξη',
-        'Subdomain (yourstore.dixis.gr)'
+        'Subdomain (yourstore.dixis.io)'
       ]
     },
     premium: {

@@ -1,0 +1,392 @@
+# Dixis Platform - Development Docker Compose
+# Multi-service orchestration for local development
+
+version: '3.8'
+
+networks:
+  dixis-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+  elasticsearch-data:
+    driver: local
+  minio-data:
+    driver: local
+
+services:
+  # ===============================================
+  # Core Application Services
+  # ===============================================
+  
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      target: development
+      args:
+        - NODE_ENV=development
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+        - NEXT_PUBLIC_APP_ENV=development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_APP_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - dixis-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Backend (Laravel)
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: development
+      args:
+        - PHP_VERSION=8.3
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /app/vendor
+      - /app/storage/logs
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:8dQ8Gg6wjlnhUrCRtOXIJgFj8P2lznhoHGDSRD6vAig=
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=dixis_development
+      - DB_USERNAME=dixis_user
+      - DB_PASSWORD=secure_password_123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+      - MAIL_MAILER=log
+    networks:
+      - dixis-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ===============================================
+  # Database Services
+  # ===============================================
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/config/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password_123
+      - MYSQL_DATABASE=dixis_development
+      - MYSQL_USER=dixis_user
+      - MYSQL_PASSWORD=secure_password_123
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+    networks:
+      - dixis-network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "dixis_user", "-psecure_password_123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache & Sessions
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./docker/config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - dixis-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ===============================================
+  # Search & Analytics
+  # ===============================================
+
+  # Elasticsearch (for product search)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=dixis-search
+      - node.name=dixis-node-1
+    networks:
+      - dixis-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ===============================================
+  # File Storage & CDN
+  # ===============================================
+
+  # MinIO (S3-compatible storage for Greek product images)
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    environment:
+      - MINIO_ROOT_USER=dixis_admin
+      - MINIO_ROOT_PASSWORD=secure_minio_password_123
+      - MINIO_REGION=eu-central-1
+    command: server /data --console-address ":9001"
+    networks:
+      - dixis-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ===============================================
+  # Development Tools
+  # ===============================================
+
+  # MailHog (Email testing)
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - dixis-network
+    restart: unless-stopped
+
+  # Adminer (Database management)
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=mysql
+      - ADMINER_DESIGN=pepa-linha
+    networks:
+      - dixis-network
+    restart: unless-stopped
+    depends_on:
+      - mysql
+
+  # ===============================================
+  # Monitoring & Observability (Development)
+  # ===============================================
+
+  # Grafana (Monitoring dashboard)
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./docker/config/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./docker/config/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - dixis-network
+    restart: unless-stopped
+
+  # Prometheus (Metrics collection)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - dixis-network
+    restart: unless-stopped
+
+  # ===============================================
+  # Queue Workers (Development)
+  # ===============================================
+
+  # General Queue Worker
+  queue-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: development
+    command: php artisan queue:work --verbose --tries=3 --timeout=90
+    volumes:
+      - ./backend:/app
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=dixis_development
+      - DB_USERNAME=dixis_user
+      - DB_PASSWORD=secure_password_123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+    networks:
+      - dixis-network
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+
+  # Greek Market Queue Worker (High Priority)
+  greek-queue-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: development
+    command: php artisan queue:work --queue=greek-market,high-priority --verbose --tries=5 --timeout=120
+    volumes:
+      - ./backend:/app
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=dixis_development
+      - DB_USERNAME=dixis_user
+      - DB_PASSWORD=secure_password_123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+    networks:
+      - dixis-network
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+
+  # ===============================================
+  # Utilities & Scripts
+  # ===============================================
+
+  # Database Migrations & Seeding
+  migrator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+      target: development
+    command: >
+      sh -c "
+        sleep 30 &&
+        php artisan migrate --force &&
+        php artisan db:seed --force &&
+        php artisan cache:clear &&
+        php artisan config:cache &&
+        php artisan route:cache
+      "
+    volumes:
+      - ./backend:/app
+    environment:
+      - APP_ENV=local
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=dixis_development
+      - DB_USERNAME=dixis_user
+      - DB_PASSWORD=secure_password_123
+    networks:
+      - dixis-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: "no"
+
+  # E2E Testing Service
+  e2e-tests:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      target: testing
+    command: npm run test:e2e
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CI=true
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+    networks:
+      - dixis-network
+    depends_on:
+      - frontend
+      - backend
+    profiles:
+      - testing
+    restart: "no"

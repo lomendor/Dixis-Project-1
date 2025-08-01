@@ -13,6 +13,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Password; // Added for password reset
 use Illuminate\Auth\Events\PasswordReset; // Added for password reset event
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -320,5 +321,148 @@ class AuthController extends Controller
         return $status == Password::PASSWORD_RESET
                     ? response()->json(['message' => 'Password successfully reset.'], 200)
                     : response()->json(['message' => 'Password reset failed. Invalid token or email.'], 400); // Or handle specific errors
+    }
+
+    /**
+     * Redirect to Google OAuth provider
+     *
+     * @OA\Get(
+     *     path="/api/v1/auth/google",
+     *     operationId="googleAuth",
+     *     tags={"Authentication"},
+     *     summary="Redirect to Google OAuth",
+     *     description="Redirect user to Google OAuth provider for authentication",
+     *     @OA\Response(
+     *         response=302,
+     *         description="Redirect to Google OAuth",
+     *     )
+     * )
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Handle Google OAuth callback
+     *
+     * @OA\Get(
+     *     path="/api/v1/auth/google/callback",
+     *     operationId="googleCallback",
+     *     tags={"Authentication"},
+     *     summary="Handle Google OAuth callback",
+     *     description="Process Google OAuth callback and create/login user",
+     *     @OA\Parameter(
+     *         name="code",
+     *         in="query",
+     *         required=true,
+     *         description="OAuth authorization code from Google",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="state",
+     *         in="query",
+     *         required=false,
+     *         description="OAuth state parameter",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Google authentication successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Συνδεθήκατε επιτυχώς με Google"),
+     *             @OA\Property(property="user", ref="#/components/schemas/User"),
+     *             @OA\Property(property="token", type="string", example="3|abc123..."),
+     *             @OA\Property(property="token_type", type="string", example="Bearer"),
+     *             @OA\Property(property="is_new_user", type="boolean", example=false)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Google authentication failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Η σύνδεση με Google απέτυχε")
+     *         )
+     *     )
+     * )
+     */
+    public function handleGoogleCallback(Request $request)
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            
+            // Check if user already exists
+            $user = User::where('email', $googleUser->getEmail())->first();
+            $isNewUser = false;
+            
+            if (!$user) {
+                // Create new user
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'email_verified_at' => now(), // Google users are automatically verified
+                    'google_id' => $googleUser->getId(),
+                    'avatar' => $googleUser->getAvatar(),
+                    'role' => 'consumer', // Default role for Google users
+                ]);
+                
+                // Assign consumer role
+                $user->assignRole('consumer');
+                $isNewUser = true;
+            } else {
+                // Update existing user with Google info if not set
+                if (!$user->google_id) {
+                    $user->update([
+                        'google_id' => $googleUser->getId(),
+                        'avatar' => $googleUser->getAvatar(),
+                        'email_verified_at' => $user->email_verified_at ?? now(),
+                    ]);
+                }
+            }
+            
+            // Create authentication token
+            $token = $user->createToken('google_auth_token')->plainTextToken;
+            
+            // Get user's roles and permissions
+            $roles = $user->getRoleNames();
+            $permissions = $user->getAllPermissions()->pluck('name');
+            
+            // Create user data with roles and permissions
+            $userData = $user->toArray();
+            $userData['roles'] = $roles;
+            $userData['permissions'] = $permissions;
+            $userData['role'] = $roles->first() ?? 'consumer';
+            
+            // For web applications, you might want to redirect to frontend with token
+            // For API-only applications, return JSON response
+            if ($request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'message' => $isNewUser ? 'Λογαριασμός δημιουργήθηκε επιτυχώς με Google' : 'Συνδεθήκατε επιτυχώς με Google',
+                    'token' => $token,
+                    'access_token' => $token,
+                    'token_type' => 'Bearer',
+                    'user' => $userData,
+                    'is_new_user' => $isNewUser
+                ]);
+            }
+            
+            // For web flow, redirect to frontend with token as URL parameter
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect()->to($frontendUrl . '/auth/google-success?token=' . urlencode($token) . '&new_user=' . ($isNewUser ? '1' : '0'));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Google OAuth Error: ' . $e->getMessage());
+            
+            if ($request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Η σύνδεση με Google απέτυχε. Παρακαλώ δοκιμάστε ξανά.',
+                    'error' => env('APP_DEBUG') ? $e->getMessage() : 'Authentication failed'
+                ], 400);
+            }
+            
+            // For web flow, redirect to frontend with error
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect()->to($frontendUrl . '/auth/error?message=' . urlencode('Η σύνδεση με Google απέτυχε'));
+        }
     }
 }

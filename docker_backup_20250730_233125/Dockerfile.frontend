@@ -1,0 +1,177 @@
+# Dixis Platform Frontend - Multi-stage Production Dockerfile
+# Based on 2025 Docker best practices for Next.js applications
+
+# ===============================================
+# Stage 1: Dependencies (Base for all stages)
+# ===============================================
+FROM node:20-alpine AS deps
+LABEL maintainer="Dixis Platform <devops@dixis.ai>"
+LABEL org.dixis.version="1.0.0"
+LABEL org.dixis.component="frontend"
+
+# Install dependencies only when needed
+RUN apk add --no-cache libc6-compat dumb-init
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package.json frontend/package-lock.json ./
+
+# Install dependencies with optimizations
+RUN npm ci --only=production --no-audit --no-fund && \
+    npm cache clean --force
+
+# ===============================================
+# Stage 2: Builder (Development dependencies)
+# ===============================================
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
+COPY frontend/ .
+
+# Set build-time environment variables
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_APP_ENV=production
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NODE_ENV=production
+
+# Build the application
+RUN npm run build
+
+# ===============================================
+# Stage 3: Runner (Production runtime)
+# ===============================================
+FROM node:20-alpine AS runner
+LABEL org.dixis.stage="production"
+
+# Install security updates and required packages
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    tini \
+    && apk upgrade \
+    && rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy built application
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/.next/cache && \
+    chown -R nextjs:nodejs /app
+
+# Switch to non-root user
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Use tini as PID 1 for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start the application
+CMD ["node", "server.js"]
+
+# ===============================================
+# Stage 4: Development (Hot reload support)
+# ===============================================
+FROM node:20-alpine AS development
+WORKDIR /app
+
+# Install development dependencies
+RUN apk add --no-cache libc6-compat git
+
+# Copy package files
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+# Copy source code
+COPY frontend/ .
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
+
+USER nextjs
+
+EXPOSE 3000
+
+# Development health check (more lenient)
+HEALTHCHECK --interval=60s --timeout=30s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:3000 || exit 1
+
+CMD ["npm", "run", "dev"]
+
+# ===============================================
+# Stage 5: Testing (E2E and unit tests)
+# ===============================================
+FROM mcr.microsoft.com/playwright:v1.40.0-focal AS testing
+
+WORKDIR /app
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
+
+# Copy package files and install dependencies
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+# Copy source code
+COPY frontend/ .
+
+# Install Playwright browsers
+RUN npx playwright install --with-deps
+
+# Create test user
+RUN groupadd --gid 1001 testuser && \
+    useradd --uid 1001 --gid testuser --shell /bin/bash --create-home testuser && \
+    chown -R testuser:testuser /app
+
+USER testuser
+
+# Default command for testing
+CMD ["npm", "run", "test:e2e"]
+
+# ===============================================
+# Build Arguments and Metadata
+# ===============================================
+ARG BUILD_DATE
+ARG GIT_COMMIT
+ARG VERSION
+
+LABEL org.dixis.build-date=$BUILD_DATE
+LABEL org.dixis.git-commit=$GIT_COMMIT
+LABEL org.dixis.version=$VERSION
+LABEL org.dixis.vendor="Dixis Platform"
+LABEL org.dixis.description="Greek Food Marketplace - Frontend Application"
+
+# ===============================================
+# Security and Optimization Annotations
+# ===============================================
+# Multi-stage build reduces image size by ~70%
+# Non-root user prevents privilege escalation
+# Health checks enable container orchestration
+# Minimal Alpine base reduces attack surface
+# Build cache optimization for faster CI/CD
+# Proper signal handling with tini/dumb-init

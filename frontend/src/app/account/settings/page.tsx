@@ -340,6 +340,7 @@ export default function SettingsPage() {
                 <input
                   {...passwordForm.register('currentPassword')}
                   type={showCurrentPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 pr-10"
                 />
                 <button
@@ -365,6 +366,7 @@ export default function SettingsPage() {
                 <input
                   {...passwordForm.register('newPassword')}
                   type={showNewPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 pr-10"
                 />
                 <button
@@ -390,6 +392,7 @@ export default function SettingsPage() {
                 <input
                   {...passwordForm.register('confirmPassword')}
                   type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 pr-10"
                 />
                 <button

@@ -55,13 +55,13 @@ export async function POST(request: NextRequest) {
         if (errorData.message && errorData.message.includes('could not be found')) {
           console.log('Laravel auth route not found, using development fallback');
           
-          if ((email === 'test@dixis.gr' || email === 'producer@dixis.gr') && password === 'password') {
+          if ((email === 'test@dixis.io' || email === 'producer@dixis.io') && password === 'password') {
             const mockUser = {
               user: {
-                id: email === 'producer@dixis.gr' ? 2 : 1,
-                name: email === 'producer@dixis.gr' ? 'Test Producer' : 'Test User',
+                id: email === 'producer@dixis.io' ? 2 : 1,
+                name: email === 'producer@dixis.io' ? 'Test Producer' : 'Test User',
                 email: email,
-                role: email === 'producer@dixis.gr' ? 'producer' : 'customer',
+                role: email === 'producer@dixis.io' ? 'producer' : 'customer',
                 emailVerified: true,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -96,13 +96,13 @@ export async function POST(request: NextRequest) {
       
       // Fallback authentication for development
       if (process.env.NODE_ENV === 'development') {
-        if ((email === 'test@dixis.gr' || email === 'producer@dixis.gr') && password === 'password') {
+        if ((email === 'test@dixis.io' || email === 'producer@dixis.io') && password === 'password') {
           const mockUser = {
             user: {
-              id: email === 'producer@dixis.gr' ? 2 : 1,
-              name: email === 'producer@dixis.gr' ? 'Test Producer' : 'Test User',
+              id: email === 'producer@dixis.io' ? 2 : 1,
+              name: email === 'producer@dixis.io' ? 'Test Producer' : 'Test User',
               email: email,
-              role: email === 'producer@dixis.gr' ? 'producer' : 'customer',
+              role: email === 'producer@dixis.io' ? 'producer' : 'customer',
               emailVerified: true,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),

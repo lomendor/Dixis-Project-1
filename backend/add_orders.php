@@ -22,7 +22,7 @@ if (!$consumer) {
     // Create a consumer if none exists
     $consumer = new User();
     $consumer->name = "Test Consumer";
-    $consumer->email = "consumer@dixis.gr";
+    $consumer->email = "consumer@dixis.io";
     $consumer->password = bcrypt("password");
     $consumer->role = "consumer";
     $consumer->email_verified_at = now();

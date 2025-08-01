@@ -50,6 +50,8 @@ const AUTH_ENDPOINTS = {
   PREFERENCES: '/api/v1/user/preferences',
   SESSIONS: '/api/v1/user/sessions',
   REVOKE_SESSION: (id: string) => `/api/v1/user/sessions/${id}/revoke`,
+  GOOGLE_AUTH: '/api/v1/auth/google',
+  GOOGLE_CALLBACK: '/api/v1/auth/google/callback',
 };
 
 // Token storage keys
@@ -392,6 +394,62 @@ export function useChangePassword() {
       } else {
         toast.error('Σφάλμα κατά την αλλαγή κωδικού');
       }
+    },
+  });
+}
+
+/**
+ * Hook for Google OAuth login
+ */
+export function useGoogleLogin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      // Direct redirect to backend Google OAuth endpoint
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const googleAuthUrl = `${backendUrl}/api/v1/auth/google`;
+      
+      // Redirect to Google OAuth
+      window.location.href = googleAuthUrl;
+      
+      // Return a promise that never resolves since we're redirecting
+      return new Promise(() => {});
+    },
+    onError: (error: any) => {
+      logger.error('Google OAuth initiation error:', toError(error), errorToContext(error));
+      toast.error('Σφάλμα κατά τη σύνδεση με Google. Δοκιμάστε ξανά.');
+    },
+  });
+}
+
+/**
+ * Hook to handle Google OAuth callback
+ */
+export function useGoogleCallback() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (callbackData: { token: string; is_new_user: boolean }) => {
+      // The token comes from the URL parameters after Google redirect
+      return callbackData;
+    },
+    onSuccess: (data) => {
+      // Store the token from Google OAuth
+      tokenUtils.setTokens(data.token, '', 3600); // 1 hour expiry
+      
+      // Invalidate user query to fetch fresh user data
+      queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.user });
+      
+      const message = data.is_new_user 
+        ? 'Καλώς ήρθατε! Ο λογαριασμός σας δημιουργήθηκε με Google.'
+        : 'Καλώς ήρθατε πίσω!';
+      
+      toast.success(message);
+    },
+    onError: (error: any) => {
+      logger.error('Google OAuth callback error:', toError(error), errorToContext(error));
+      toast.error('Σφάλμα κατά τη σύνδεση με Google. Δοκιμάστε ξανά.');
     },
   });
 }

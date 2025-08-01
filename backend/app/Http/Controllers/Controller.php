@@ -12,9 +12,9 @@ use Illuminate\Routing\Controller as BaseController;
  *     title="Dixis Marketplace API",
  *     version="1.0.0",
  *     description="Comprehensive API for the Dixis Greek Agricultural Marketplace Platform",
- *     termsOfService="https://dixis.gr/terms",
+ *     termsOfService="https://dixis.io/terms",
  *     @OA\Contact(
- *         email="api@dixis.gr",
+ *         email="api@dixis.io",
  *         name="Dixis API Support"
  *     ),
  *     @OA\License(

@@ -1,0 +1,71 @@
+# DIXIS Enterprise Code Ownership
+# This file defines code ownership for enterprise-level governance
+# Follows GitHub Enterprise best practices for 2025
+
+# Global Ownership
+* @dixis-platform/core-team
+
+# Backend Ownership (Laravel Platform)
+/backend/ @dixis-platform/backend-team @dixis-platform/core-team
+/backend/app/Http/Controllers/ @dixis-platform/api-team @dixis-platform/backend-team
+/backend/app/Models/ @dixis-platform/data-team @dixis-platform/backend-team
+/backend/database/ @dixis-platform/data-team @dixis-platform/backend-team
+/backend/config/ @dixis-platform/devops-team @dixis-platform/backend-team
+/backend/routes/ @dixis-platform/api-team @dixis-platform/backend-team
+
+# Frontend Ownership (Next.js Platform) 
+/frontend/ @dixis-platform/frontend-team @dixis-platform/core-team
+/frontend/src/components/ @dixis-platform/ui-team @dixis-platform/frontend-team
+/frontend/src/lib/api/ @dixis-platform/api-team @dixis-platform/frontend-team
+/frontend/src/stores/ @dixis-platform/state-team @dixis-platform/frontend-team
+/frontend/src/hooks/ @dixis-platform/frontend-team
+/frontend/tests/ @dixis-platform/qa-team @dixis-platform/frontend-team
+
+# DevOps & Infrastructure
+/.github/ @dixis-platform/devops-team @dixis-platform/core-team
+/docker/ @dixis-platform/devops-team
+/scripts/ @dixis-platform/devops-team
+/.env.* @dixis-platform/devops-team @dixis-platform/security-team
+/docker-compose*.yml @dixis-platform/devops-team
+
+# Security Critical Files
+/backend/config/auth.php @dixis-platform/security-team @dixis-platform/backend-team
+/backend/config/database.php @dixis-platform/security-team @dixis-platform/data-team
+/frontend/src/lib/auth/ @dixis-platform/security-team @dixis-platform/frontend-team
+/frontend/src/lib/api/config/ @dixis-platform/security-team @dixis-platform/api-team
+
+# Documentation & Governance
+/docs/ @dixis-platform/docs-team @dixis-platform/core-team
+/CLAUDE.md @dixis-platform/core-team
+/README.md @dixis-platform/docs-team @dixis-platform/core-team
+/SECURITY.md @dixis-platform/security-team @dixis-platform/core-team
+/CONTRIBUTING.md @dixis-platform/docs-team @dixis-platform/core-team
+
+# AI & Machine Learning
+/backend/app/Services/AI/ @dixis-platform/ai-team @dixis-platform/backend-team
+/frontend/src/lib/ai/ @dixis-platform/ai-team @dixis-platform/frontend-team
+/docs/AI_IMPLEMENTATION_ROADMAP.md @dixis-platform/ai-team @dixis-platform/core-team
+
+# Greek Market Specific
+/backend/app/Services/Greek/ @dixis-platform/localization-team @dixis-platform/backend-team
+/frontend/src/lib/greek/ @dixis-platform/localization-team @dixis-platform/frontend-team
+/docs/GREEK_MARKET_STRATEGY.md @dixis-platform/localization-team @dixis-platform/core-team
+
+# Payment & Financial Systems (High Security)
+/backend/app/Services/Payment/ @dixis-platform/security-team @dixis-platform/fintech-team @dixis-platform/backend-team
+/frontend/src/lib/payment/ @dixis-platform/security-team @dixis-platform/fintech-team @dixis-platform/frontend-team
+
+# Testing & Quality Assurance
+/frontend/tests/e2e/ @dixis-platform/qa-team @dixis-platform/frontend-team
+/backend/tests/ @dixis-platform/qa-team @dixis-platform/backend-team
+/playwright.config.ts @dixis-platform/qa-team @dixis-platform/frontend-team
+
+# Enterprise Configuration Files (Require Multiple Approvals)
+/package.json @dixis-platform/devops-team @dixis-platform/core-team
+/composer.json @dixis-platform/devops-team @dixis-platform/backend-team
+/tsconfig.json @dixis-platform/frontend-team @dixis-platform/core-team
+/tailwind.config.js @dixis-platform/ui-team @dixis-platform/frontend-team
+
+# Release & Deployment
+/CHANGELOG.md @dixis-platform/release-team @dixis-platform/core-team
+/VERSION @dixis-platform/release-team @dixis-platform/core-team

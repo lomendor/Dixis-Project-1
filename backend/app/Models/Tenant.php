@@ -297,7 +297,7 @@ class Tenant extends Model
             return 'https://' . $this->domain;
         }
         
-        return 'https://' . $this->subdomain . '.dixis.gr';
+        return 'https://' . $this->subdomain . '.dixis.io';
     }
 
     /**

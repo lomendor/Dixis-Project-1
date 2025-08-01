@@ -321,7 +321,7 @@ function generateProducerEmailContent(orderData: OrderNotificationData, producer
       </div>
 
       <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center; color: #6b7280; font-size: 14px;">
-        <p>Χρειάζεστε βοήθεια; Επικοινωνήστε μαζί μας στο producers@dixis.gr ή 210 123 4567</p>
+        <p>Χρειάζεστε βοήθεια; Επικοινωνήστε μαζί μας στο producers@dixis.io ή 210 123 4567</p>
         <p style="margin: 5px 0 0;">© 2025 Dixis Fresh - Marketplace Ελληνικών Προϊόντων</p>
       </div>
     </body>

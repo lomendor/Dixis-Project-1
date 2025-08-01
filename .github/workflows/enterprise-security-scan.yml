@@ -1,0 +1,297 @@
+name: 🔒 Enterprise Security Scanning
+
+on:
+  push:
+    branches: [ main, develop, staging ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 02:00 UTC
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '20'
+  PHP_VERSION: '8.3'
+
+jobs:
+  # Secret Scanning & Sensitive Data Detection
+  secret-scan:
+    name: 🕵️ Secret Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: GitLeaks Secret Scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
+
+      - name: TruffleHog Secret Scanning
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  # Frontend Security Analysis
+  frontend-security:
+    name: 🎨 Frontend Security Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint Security Analysis
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-results.json || true
+
+      - name: Upload ESLint results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: frontend/eslint-results.json
+          category: eslint
+
+      - name: Audit NPM Dependencies
+        run: |
+          npm audit --audit-level high --json > npm-audit.json || true
+          
+      - name: Semgrep Security Analysis
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/ci
+            p/react
+            p/typescript
+          generateSarif: "1"
+
+      - name: Snyk Security Analysis
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=frontend/package.json
+
+  # Backend Security Analysis
+  backend-security:
+    name: ⚙️ Backend Security Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, bcmath, pdo, mysql, zip
+          coverage: xdebug
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: PHPStan Security Analysis
+        run: vendor/bin/phpstan analyse --error-format=github
+
+      - name: Psalm Security Analysis
+        run: vendor/bin/psalm --output-format=github --threads=4
+
+      - name: Laravel Security Checker
+        run: |
+          composer require --dev enlightn/security-checker
+          vendor/bin/security-checker security:check composer.lock
+
+      - name: Semgrep PHP Security Analysis
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/php
+            p/laravel
+            p/security-audit
+            p/secrets
+          generateSarif: "1"
+
+  # Dependency Vulnerability Scanning
+  dependency-scan:
+    name: 📦 Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [frontend, backend]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Frontend Dependency Scan
+        if: matrix.component == 'frontend'
+        uses: actions/dependency-review-action@v4
+        with:
+          config-file: './.github/dependency-review-config.yml'
+          base-ref: ${{ github.event.repository.default_branch }}
+          head-ref: ${{ github.ref }}
+
+      - name: Backend Dependency Scan  
+        if: matrix.component == 'backend'
+        run: |
+          cd backend
+          composer audit --format=json > composer-audit.json || true
+
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'Dixis-Platform'
+          path: '.'
+          format: 'SARIF'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --failOnCVSS 7
+
+      - name: Upload OWASP results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: reports/dependency-check-report.sarif
+
+  # Infrastructure as Code Security
+  iac-security:
+    name: 🏗️ Infrastructure Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Checkov IaC Security Analysis
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: dockerfile,github_actions,secrets
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      - name: Upload Checkov results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: checkov-results.sarif
+
+      - name: Docker Image Security Scan
+        if: hashFiles('docker/Dockerfile*') != ''
+        run: |
+          docker build -t dixis-security-scan:latest -f docker/Dockerfile.frontend .
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $(pwd):/tmp aquasec/trivy image dixis-security-scan:latest
+
+  # Security Compliance & Reporting
+  security-report:
+    name: 📊 Security Compliance Report
+    runs-on: ubuntu-latest
+    needs: [secret-scan, frontend-security, backend-security, dependency-scan, iac-security]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Security Summary Report
+        run: |
+          echo "# 🔒 Dixis Platform Security Scan Results" > security-report.md
+          echo "" >> security-report.md
+          echo "**Scan Date:** $(date -u)" >> security-report.md
+          echo "**Repository:** ${{ github.repository }}" >> security-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> security-report.md
+          echo "**Commit:** ${{ github.sha }}" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "## 🎯 Scan Results Summary" >> security-report.md
+          echo "- ✅ Secret Scanning: ${{ needs.secret-scan.result }}" >> security-report.md
+          echo "- ✅ Frontend Security: ${{ needs.frontend-security.result }}" >> security-report.md
+          echo "- ✅ Backend Security: ${{ needs.backend-security.result }}" >> security-report.md
+          echo "- ✅ Dependency Scan: ${{ needs.dependency-scan.result }}" >> security-report.md
+          echo "- ✅ Infrastructure Scan: ${{ needs.iac-security.result }}" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "## 🚀 Next Steps" >> security-report.md
+          echo "1. Review any detected vulnerabilities in the Security tab" >> security-report.md
+          echo "2. Update dependencies with known vulnerabilities" >> security-report.md
+          echo "3. Ensure all secrets are properly managed" >> security-report.md
+          echo "4. Validate infrastructure security configurations" >> security-report.md
+
+      - name: Upload Security Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report-${{ github.run_number }}
+          path: security-report.md
+
+      - name: Security Notification
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#dixis-security'
+          text: '🚨 Security scan failed for ${{ github.repository }} on ${{ github.ref_name }}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Auto-fix Security Issues (Optional)
+  security-autofix:
+    name: 🔧 Auto-fix Security Issues
+    runs-on: ubuntu-latest
+    needs: [frontend-security, backend-security]
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Auto-fix NPM vulnerabilities
+        working-directory: ./frontend
+        run: |
+          npm audit fix --force || true
+          
+      - name: Auto-fix Composer vulnerabilities
+        working-directory: ./backend
+        run: |
+          composer update --with-all-dependencies || true
+
+      - name: Commit auto-fixes
+        run: |
+          git config --local user.email "security@dixis.ai"
+          git config --local user.name "Dixis Security Bot"
+          git add .
+          git diff --staged --quiet || git commit -m "🔒 Auto-fix security vulnerabilities"
+          git push || true

@@ -80,7 +80,7 @@ const LEGACY_ENDPOINT_MAPPINGS = {
 const LEGACY_BASE_URL_MAPPINGS = {
   'http://localhost:8004': 'http://localhost:8000',
   'http://localhost:3000': 'http://localhost:8000',
-  'https://api.dixis.io': 'https://api.dixis.gr',
+  'https://api.dixis.io': 'https://api.dixis.io',
 } as const;
 
 /**

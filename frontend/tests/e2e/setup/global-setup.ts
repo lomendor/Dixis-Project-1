@@ -46,7 +46,7 @@ async function globalSetup(config: FullConfig) {
         console.log('🔐 Setting up authentication state...');
         
         // Fill login form with test credentials
-        const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.gr';
+        const testEmail = process.env.TEST_USER_EMAIL || 'test@dixis.io';
         const testPassword = process.env.TEST_USER_PASSWORD || 'testpassword123';
         
         await page.fill('input[type="email"], input[name="email"]', testEmail);
@@ -101,8 +101,9 @@ async function setupTestData(page: any) {
   console.log('📊 Setting up test data...');
   
   try {
-    // Check if API is available
-    const apiBaseURL = process.env.PLAYWRIGHT_API_URL || 'http://localhost:8080';
+    // 🔧 CRITICAL FIX: Use correct backend port (8000, not 8080)
+    const apiBaseURL = process.env.PLAYWRIGHT_API_URL || 'http://localhost:8000';
+    console.log(`🔍 Testing API connection to: ${apiBaseURL}`);
     
     // Test API health endpoint
     const response = await page.request.get(`${apiBaseURL}/api/health`);

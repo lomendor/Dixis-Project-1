@@ -83,7 +83,7 @@ class TenantMiddleware
     protected function isSubdomainRequest(Request $request): bool
     {
         $host = $request->getHost();
-        $mainDomain = config('app.domain', 'dixis.gr');
+        $mainDomain = config('app.domain', 'dixis.io');
         
         // Check if host is a subdomain of main domain
         return $host !== $mainDomain && str_ends_with($host, '.' . $mainDomain);

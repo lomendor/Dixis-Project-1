@@ -105,7 +105,7 @@ export async function demoFetch(url: string, options?: RequestInit): Promise<Res
       demoData = {
         id: 1,
         name: 'Demo Business User',
-        email: 'demo@dixis.gr',
+        email: 'demo@dixis.io',
         business_name: 'Demo Επιχείρηση Α.Ε.',
         role: 'business',
         verified: true,

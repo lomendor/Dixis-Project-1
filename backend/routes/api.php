@@ -525,14 +525,14 @@ Route::prefix('v1')->group(function () {
             
             // For MVP testing, create a simple producer login
             // In production, this would use proper authentication
-            if ($validated['email'] === 'producer@dixis.gr' && $validated['password'] === 'test123') {
+            if ($validated['email'] === 'producer@dixis.io' && $validated['password'] === 'test123') {
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Producer logged in successfully',
                     'data' => [
                         'id' => 1,
                         'name' => 'Ελαιώνες Καλαμάτας',
-                        'email' => 'producer@dixis.gr',
+                        'email' => 'producer@dixis.io',
                         'role' => 'producer',
                         'token' => 'test-producer-token-' . time()
                     ]

@@ -83,23 +83,27 @@ interface Product {
 
 interface EnhancedProductCardProps {
   product: Product;
+  onAddToCart?: (product: Product) => void;
   onQuickView?: (product: Product) => void;
   onToggleWishlist?: (product: Product) => void;
   isInWishlist?: boolean;
   showProducerInfo?: boolean;
   showEnhancedFeatures?: boolean;
   compact?: boolean;
+  listView?: boolean;
   className?: string;
 }
 
 export default function EnhancedProductCard({ 
   product, 
+  onAddToCart,
   onQuickView,
   onToggleWishlist,
   isInWishlist = false,
   showProducerInfo = true,
   showEnhancedFeatures = true,
   compact = false,
+  listView = false,
   className = '' 
 }: EnhancedProductCardProps) {
   const [quantity, setQuantity] = useState(1);

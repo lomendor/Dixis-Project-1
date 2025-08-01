@@ -28,7 +28,7 @@ interface ProducerProductsPageProps {
 }
 
 export default async function ProducerProductsPage({ params }: ProducerProductsPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   let producer: Producer | null = null;
   let products: Product[] = [];
   let error = null;

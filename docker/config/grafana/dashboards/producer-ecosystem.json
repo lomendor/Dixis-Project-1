@@ -1,0 +1,470 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "🏛️ Greek Producer Ecosystem Dashboard",
+    "tags": ["dixis", "producers", "ecosystem", "greece", "b2b"],
+    "style": "dark",
+    "timezone": "Europe/Athens",
+    "refresh": "5m",
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "🌍 Producer Distribution by Greek Region",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "count by (producer_region) (dixis_producers_active{country=\"GR\"})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              }
+            },
+            "mappings": [
+              {"options": {"crete": {"text": "Κρήτη"}}, "type": "value"},
+              {"options": {"peloponnese": {"text": "Πελοπόννησος"}}, "type": "value"},
+              {"options": {"macedonia": {"text": "Μακεδονία"}}, "type": "value"},
+              {"options": {"thessaly": {"text": "Θεσσαλία"}}, "type": "value"},
+              {"options": {"epirus": {"text": "Ήπειρος"}}, "type": "value"},
+              {"options": {"thrace": {"text": "Θράκη"}}, "type": "value"},
+              {"options": {"aegean_islands": {"text": "Νησιά Αιγαίου"}}, "type": "value"},
+              {"options": {"ionian_islands": {"text": "Ιόνια Νησιά"}}, "type": "value"}
+            ]
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "pieType": "donut",
+          "tooltip": {"mode": "multi"},
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["percent", "value"]
+          },
+          "displayLabels": ["name", "percent"]
+        },
+        "gridPos": {"h": 10, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "📊 Producer Performance Rankings",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(20, sum by (producer_name, producer_region) (dixis_producer_revenue_euros))",
+            "refId": "A",
+            "format": "table"
+          },
+          {
+            "expr": "topk(20, sum by (producer_name, producer_region) (dixis_producer_orders_total))",
+            "refId": "B",
+            "format": "table"
+          },
+          {
+            "expr": "topk(20, avg by (producer_name, producer_region) (dixis_producer_rating))",
+            "refId": "C",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto",
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 80}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "producer_name"},
+              "properties": [
+                {"id": "displayName", "value": "🏛️ Producer Name"},
+                {"id": "custom.width", "value": 200}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "producer_region"},
+              "properties": [
+                {"id": "displayName", "value": "🌍 Region"},
+                {"id": "custom.width", "value": 120}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Value #A"},
+              "properties": [
+                {"id": "displayName", "value": "💰 Revenue (€)"},
+                {"id": "unit", "value": "euro"},
+                {"id": "custom.displayMode", "value": "color-background"}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Value #B"},
+              "properties": [
+                {"id": "displayName", "value": "📦 Total Orders"},
+                {"id": "custom.displayMode", "value": "color-background"}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Value #C"},
+              "properties": [
+                {"id": "displayName", "value": "⭐ Rating"},
+                {"id": "max", "value": 5},
+                {"id": "min", "value": 1},
+                {"id": "custom.displayMode", "value": "color-background"}
+              ]
+            }
+          ]
+        },
+        "gridPos": {"h": 10, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "💰 Revenue Distribution Across Producers",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (producer_region) (rate(dixis_producer_revenue_euros[1h]))",
+            "refId": "A",
+            "legendFormat": "{{producer_region}}"
+          }
+        ],
+        "yAxes": [
+          {"label": "Revenue (€/hour)", "show": true}
+        ],
+        "xAxis": {"show": true},
+        "legend": {
+          "alignAsTable": true,
+          "avg": true,
+          "current": true,
+          "max": true,
+          "min": false,
+          "rightSide": true,
+          "show": true,
+          "total": true,
+          "values": true
+        },
+        "seriesOverrides": [
+          {
+            "alias": "crete",
+            "color": "#FF7383"
+          },
+          {
+            "alias": "peloponnese", 
+            "color": "#73BF69"
+          },
+          {
+            "alias": "macedonia",
+            "color": "#5794F2"
+          }
+        ],
+        "gridPos": {"h": 9, "w": 24, "x": 0, "y": 10}
+      },
+      {
+        "id": 4,
+        "title": "📈 Product Upload Trends",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(dixis_products_uploaded_total[1h])",
+            "refId": "A",
+            "legendFormat": "Products Uploaded/hour"
+          },
+          {
+            "expr": "rate(dixis_products_approved_total[1h])",
+            "refId": "B",
+            "legendFormat": "Products Approved/hour"
+          },
+          {
+            "expr": "rate(dixis_products_rejected_total[1h])",
+            "refId": "C",
+            "legendFormat": "Products Rejected/hour"
+          }
+        ],
+        "yAxes": [
+          {"label": "Products/hour", "show": true}
+        ],
+        "xAxis": {"show": true},
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.1],
+                "type": "lt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "5m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "Low Product Upload Rate",
+          "noDataState": "no_data",
+          "notifications": []
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 19}
+      },
+      {
+        "id": 5,
+        "title": "🎯 Producer Quality Scores",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(dixis_producer_quality_score)",
+            "refId": "A",
+            "legendFormat": "Average Quality Score"
+          },
+          {
+            "expr": "count(dixis_producer_quality_score > 4.5)",
+            "refId": "B",
+            "legendFormat": "High Quality Producers (>4.5)"
+          },
+          {
+            "expr": "count(dixis_producer_quality_score < 3.0)",
+            "refId": "C",
+            "legendFormat": "Low Quality Producers (<3.0)"
+          },
+          {
+            "expr": "avg(dixis_producer_response_time_hours)",
+            "refId": "D",
+            "legendFormat": "Avg Response Time (hours)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 3},
+                {"color": "green", "value": 4},
+                {"color": "super-green", "value": 4.5}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Average Quality Score"},
+              "properties": [
+                {"id": "max", "value": 5},
+                {"id": "min", "value": 1},
+                {"id": "decimals", "value": 2}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Avg Response Time (hours)"},
+              "properties": [
+                {"id": "unit", "value": "h"},
+                {"id": "thresholds", "value": {
+                  "steps": [
+                    {"color": "green", "value": 0},
+                    {"color": "yellow", "value": 24},
+                    {"color": "red", "value": 48}
+                  ]
+                }}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "vertical",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 19}
+      },
+      {
+        "id": 6,
+        "title": "📦 Inventory Health by Category",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum by (product_category, producer_region) (dixis_inventory_stock_level)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "scaleDistribution": {
+                "type": "linear"
+              }
+            }
+          }
+        },
+        "options": {
+          "calculate": false,
+          "cellGap": 2,
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-green",
+            "mode": "spectrum",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "Greens",
+            "steps": 64
+          },
+          "exemplars": {
+            "color": "rgba(255,0,255,0.7)"
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {
+            "show": true
+          },
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "tooltip": {
+            "show": true,
+            "yHistogram": false
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "reverse": false,
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 28}
+      },
+      {
+        "id": 7,
+        "title": "🔔 Producer Onboarding Pipeline",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(dixis_producer_applications_total[1h])",
+            "refId": "A",
+            "legendFormat": "Applications Received/hour"
+          },
+          {
+            "expr": "rate(dixis_producer_approved_total[1h])",
+            "refId": "B",
+            "legendFormat": "Producers Approved/hour"
+          },
+          {
+            "expr": "rate(dixis_producer_onboarded_total[1h])",
+            "refId": "C",
+            "legendFormat": "Producers Fully Onboarded/hour"
+          },
+          {
+            "expr": "rate(dixis_producer_first_sale_total[1h])",
+            "refId": "D",
+            "legendFormat": "First Sales Achieved/hour"
+          }
+        ],
+        "yAxes": [
+          {"label": "Rate (per hour)", "show": true}
+        ],
+        "xAxis": {"show": true},
+        "legend": {
+          "alignAsTable": true,
+          "avg": true,
+          "current": true,
+          "max": true,
+          "min": false,
+          "rightSide": false,
+          "show": true,
+          "total": true,
+          "values": true
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 36}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "producer_region",
+          "type": "query",
+          "query": "label_values(dixis_producers_active{country=\"GR\"}, producer_region)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true,
+          "allValue": null
+        },
+        {
+          "name": "product_category",
+          "type": "query",
+          "query": "label_values(dixis_products_total, product_category)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true,
+          "allValue": null
+        },
+        {
+          "name": "quality_threshold",
+          "type": "custom",
+          "query": "3.0,3.5,4.0,4.5,5.0",
+          "refresh": 2,
+          "current": {"text": "4.0", "value": "4.0"}
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Producer Events",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "dixis_producer_milestone_events",
+          "textFormat": "{{event_type}}: {{producer_name}}",
+          "titleFormat": "🏛️ Producer Event"
+        },
+        {
+          "name": "Quality Issues",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "dixis_producer_quality_alerts",
+          "textFormat": "Quality Alert: {{producer_name}}",
+          "titleFormat": "⚠️ Quality Issue"
+        }
+      ]
+    }
+  },
+  "folderId": null,
+  "overwrite": true
+}

@@ -294,6 +294,7 @@ export function TouchInput({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
+        autoComplete={type === 'password' ? 'current-password' : undefined}
         className={cn(
           'w-full px-4 py-3 text-base border border-gray-300 rounded-lg',
           'focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent',

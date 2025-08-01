@@ -1,0 +1,22 @@
+apiVersion: 1
+
+providers:
+  - name: 'Greek Market Dashboards'
+    orgId: 1
+    folder: 'Dixis Greek Marketplace'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards
+
+  - name: 'Production Monitoring'
+    orgId: 1
+    folder: 'Production'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards

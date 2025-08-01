@@ -6,7 +6,7 @@ test.describe('B2B Dashboard Navigation and Functionality', () => {
   const loginAsB2BUser = async (page: any) => {
     await page.goto('/b2b/login');
     
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);
@@ -334,7 +334,7 @@ test.describe('B2B Dashboard Performance and Accessibility', () => {
     
     await page.goto('/b2b/login');
     
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);
@@ -355,7 +355,7 @@ test.describe('B2B Dashboard Performance and Accessibility', () => {
   test('should be accessible with keyboard navigation', async ({ page }) => {
     await page.goto('/b2b/login');
     
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);
@@ -384,7 +384,7 @@ test.describe('B2B Dashboard Performance and Accessibility', () => {
   test('should have proper ARIA labels and semantic HTML', async ({ page }) => {
     await page.goto('/b2b/login');
     
-    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.gr';
+    const testB2BEmail = process.env.TEST_B2B_EMAIL || 'business@dixis.io';
     const testB2BPassword = process.env.TEST_B2B_PASSWORD || 'businesspass123';
     
     await page.fill('input[type="email"]', testB2BEmail);

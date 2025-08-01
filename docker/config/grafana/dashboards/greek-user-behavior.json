@@ -1,0 +1,401 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "🇬🇷 Greek User Behavior Analytics",
+    "tags": ["dixis", "greek-market", "users", "behavior", "analytics"],
+    "style": "dark",
+    "timezone": "Europe/Athens",
+    "refresh": "1m",
+    "time": {
+      "from": "now-7d",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "🗺️ User Geographic Distribution",
+        "type": "geomap",
+        "targets": [
+          {
+            "expr": "sum by (city) (dixis_active_users{country=\"GR\"})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              }
+            },
+            "mappings": [
+              {"options": {"athens": {"text": "Αθήνα"}}, "type": "value"},
+              {"options": {"thessaloniki": {"text": "Θεσσαλονίκη"}}, "type": "value"},
+              {"options": {"patras": {"text": "Πάτρα"}}, "type": "value"},
+              {"options": {"heraklion": {"text": "Ηράκλειο"}}, "type": "value"},
+              {"options": {"larissa": {"text": "Λάρισα"}}, "type": "value"}
+            ],
+            "color": {"mode": "continuous-GrYlRd"}
+          }
+        },
+        "options": {
+          "view": {
+            "id": "coords",
+            "lat": 39.0742,
+            "lon": 21.8243,
+            "zoom": 6
+          },
+          "controls": {
+            "mouseWheelZoom": true,
+            "showZoom": true,
+            "showAttribution": true
+          },
+          "basemap": {
+            "type": "osm-standard"
+          },
+          "layers": [
+            {
+              "type": "markers",
+              "config": {
+                "size": {
+                  "field": "Value",
+                  "fixed": 5,
+                  "max": 15,
+                  "min": 2
+                },
+                "color": {
+                  "field": "Value",
+                  "fixed": "dark-green"
+                },
+                "fillOpacity": 0.4,
+                "strokeWidth": 1,
+                "strokeColor": "white"
+              }
+            }
+          ]
+        },
+        "gridPos": {"h": 12, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "🥘 Product Category Preferences",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (category_greek) (dixis_product_views{country=\"GR\"})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              }
+            },
+            "mappings": [
+              {"options": {"olive_oil": {"text": "Ελαιόλαδο"}}, "type": "value"},
+              {"options": {"honey": {"text": "Μέλι"}}, "type": "value"},
+              {"options": {"cheese": {"text": "Τυριά"}}, "type": "value"},
+              {"options": {"wine": {"text": "Κρασί"}}, "type": "value"},
+              {"options": {"herbs": {"text": "Βότανα"}}, "type": "value"},
+              {"options": {"olives": {"text": "Ελιές"}}, "type": "value"}
+            ]
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "pieType": "donut",
+          "tooltip": {"mode": "multi"},
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "values": ["percent", "value"]
+          },
+          "displayLabels": ["name", "percent"]
+        },
+        "gridPos": {"h": 12, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "🌐 Greek Language Engagement",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(dixis_page_views{language=\"el\"}[5m])",
+            "refId": "A",
+            "legendFormat": "Greek Pages (ελ)"
+          },
+          {
+            "expr": "rate(dixis_page_views{language=\"en\"}[5m])",
+            "refId": "B",
+            "legendFormat": "English Pages (en)"
+          },
+          {
+            "expr": "rate(dixis_search_queries{language=\"el\"}[5m])",
+            "refId": "C",
+            "legendFormat": "Greek Searches"
+          }
+        ],
+        "yAxes": [
+          {"label": "Views/min", "show": true}
+        ],
+        "xAxis": {"show": true},
+        "legend": {
+          "alignAsTable": true,
+          "avg": true,
+          "current": true,
+          "max": true,
+          "min": false,
+          "rightSide": false,
+          "show": true,
+          "total": false,
+          "values": true
+        },
+        "gridPos": {"h": 9, "w": 24, "x": 0, "y": 12}
+      },
+      {
+        "id": 4,
+        "title": "📱 Device Usage Patterns",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "sum by (device_type) (dixis_sessions_total{country=\"GR\"})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "displayMode": "gradient",
+              "orientation": "horizontal"
+            },
+            "mappings": [
+              {"options": {"mobile": {"text": "📱 Κινητό"}}, "type": "value"},
+              {"options": {"desktop": {"text": "🖥️ Desktop"}}, "type": "value"},
+              {"options": {"tablet": {"text": "📱 Tablet"}}, "type": "value"}
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 50},
+                {"color": "green", "value": 100}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 21}
+      },
+      {
+        "id": 5,
+        "title": "🛒 Cart Abandonment Analysis",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "((dixis_carts_created - dixis_orders_completed) / dixis_carts_created) * 100",
+            "refId": "A",
+            "legendFormat": "Cart Abandonment Rate (%)"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(dixis_cart_session_duration_seconds_bucket[1h]))",
+            "refId": "B",
+            "legendFormat": "Median Cart Session (min)"
+          },
+          {
+            "expr": "avg(dixis_cart_items_count)",
+            "refId": "C",
+            "legendFormat": "Avg Items per Cart"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 60},
+                {"color": "red", "value": 80}
+              ]
+            }
+          },
+          "overrides": [
+            {"matcher": {"id": "byName", "options": "Cart Abandonment Rate (%)"}, "properties": [{"id": "unit", "value": "percent"}]},
+            {"matcher": {"id": "byName", "options": "Median Cart Session (min)"}, "properties": [{"id": "unit", "value": "m"}]}
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "vertical",
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 21}
+      },
+      {
+        "id": 6,
+        "title": "⏰ Peak Usage Hours (Greek Time)",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum by (hour) (increase(dixis_page_views{country=\"GR\"}[1h]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              },
+              "scaleDistribution": {
+                "type": "linear"
+              }
+            }
+          }
+        },
+        "options": {
+          "calculate": false,
+          "cellGap": 2,
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-orange",
+            "mode": "spectrum",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "Oranges",
+            "steps": 64
+          },
+          "exemplars": {
+            "color": "rgba(255,0,255,0.7)"
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {
+            "show": true
+          },
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "tooltip": {
+            "show": true,
+            "yHistogram": false
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "reverse": false,
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 30}
+      },
+      {
+        "id": 7,
+        "title": "🔍 Search Behavior Analytics", 
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, sum by (search_term_greek) (dixis_search_queries{language=\"el\"}))",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto",
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 80}
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "search_term_greek"},
+              "properties": [
+                {"id": "displayName", "value": "🔍 Greek Search Terms"},
+                {"id": "custom.width", "value": 300}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Value"},
+              "properties": [
+                {"id": "displayName", "value": "Search Count"},
+                {"id": "custom.displayMode", "value": "color-background"}
+              ]
+            }
+          ]
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 38}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "city",
+          "type": "query",
+          "query": "label_values(dixis_active_users{country=\"GR\"}, city)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true,
+          "allValue": null
+        },
+        {
+          "name": "device_type",
+          "type": "custom",
+          "query": "mobile,desktop,tablet",
+          "refresh": 2,
+          "includeAll": true,
+          "multi": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Marketing Campaigns",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "marketing_campaign_start",
+          "textFormat": "{{campaign_name}}",
+          "titleFormat": "📢 Campaign: {{campaign_name}}"
+        }
+      ]
+    }
+  },
+  "folderId": null,
+  "overwrite": true
+}

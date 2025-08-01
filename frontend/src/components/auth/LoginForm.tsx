@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuthActions, useAuthStatus } from '@/stores/authStore';
 import { LoginCredentials } from '@/lib/api/models/auth/types';
+import { useGoogleLogin } from '@/lib/api/services/auth/useAuth';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import {
   sanitizeInput,
@@ -29,6 +30,7 @@ export default function LoginForm({
 }: LoginFormProps) {
   const { loginWithCredentials } = useAuthActions();
   const { isLoading } = useAuthStatus();
+  const googleLogin = useGoogleLogin();
 
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
@@ -97,9 +99,8 @@ export default function LoginForm({
 
   const handleGoogleLogin = async () => {
     try {
-      // For now, show a message that this will be implemented
-      alert('Google σύνδεση θα υλοποιηθεί σύντομα!');
-      logger.info('Google login clicked - will implement with OAuth');
+      logger.info('Initiating Google OAuth login');
+      await googleLogin.mutateAsync();
     } catch (error) {
       logger.error('Google login error', toError(error), errorToContext(error));
     }
@@ -190,6 +191,7 @@ export default function LoginForm({
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
+                autoComplete="current-password"
                 className={`
                   block w-full pl-10 pr-10 py-3 border rounded-lg
                   focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
@@ -282,7 +284,7 @@ export default function LoginForm({
             type="button"
             onClick={handleGoogleLogin}
             className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-            disabled={isLoading}
+            disabled={isLoading || googleLogin.isPending}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

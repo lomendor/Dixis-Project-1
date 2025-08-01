@@ -74,7 +74,7 @@ APP_NAME="Dixis Fresh"
 APP_ENV=production
 APP_KEY=${appKey}
 APP_DEBUG=false
-APP_URL=https://dixis.gr
+APP_URL=https://dixis.io
 APP_TIMEZONE=Europe/Athens
 
 LOG_CHANNEL=daily
@@ -84,7 +84,7 @@ LOG_DAYS=14
 
 # MySQL Production Database
 DB_CONNECTION=mysql
-DB_HOST=mysql.dixis.gr
+DB_HOST=mysql.dixis.io
 DB_PORT=3306
 DB_DATABASE=dixis_production
 DB_USERNAME=dixis_user
@@ -108,12 +108,12 @@ SESSION_DRIVER=redis
 SESSION_LIFETIME=120
 SESSION_ENCRYPT=true
 SESSION_PATH=/
-SESSION_DOMAIN=.dixis.gr
+SESSION_DOMAIN=.dixis.io
 SESSION_SECURE_COOKIE=true
 SESSION_HTTP_ONLY=true
 SESSION_SAME_SITE=lax
 
-REDIS_HOST=redis.dixis.gr
+REDIS_HOST=redis.dixis.io
 REDIS_PASSWORD=REPLACE_WITH_REDIS_PASSWORD
 REDIS_PORT=6379
 REDIS_CLIENT=phpredis
@@ -126,17 +126,17 @@ JWT_ALGO=HS256
 
 # Email Configuration (SMTP)
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.dixis.gr
+MAIL_HOST=smtp.dixis.io
 MAIL_PORT=587
-MAIL_USERNAME=noreply@dixis.gr
+MAIL_USERNAME=noreply@dixis.io
 MAIL_PASSWORD=REPLACE_WITH_EMAIL_PASSWORD
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@dixis.gr
+MAIL_FROM_ADDRESS=noreply@dixis.io
 MAIL_FROM_NAME="Dixis Fresh"
 
 # Email Backup Configuration
 MAIL_BACKUP_MAILER=log
-MAIL_ADMIN_ADDRESS=admin@dixis.gr
+MAIL_ADMIN_ADDRESS=admin@dixis.io
 
 # Stripe Payment Processing (LIVE)
 STRIPE_KEY=pk_live_REPLACE_WITH_LIVE_PUBLISHABLE_KEY
@@ -169,7 +169,7 @@ AWS_USE_PATH_STYLE_ENDPOINT=false
 AWS_URL=https://dixis-production-storage.s3.eu-west-1.amazonaws.com
 
 # CDN Configuration
-CDN_URL=https://cdn.dixis.gr
+CDN_URL=https://cdn.dixis.io
 CDN_ENABLED=true
 
 # QuickBooks Integration (Production)
@@ -191,7 +191,7 @@ HSTS_MAX_AGE=31536000
 CONTENT_SECURITY_POLICY=true
 
 # Sanctum Configuration
-SANCTUM_STATEFUL_DOMAINS=dixis.gr,www.dixis.gr,admin.dixis.gr
+SANCTUM_STATEFUL_DOMAINS=dixis.io,www.dixis.io,admin.dixis.io
 SANCTUM_GUARD=web
 SANCTUM_MIDDLEWARE=web
 
@@ -217,7 +217,7 @@ BACKUP_ENABLED=true
 BACKUP_DISK=s3
 BACKUP_SCHEDULE="0 2 * * *"
 BACKUP_RETENTION_DAYS=30
-BACKUP_NOTIFICATION_EMAIL=admin@dixis.gr
+BACKUP_NOTIFICATION_EMAIL=admin@dixis.io
 
 # Error Tracking (Sentry)
 SENTRY_LARAVEL_DSN=REPLACE_WITH_SENTRY_DSN
@@ -250,13 +250,13 @@ QUEUE_MAX_JOBS=1000
 REVERB_APP_ID=REPLACE_WITH_REVERB_APP_ID
 REVERB_APP_KEY=REPLACE_WITH_REVERB_APP_KEY
 REVERB_APP_SECRET=REPLACE_WITH_REVERB_APP_SECRET
-REVERB_HOST=ws.dixis.gr
+REVERB_HOST=ws.dixis.io
 REVERB_PORT=443
 REVERB_SCHEME=https
 
 # Search Configuration (Scout)
 SCOUT_DRIVER=meilisearch
-MEILISEARCH_HOST=http://meilisearch.dixis.gr:7700
+MEILISEARCH_HOST=http://meilisearch.dixis.io:7700
 MEILISEARCH_KEY=REPLACE_WITH_MEILISEARCH_KEY
 
 # Greek Locale
@@ -313,7 +313,7 @@ services:
       - CONTAINER_ROLE=app
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dixis.rule=Host(\`dixis.gr\`)"
+      - "traefik.http.routers.dixis.rule=Host(\`dixis.io\`)"
       - "traefik.http.routers.dixis.tls=true"
       - "traefik.http.routers.dixis.tls.certresolver=letsencrypt"
 
@@ -589,7 +589,7 @@ http {
 
       const defaultConf = `server {
     listen 80;
-    server_name dixis.gr www.dixis.gr;
+    server_name dixis.io www.dixis.io;
     root /var/www/public;
     index index.php index.html;
 
@@ -655,7 +655,7 @@ http {
 # HTTPS redirect (handled by load balancer in production)
 server {
     listen 443 ssl http2;
-    server_name dixis.gr www.dixis.gr;
+    server_name dixis.io www.dixis.io;
     
     # SSL configuration would be handled by load balancer
     # This is just a placeholder for local development
@@ -849,7 +849,7 @@ echo "✅ Deployment completed at $(date)"
 # Dixis Fresh Health Check Script
 
 # Configuration
-APP_URL="\${APP_URL:-https://dixis.gr}"
+APP_URL="\${APP_URL:-https://dixis.io}"
 DB_CHECK_TIMEOUT=5
 REDIS_CHECK_TIMEOUT=3
 LOG_FILE="/var/log/dixis/health.log"
@@ -970,7 +970,7 @@ MEMORY_USAGE=$(free | grep Mem | awk '{printf "%.2f", \$3/\$2 * 100.0}')
 log_metric "memory_usage" "\${MEMORY_USAGE}"
 
 # Response Time
-RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" https://dixis.gr | awk '{print \$1 * 1000}')
+RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" https://dixis.io | awk '{print \$1 * 1000}')
 log_metric "response_time_ms" "\${RESPONSE_TIME}"
 
 # Database Connections

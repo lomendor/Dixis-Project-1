@@ -165,7 +165,7 @@
       "ssl": {
         "status": "pending",
         "certificate": "letsencrypt",
-        "domain": "dixis.gr"
+        "domain": "dixis.io"
       }
     },
     "greekMarketReadiness": "70%",

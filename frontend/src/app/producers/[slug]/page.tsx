@@ -24,7 +24,7 @@ interface ProducerDetailPageProps {
 }
 
 export default async function ProducerDetailPage({ params }: ProducerDetailPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   let producer: Producer | null = null;
   let error = null;
   

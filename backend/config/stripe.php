@@ -153,7 +153,7 @@ return [
         'failed_payment_threshold' => 5, // per hour
         'webhook_failure_threshold' => 3, // consecutive failures
         'high_value_payment_threshold' => 1000, // EUR
-        'admin_email' => env('ADMIN_EMAIL', 'admin@dixis.gr'),
+        'admin_email' => env('ADMIN_EMAIL', 'admin@dixis.io'),
     ],
 
 ];

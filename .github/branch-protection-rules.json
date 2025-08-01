@@ -1,0 +1,204 @@
+{
+  "repository": "dixis-platform/dixis-marketplace",
+  "branch_protection_rules": {
+    "main": {
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "🔍 Detect Changes",
+          "🎨 Frontend Pipeline (lint)",
+          "🎨 Frontend Pipeline (test)",
+          "🎨 Frontend Pipeline (build)",
+          "⚙️ Backend Pipeline (lint)",
+          "⚙️ Backend Pipeline (test)",
+          "⚙️ Backend Pipeline (integration)",
+          "🔒 Secret Scanning",
+          "🎨 Frontend Security Analysis",
+          "⚙️ Backend Security Analysis",
+          "📦 Dependency Vulnerability Scan",
+          "🎯 Quality Gates"
+        ]
+      },
+      "enforce_admins": false,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 2,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": true,
+        "require_last_push_approval": true,
+        "bypass_pull_request_allowances": {
+          "users": [],
+          "teams": ["dixis-platform/core-team"],
+          "apps": ["dependabot"]
+        }
+      },
+      "restrictions": {
+        "users": [],
+        "teams": ["dixis-platform/core-team", "dixis-platform/release-team"],
+        "apps": []
+      },
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "block_creations": false,
+      "required_conversation_resolution": true,
+      "lock_branch": false,
+      "allow_fork_syncing": true
+    },
+    "develop": {
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "🔍 Detect Changes",
+          "🎨 Frontend Pipeline (lint)",
+          "🎨 Frontend Pipeline (test)",
+          "⚙️ Backend Pipeline (lint)",
+          "⚙️ Backend Pipeline (test)",
+          "🔒 Secret Scanning"
+        ]
+      },
+      "enforce_admins": false,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": true,
+        "require_last_push_approval": false,
+        "bypass_pull_request_allowances": {
+          "users": [],
+          "teams": ["dixis-platform/core-team"],
+          "apps": ["dependabot"]
+        }
+      },
+      "restrictions": null,
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "block_creations": false,
+      "required_conversation_resolution": true,
+      "lock_branch": false,
+      "allow_fork_syncing": true
+    },
+    "staging": {
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "🔍 Detect Changes",
+          "🎨 Frontend Pipeline (build)",
+          "⚙️ Backend Pipeline (integration)",
+          "🐳 Docker Build & Scan"
+        ]
+      },
+      "enforce_admins": false,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": false,
+        "require_last_push_approval": false
+      },
+      "restrictions": {
+        "users": [],
+        "teams": ["dixis-platform/core-team", "dixis-platform/devops-team"],
+        "apps": []
+      },
+      "allow_force_pushes": false,
+      "allow_deletions": false,
+      "block_creations": false,
+      "required_conversation_resolution": false,
+      "lock_branch": false,
+      "allow_fork_syncing": true
+    }
+  },
+  "rulesets": {
+    "security_critical_files": {
+      "name": "Security Critical Files Protection",
+      "target": "branch",
+      "enforcement": "active",
+      "conditions": {
+        "ref_name": {
+          "include": ["refs/heads/main", "refs/heads/develop"],
+          "exclude": []
+        }
+      },
+      "rules": [
+        {
+          "type": "file_path_restriction",
+          "parameters": {
+            "restricted_file_paths": [
+              ".env*",
+              "backend/config/auth.php",
+              "backend/config/database.php",
+              "frontend/src/lib/auth/**",
+              "frontend/src/lib/payment/**",
+              ".github/workflows/**"
+            ]
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "required_status_checks": [
+              {
+                "context": "🔒 Secret Scanning",
+                "integration_id": null
+              },
+              {
+                "context": "🎨 Frontend Security Analysis",
+                "integration_id": null
+              },
+              {
+                "context": "⚙️ Backend Security Analysis",
+                "integration_id": null
+              }
+            ],
+            "strict_required_status_checks_policy": true
+          }
+        }
+      ],
+      "bypass_actors": [
+        {
+          "actor_id": "dixis-platform/security-team",
+          "actor_type": "Team",
+          "bypass_mode": "pull_request"
+        }
+      ]
+    },
+    "dependency_updates": {
+      "name": "Dependency Update Protection",
+      "target": "branch",
+      "enforcement": "active",
+      "conditions": {
+        "ref_name": {
+          "include": ["refs/heads/main"],
+          "exclude": []
+        }
+      },
+      "rules": [
+        {
+          "type": "file_path_restriction",
+          "parameters": {
+            "restricted_file_paths": [
+              "package*.json",
+              "composer.json",
+              "composer.lock"
+            ]
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "required_status_checks": [
+              {
+                "context": "📦 Dependency Vulnerability Scan",
+                "integration_id": null
+              }
+            ]
+          }
+        }
+      ],
+      "bypass_actors": [
+        {
+          "actor_id": "dependabot[bot]",
+          "actor_type": "Integration",
+          "bypass_mode": "pull_request"
+        }
+      ]
+    }
+  }
+}

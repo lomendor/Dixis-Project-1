@@ -234,7 +234,7 @@ return [
     */
     'emergency' => [
         'maintenance_mode_secret' => env('MAINTENANCE_MODE_SECRET', null),
-        'emergency_contact_email' => env('EMERGENCY_CONTACT_EMAIL', 'security@dixis.gr'),
+        'emergency_contact_email' => env('EMERGENCY_CONTACT_EMAIL', 'security@dixis.io'),
         'incident_response_webhook' => env('INCIDENT_RESPONSE_WEBHOOK', null),
         'auto_lockdown_threshold' => env('AUTO_LOCKDOWN_THRESHOLD', 100), // suspicious requests per minute
     ],

@@ -250,6 +250,7 @@ export default function RegisterForm({
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
+                  autoComplete="new-password"
                   className={`
                     block w-full pl-10 pr-10 py-3 border rounded-lg
                     focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
@@ -289,6 +290,7 @@ export default function RegisterForm({
                   type={showPasswordConfirmation ? 'text' : 'password'}
                   value={formData.passwordConfirmation}
                   onChange={(e) => handleInputChange('passwordConfirmation', e.target.value)}
+                  autoComplete="new-password"
                   className={`
                     block w-full pl-10 pr-10 py-3 border rounded-lg
                     focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500

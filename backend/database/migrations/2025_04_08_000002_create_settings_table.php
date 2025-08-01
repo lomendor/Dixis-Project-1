@@ -55,7 +55,7 @@ return new class extends Migration
             ],
             [
                 'key' => 'contact_email',
-                'value' => json_encode('info@dixis.gr'),
+                'value' => json_encode('info@dixis.io'),
                 'type' => 'string',
                 'group' => 'contact',
                 'description' => 'The contact email of the site',

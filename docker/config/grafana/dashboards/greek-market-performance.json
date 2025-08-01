@@ -1,0 +1,287 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "🇬🇷 Greek Market Performance Dashboard",
+    "tags": ["dixis", "greek-market", "performance", "revenue"],
+    "style": "dark",
+    "timezone": "Europe/Athens",
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "💰 Revenue Overview (€)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(dixis_revenue_total_euros)",
+            "refId": "A",
+            "legendFormat": "Total Revenue (€)"
+          },
+          {
+            "expr": "sum(rate(dixis_revenue_total_euros[1h]))",
+            "refId": "B", 
+            "legendFormat": "Hourly Revenue Rate (€/h)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "basic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 100},
+                {"color": "green", "value": 500},
+                {"color": "super-green", "value": 1000}
+              ]
+            },
+            "unit": "euro"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "center"
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "🏛️ VAT Collection by Region",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (vat_region) (dixis_vat_collected_euros{vat_region=~\"mainland|islands\"})",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "vis": false
+              }
+            },
+            "mappings": [
+              {"options": {"mainland": {"text": "Ηπειρωτική Ελλάδα (24%)"}}, "type": "value"},
+              {"options": {"islands": {"text": "Ελληνικά Νησιά (13%)"}}, "type": "value"}
+            ],
+            "unit": "euro"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "pieType": "pie",
+          "tooltip": {"mode": "single"},
+          "legend": {"displayMode": "table", "placement": "right", "values": ["percent", "value"]},
+          "displayLabels": ["name", "percent"]
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "💳 Viva Wallet Transaction Analytics",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(viva_wallet_transactions_total{status=\"success\"}[5m])",
+            "refId": "A",
+            "legendFormat": "Successful Transactions/min"
+          },
+          {
+            "expr": "rate(viva_wallet_transactions_total{status=\"failed\"}[5m])",
+            "refId": "B",
+            "legendFormat": "Failed Transactions/min"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(viva_wallet_response_time_seconds_bucket[5m]))",
+            "refId": "C",
+            "legendFormat": "95th Percentile Response Time"
+          }
+        ],
+        "yAxes": [
+          {"label": "Transactions/min", "show": true},
+          {"label": "Response Time (s)", "show": true, "opposite": true}
+        ],
+        "xAxis": {"show": true},
+        "gridPos": {"h": 9, "w": 24, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "🚚 Shipping Performance by Zone",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "sum by (shipping_zone) (dixis_orders_shipped_total)",
+            "refId": "A",
+            "format": "table"
+          },
+          {
+            "expr": "avg by (shipping_zone) (dixis_shipping_cost_euros)",
+            "refId": "B",
+            "format": "table"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum by (shipping_zone, le) (rate(dixis_delivery_time_hours_bucket[1h])))",
+            "refId": "C",
+            "format": "table"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            },
+            "mappings": [
+              {"options": {"athens": {"text": "Αθήνα"}}, "type": "value"},
+              {"options": {"thessaloniki": {"text": "Θεσσαλονίκη"}}, "type": "value"},
+              {"options": {"islands": {"text": "Νησιά"}}, "type": "value"},
+              {"options": {"other": {"text": "Άλλες Πόλεις"}}, "type": "value"}
+            ]
+          },
+          "overrides": [
+            {"matcher": {"id": "byName", "options": "Value #A"}, "properties": [{"id": "displayName", "value": "Total Orders"}, {"id": "unit", "value": "short"}]},
+            {"matcher": {"id": "byName", "options": "Value #B"}, "properties": [{"id": "displayName", "value": "Avg Cost (€)"}, {"id": "unit", "value": "euro"}]},
+            {"matcher": {"id": "byName", "options": "Value #C"}, "properties": [{"id": "displayName", "value": "95th Delivery Time (h)"}, {"id": "unit", "value": "h"}]}
+          ]
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 17}
+      },
+      {
+        "id": 5,
+        "title": "📅 Orthodox Calendar Impact",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(dixis_orders_total{season=~\"lent|easter|christmas\"}[1h]))",
+            "refId": "A",
+            "legendFormat": "Religious Season Orders/h"
+          },
+          {
+            "expr": "sum(rate(dixis_orders_total{season=\"regular\"}[1h]))",
+            "refId": "B",
+            "legendFormat": "Regular Season Orders/h"
+          }
+        ],
+        "yAxes": [{"label": "Orders/hour", "show": true}],
+        "xAxis": {"show": true},
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 17}
+      },
+      {
+        "id": 6,
+        "title": "📊 Greek Market KPIs",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "dixis_active_users_greece",
+            "refId": "A",
+            "legendFormat": "Active Greek Users"
+          },
+          {
+            "expr": "dixis_conversion_rate_greece * 100",
+            "refId": "B",
+            "legendFormat": "Conversion Rate (%)"
+          },
+          {
+            "expr": "dixis_avg_order_value_euros",
+            "refId": "C",
+            "legendFormat": "Avg Order Value (€)"
+          },
+          {
+            "expr": "count(dixis_producers_active{country=\"GR\"})",
+            "refId": "D",
+            "legendFormat": "Active Greek Producers"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "mappings": [],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 50},
+                {"color": "green", "value": 100}
+              ]
+            }
+          },
+          "overrides": [
+            {"matcher": {"id": "byName", "options": "Conversion Rate (%)"}, "properties": [{"id": "unit", "value": "percent"}]},
+            {"matcher": {"id": "byName", "options": "Avg Order Value (€)"}, "properties": [{"id": "unit", "value": "euro"}]}
+          ]
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "orientation": "horizontal",
+          "textMode": "value_and_name",
+          "colorMode": "value"
+        },
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 26}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "region",
+          "type": "query",
+          "query": "label_values(dixis_orders_total, shipping_region)",
+          "refresh": 1,
+          "includeAll": true,
+          "multi": true,
+          "allValue": null
+        },
+        {
+          "name": "time_range",
+          "type": "interval",
+          "query": "1m,5m,15m,1h,6h,12h,1d,7d",
+          "refresh": 2,
+          "current": {"text": "5m", "value": "5m"}
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Greek Holidays",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "greek_holidays",
+          "textFormat": "{{holiday_name}}",
+          "titleFormat": "🇬🇷 Greek Holiday"
+        }
+      ]
+    }
+  },
+  "folderId": null,
+  "overwrite": true
+}

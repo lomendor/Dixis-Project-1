@@ -31,6 +31,9 @@ class User extends Authenticatable implements MustVerifyEmail // Implemented int
         'role',  // Add role
         'is_active', // Add is_active
         'stripe_customer_id', // Stripe customer reference
+        'google_id', // Google OAuth ID
+        'avatar', // User avatar from Google
+        'email_verified_at', // Allow mass assignment for email verification
     ];
 
     /**

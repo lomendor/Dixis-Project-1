@@ -29,11 +29,11 @@ class TestDataSeeder extends Seeder
         }
 
         // Create user and producer
-        $user = User::where('email', 'producer@dixis.gr')->first();
+        $user = User::where('email', 'producer@dixis.io')->first();
         if (!$user) {
             $user = User::create([
                 'name' => 'Producer',
-                'email' => 'producer@dixis.gr',
+                'email' => 'producer@dixis.io',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]);

@@ -1,0 +1,222 @@
+# Dixis Platform Dependency Review Configuration
+# Enterprise-grade dependency security and compliance
+
+# Fail the action if any vulnerabilities are found at or above this severity level
+fail-on-severity: moderate
+
+# Fail the action if any dependencies with these licenses are found
+fail-on-licenses:
+  - GPL-2.0
+  - GPL-3.0
+  - AGPL-1.0
+  - AGPL-3.0
+  - CPAL-1.0
+  - EUPL-1.1
+  - EUPL-1.2
+
+# Allow these licenses (Greek/European business compliance)
+allow-licenses:
+  - MIT
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - ISC
+  - CC0-1.0
+  - Unlicense
+  - WTFPL
+  - 0BSD
+
+# Allow dependencies with these scopes (npm)
+allow-dependencies-scopes:
+  - development
+  - optional
+  - peer
+
+# Block these packages due to security concerns
+deny-packages:
+  # Known malicious or abandoned packages
+  - "event-stream@3.3.6"
+  - "flatmap-stream@0.1.1"
+  - "eslint-scope@3.7.2"
+  - "getcookies@1.0.0"
+  
+  # Packages with known vulnerabilities in specific versions
+  - "lodash@<4.17.21"
+  - "moment@<2.29.2"
+  - "axios@<0.21.2"
+  - "serialize-javascript@<3.1.0"
+  
+  # PHP packages with security issues
+  - "monolog/monolog@<2.0.0"
+  - "symfony/http-foundation@<4.4.50"
+  - "laravel/framework@<8.83.27"
+
+# Vulnerability database configuration
+vulnerability-check:
+  # Use GitHub's vulnerability database
+  github-advisory-database: true
+  
+  # Additional vulnerability databases
+  osv-database: true
+  
+  # Custom vulnerability patterns for Greek market specific issues
+  custom-patterns:
+    - pattern: ".*(?i)(password|secret|key|token).*"
+      description: "Potential secret in package name"
+      severity: "high"
+
+# License compatibility matrix for Greek business operations
+license-compatibility:
+  # Commercial friendly licenses
+  commercial-friendly:
+    - MIT
+    - Apache-2.0
+    - BSD-2-Clause
+    - BSD-3-Clause
+    - ISC
+  
+  # Licenses requiring attribution
+  attribution-required:
+    - Apache-2.0
+    - BSD-2-Clause
+    - BSD-3-Clause
+  
+  # Copyleft licenses (generally not allowed)
+  copyleft:
+    - GPL-2.0
+    - GPL-3.0
+    - LGPL-2.1
+    - LGPL-3.0
+    - AGPL-3.0
+
+# Package ecosystem specific configuration
+ecosystems:
+  npm:
+    # NPM specific security configuration
+    security:
+      # Minimum package popularity score (0-100)
+      min-popularity-score: 10
+      
+      # Maximum age for last update (days)
+      max-age-days: 730
+      
+      # Require packages to have README
+      require-readme: true
+      
+      # Block packages from these suspicious publishers
+      blocked-publishers:
+        - "suspicious-publisher"
+        - "malware-author"
+    
+    # Development vs Production dependencies
+    dependency-types:
+      production:
+        # Stricter rules for production dependencies
+        fail-on-severity: low
+        require-license: true
+        block-deprecated: true
+      
+      development:
+        # More lenient for dev dependencies
+        fail-on-severity: high
+        require-license: false
+        block-deprecated: false
+
+  composer:
+    # Composer/PHP specific configuration
+    security:
+      # Require packages from packagist.org
+      require-official-source: true
+      
+      # Block packages without proper version constraints
+      require-version-constraints: true
+      
+      # PHP version compatibility checking
+      php-version-compatibility: "8.3"
+    
+    # Laravel ecosystem specific rules
+    laravel:
+      # Prefer official Laravel packages
+      prefer-official: true
+      
+      # Block packages that haven't been updated for current Laravel version
+      require-laravel-compatibility: "10.x"
+
+# Reporting and notifications
+reporting:
+  # Generate detailed security report
+  detailed-report: true
+  
+  # Include license analysis in report
+  include-license-analysis: true
+  
+  # Include dependency tree analysis
+  include-dependency-tree: true
+  
+  # Output formats
+  formats:
+    - json
+    - sarif
+    - markdown
+
+# Integration with other security tools
+integrations:
+  # Snyk integration
+  snyk:
+    enabled: true
+    organization: "dixis-platform"
+    
+  # WhiteSource/Mend integration
+  whitesource:
+    enabled: false
+    
+  # FOSSA integration for license compliance
+  fossa:
+    enabled: false
+
+# Custom rules for Greek market compliance
+greek-market-compliance:
+  # GDPR compliance requirements
+  gdpr:
+    # Block packages that don't support GDPR
+    require-gdpr-compliance: true
+    
+    # Block packages with data collection without consent
+    block-tracking-packages: true
+  
+  # Greek language support requirements
+  localization:
+    # Prefer packages with Greek locale support
+    prefer-greek-support: true
+    
+    # Block packages that conflict with Greek character encoding
+    block-encoding-conflicts: true
+
+# Performance impact analysis
+performance:
+  # Maximum bundle size impact (KB)
+  max-bundle-size-impact: 500
+  
+  # Maximum number of new dependencies
+  max-new-dependencies: 50
+  
+  # Block packages with known performance issues
+  block-performance-issues: true
+
+# Maintenance and update policy
+maintenance:
+  # Require active maintenance (commits in last 12 months)
+  require-active-maintenance: true
+  
+  # Block archived or deprecated packages
+  block-archived: true
+  
+  # Automatic update policy for security patches
+  auto-update-security: true
+  
+  # Update frequency requirements
+  update-frequency:
+    critical: "immediate"
+    high: "weekly"
+    moderate: "monthly"
+    low: "quarterly"

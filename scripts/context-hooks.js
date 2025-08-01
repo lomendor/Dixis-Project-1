@@ -535,7 +535,7 @@ class ContextEngineering {
             console.log('🔍 Testing user registration for PostgreSQL sequence issue...');
             
             // Create test user with unique email
-            const testEmail = `test${Date.now()}@dixis.gr`;
+            const testEmail = `test${Date.now()}@dixis.io`;
             const registrationData = {
                 name: "Test User",
                 email: testEmail,

@@ -17,7 +17,7 @@ class SimpleGreekProductsSeeder extends Seeder
         if (!$producer) {
             $producer = User::create([
                 'name' => 'Ελληνικά Προϊόντα ΑΕ',
-                'email' => 'producer@dixis.gr',
+                'email' => 'producer@dixis.io',
                 'password' => bcrypt('password123'),
                 'role' => 'producer',
                 'email_verified_at' => now(),

@@ -8,7 +8,7 @@ export const productionConfig = {
   isTest: process.env.NODE_ENV === 'test',
   
   // Site Configuration
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.gr',
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://dixis.io',
   siteName: process.env.NEXT_PUBLIC_SITE_NAME || 'Dixis',
   
   // API Configuration
@@ -31,7 +31,7 @@ export const productionConfig = {
   
   // Email
   emailProvider: process.env.EMAIL_PROVIDER || 'sendgrid',
-  emailFrom: process.env.EMAIL_FROM || 'noreply@dixis.gr',
+  emailFrom: process.env.EMAIL_FROM || 'noreply@dixis.io',
   emailFromName: process.env.EMAIL_FROM_NAME || 'Dixis Team',
   sendgridApiKey: process.env.SENDGRID_API_KEY,
   
@@ -104,8 +104,8 @@ export const productionConfig = {
   
   // Contact
   contact: {
-    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'info@dixis.gr',
-    supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@dixis.gr',
+    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'info@dixis.io',
+    supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@dixis.io',
     phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '+30 210 1234567',
   },
   
