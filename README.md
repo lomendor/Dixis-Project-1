@@ -1,6 +1,23 @@
-# 🏢 DIXIS - Clean Enterprise Marketplace Platform
+## ⚠️ LEGACY REPOSITORY NOTICE
+
+**🚨 This repository is deprecated and archived for historical purposes.**
+
+### 🔄 **Active Development**
+Use **[lomendor/Project-Dixis](https://github.com/lomendor/Project-Dixis)** for current development.
+
+### 🔒 **Security Workflows**
+All automated security scans have been disabled to prevent email noise.
+Security workflows can be triggered manually if needed for reference purposes.
+
+### 📅 **Last Updated**: January 2025
+
+---
+
+# 🏢 DIXIS - Clean Enterprise Marketplace Platform (ARCHIVED)
 
 **From Producer to Table - Clean, Professional, Production-Ready**
+
+> ⚠️ **Note**: This is a legacy version. Active development continues at [Project-Dixis](https://github.com/lomendor/Project-Dixis).
 
 ## 🎯 Overview
 
